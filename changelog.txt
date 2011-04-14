@@ -1,0 +1,10 @@
+1.1.6
+=====
+
+2011-04-14
+------------------------------------
+添加了excel导出功能 － 邹磊
+需要做如下配置：
+	uncertian.xml 需要注册 <package-mapping packageName="aurora.plugin"/>
+	service-listener.config 需要添加
+	<participant class="aurora.plugin.export.ModelExport" />
