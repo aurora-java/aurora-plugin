@@ -29,30 +29,20 @@ public class ModelExport {
 	public final String KEY_COLUMN = "column";
 	public final String KEY_WIDTH = "width";
 	public final String KEY_GENERATE_STATE = "_generate_state";
-	public final String KEY_FORMAT = "_format";
+	public final String KEY_FORMAT = "_format";	
 	
-	ServiceInstance svc;
-	ServiceContext serviceContext;
-	ILogger mLogger;
-	IObjectRegistry mObjectRegistry;
-	String exportFormat="xls";
-	String langString="ZHS";
-	boolean in_generate_state = false;
+	IObjectRegistry mObjectRegistry;		
 
-	public ModelExport(IObjectRegistry registry) {
-		mLogger =LoggingContext.getLogger("aurora.plugin.export", registry);
+	public ModelExport(IObjectRegistry registry) {		
 		mObjectRegistry = registry;
 		
 	}
 
-	public int preInvokeService(ServiceContext context) throws Exception {
-		in_generate_state = context.getParameter().getBoolean(KEY_GENERATE_STATE, false);
-		if (!in_generate_state)
+	public int preInvokeService(ServiceContext context) throws Exception {		
+		if (!context.getParameter().getBoolean(KEY_GENERATE_STATE, false))
 			return EventModel.HANDLE_NORMAL;
-
-		serviceContext = context;
-		svc = ServiceInstance.getInstance(context.getObjectContext());		
-		langString=serviceContext.getSession().getString("lang").toUpperCase();
+		ILogger mLogger =LoggingContext.getLogger("aurora.plugin.export", mObjectRegistry);		
+		ServiceInstance svc = ServiceInstance.getInstance(context.getObjectContext());			
 		//修改fetchall为ture
 		CompositeMap config = svc.getServiceConfigData().getChild(BaseServiceConfig.KEY_INIT_PROCEDURE);
 		if(config==null){
@@ -73,19 +63,21 @@ public class ModelExport {
 		return EventModel.HANDLE_NORMAL;
 	}
     
-	public int preCreateSuccessResponse(ProcedureRunner runner)
+	public int preCreateSuccessResponse(ServiceContext context)
 			throws Exception {
-		if (!in_generate_state)
+		if (!context.getParameter().getBoolean(KEY_GENERATE_STATE, false))
 			return EventModel.HANDLE_NORMAL;
+		ILogger mLogger =LoggingContext.getLogger("aurora.plugin.export", mObjectRegistry);
 		
+		ServiceInstance svc = ServiceInstance.getInstance(context.getObjectContext());	
 		String return_path =(String)svc.getServiceConfigData().getObject(ServiceOutputConfig.KEY_SERVICE_OUTPUT+"/@"+ServiceOutputConfig.KEY_OUTPUT);
 		if(return_path==null){
 			mLogger.log(Level.SEVERE, "_column_config_ must be defined");
 			throw new ServletException("_column_config_ must be defined");
 		}		
 		
-		CompositeMap model = serviceContext.getModel();	
-		CompositeMap parameter = serviceContext.getParameter();
+		CompositeMap model = context.getModel();	
+		CompositeMap parameter = context.getParameter();
 		CompositeMap column_config = (CompositeMap)parameter.getObject(KEY_COLUMN_CONFIG+"/"+KEY_COLUMN);
 		if(column_config==null){
 			mLogger.log(Level.SEVERE, "service-output tag and output attibute must be defined");
@@ -94,7 +86,8 @@ public class ModelExport {
 		CompositeMap exportData=(CompositeMap)model.getObject(return_path);		
 			
 		HttpServletResponse response = ((HttpServiceInstance) svc).getResponse();
-		String returnString=checkExportData(exportData);
+		String langString=context.getSession().getString("lang").toUpperCase();
+		String returnString=checkExportData(exportData,langString,"xls");
 		if(returnString!=null){
 			response.setCharacterEncoding(KEY_CHARSET);
 			response.getWriter().print("<script>alert('"+returnString+"');</script>");
@@ -102,13 +95,13 @@ public class ModelExport {
 			String fileName = parameter.getString(KEY_FILE_NAME,"excel");
 			response.setContentType("application/vnd.ms-excel;charset="	+ KEY_CHARSET);			
 			response.setHeader("Content-Disposition", "attachment; filename=\""	+ fileName + ".xls\"");			
-			ExcelFactoryImpl excelFactory = new ExcelFactoryImpl(serviceContext,mObjectRegistry);
+			ExcelFactoryImpl excelFactory = new ExcelFactoryImpl(context,mObjectRegistry);
 			excelFactory.createExcel(exportData,column_config,response.getOutputStream());
 		}
 		return EventModel.HANDLE_STOP;
 	}
 	
-	String checkExportData(CompositeMap data){
+	String checkExportData(CompositeMap data,String langString,String exportFormat){
 		String returnMessage=null;
 		List dataList=data.getChilds();
 		if(dataList==null){
