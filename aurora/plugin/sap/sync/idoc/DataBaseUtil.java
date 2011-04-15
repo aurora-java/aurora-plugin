@@ -190,7 +190,7 @@ public class DataBaseUtil {
 
 	}
 	public String getTemplateCode(String idoctyp, String cimtyp) throws SQLException {
-		StringBuffer query_sql = new StringBuffer("select TEMPLATE_CODE from SAP_IDOC_TEMPLATES where IDOCTYP=? ");
+		StringBuffer query_sql = new StringBuffer("select TEMPLATE_CODE from FND_SAP_IDOC_TEMPLATES where IDOCTYP=? ");
 		if (cimtyp != null)
 			query_sql.append(" and CIMTYP=?");
 		PreparedStatement statement = dbConn.prepareStatement(query_sql.toString());
