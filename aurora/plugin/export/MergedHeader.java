@@ -16,7 +16,7 @@ public class MergedHeader {
 		parseColumn(headerConfig);
 	}
 	
-	static Map<String,Integer> parseColumn(CompositeMap config){
+	static Map parseColumn(CompositeMap config){
 		int count=0;
 		int level=0;
 		Map<String,Integer> returnMap=new HashMap<String,Integer>();  
