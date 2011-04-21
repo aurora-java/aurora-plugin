@@ -8,3 +8,6 @@
 	uncertian.xml 需要注册 <package-mapping packageName="aurora.plugin"/>
 	service-listener.config 需要添加
 	<participant class="aurora.plugin.export.ModelExport" />
+	在系统描述中添加
+		COMMON_MESSAGE.EXPORT_DATA_EMPTY                数据为空
+		COMMON_MESSAGE.EXPORT_DATA_OUT_OF_RANGE         数据超出范围
