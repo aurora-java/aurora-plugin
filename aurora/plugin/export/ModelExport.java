@@ -7,6 +7,8 @@ import java.util.logging.Level;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import aurora.application.config.BaseServiceConfig;
+import aurora.i18n.ILocalizedMessageProvider;
+import aurora.i18n.IMessageProvider;
 import aurora.plugin.export.xlsx.poi.ExcelFactoryImpl;
 import aurora.presentation.component.std.config.DataSetConfig;
 import aurora.service.ServiceContext;
@@ -30,7 +32,7 @@ public class ModelExport {
 	public final String KEY_WIDTH = "width";
 	public final String KEY_GENERATE_STATE = "_generate_state";
 	public final String KEY_FORMAT = "_format";	
-	
+
 	IObjectRegistry mObjectRegistry;		
 
 	public ModelExport(IObjectRegistry registry) {		
@@ -65,10 +67,15 @@ public class ModelExport {
     
 	public int preCreateSuccessResponse(ServiceContext context)
 			throws Exception {
-		if (!context.getParameter().getBoolean(KEY_GENERATE_STATE, false))
+		CompositeMap parameter = context.getParameter();
+		if (!parameter.getBoolean(KEY_GENERATE_STATE, false))
 			return EventModel.HANDLE_NORMAL;
-		ILogger mLogger =LoggingContext.getLogger("aurora.plugin.export", mObjectRegistry);
 		
+		IMessageProvider msgProvider=(IMessageProvider)mObjectRegistry.getInstanceOfType(IMessageProvider.class);
+		String langString=context.getSession().getString("lang");
+		ILocalizedMessageProvider localMsgProvider=msgProvider.getLocalizedMessageProvider(langString);	
+		
+		ILogger mLogger =LoggingContext.getLogger("aurora.plugin.export", mObjectRegistry);		
 		ServiceInstance svc = ServiceInstance.getInstance(context.getObjectContext());	
 		String return_path =(String)svc.getServiceConfigData().getObject(ServiceOutputConfig.KEY_SERVICE_OUTPUT+"/@"+ServiceOutputConfig.KEY_OUTPUT);
 		if(return_path==null){
@@ -76,18 +83,16 @@ public class ModelExport {
 			throw new ServletException("_column_config_ must be defined");
 		}		
 		
-		CompositeMap model = context.getModel();	
-		CompositeMap parameter = context.getParameter();
+		CompositeMap model = context.getModel();			
 		CompositeMap column_config = (CompositeMap)parameter.getObject(KEY_COLUMN_CONFIG+"/"+KEY_COLUMN);
 		if(column_config==null){
 			mLogger.log(Level.SEVERE, "service-output tag and output attibute must be defined");
 			throw new ServletException("service-output tag and output attibute must be defined");
 		}			
 		CompositeMap exportData=(CompositeMap)model.getObject(return_path);		
-			
-		HttpServletResponse response = ((HttpServiceInstance) svc).getResponse();
-		String langString=context.getSession().getString("lang").toUpperCase();
-		String returnString=checkExportData(exportData,langString,"xls");
+		String returnString=checkExportData(exportData,localMsgProvider,"xls");	
+		
+		HttpServletResponse response = ((HttpServiceInstance) svc).getResponse();		
 		if(returnString!=null){
 			response.setCharacterEncoding(KEY_CHARSET);
 			response.getWriter().print("<script>alert('"+returnString+"');</script>");
@@ -95,28 +100,20 @@ public class ModelExport {
 			String fileName = parameter.getString(KEY_FILE_NAME,"excel");
 			response.setContentType("application/vnd.ms-excel;charset="	+ KEY_CHARSET);			
 			response.setHeader("Content-Disposition", "attachment; filename=\""	+ fileName + ".xls\"");			
-			ExcelFactoryImpl excelFactory = new ExcelFactoryImpl(context,mObjectRegistry);
+			ExcelFactoryImpl excelFactory = new ExcelFactoryImpl(localMsgProvider);
 			excelFactory.createExcel(exportData,column_config,response.getOutputStream());
 		}
 		return EventModel.HANDLE_STOP;
 	}
 	
-	String checkExportData(CompositeMap data,String langString,String exportFormat){
+	String checkExportData(CompositeMap data,ILocalizedMessageProvider localMsgProvider,String exportFormat){
 		String returnMessage=null;
 		List dataList=data.getChilds();
 		if(dataList==null){
-			if("ZHS".equalsIgnoreCase(langString))
-				returnMessage="数据为空";
-			else {
-				returnMessage="The data is empty";
-			}
+			returnMessage=localMsgProvider.getMessage("COMMON_MESSAGE.EXPORT_DATA_EMPTY1");			
 		}else{
 			if(dataList.size()>65535&&"xls".equalsIgnoreCase(exportFormat)){
-				if("ZHS".equalsIgnoreCase(langString))
-					returnMessage="数据超过xls文件类型允许记录数";
-				else {
-					returnMessage="The records more than the allowable range";
-				}
+				returnMessage=localMsgProvider.getMessage("COMMON_MESSAGE.EXPORT_DATA_OUT_OF_RANGE");
 			}
 		}
 		return returnMessage; 
