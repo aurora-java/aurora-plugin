@@ -11,6 +11,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellRangeAddress;
 import org.apache.poi.ss.usermodel.*;
 
+import aurora.i18n.ILocalizedMessageProvider;
 import aurora.i18n.IMessageProvider;
 import aurora.plugin.export.MergedHeader;
 import aurora.service.ServiceContext;
@@ -18,8 +19,7 @@ import uncertain.composite.CompositeMap;
 import uncertain.ocm.IObjectRegistry;
 
 public class ExcelFactoryImpl {	
-	IObjectRegistry mObjectRegistry;
-	ServiceContext serviceContext;	
+	ILocalizedMessageProvider localMsgProvider;	
 	Workbook wb;
 	
 	CompositeMap dataModel;	
@@ -27,9 +27,8 @@ public class ExcelFactoryImpl {
 	
 	int headLevel=0;
 	HSSFCellStyle headstyle;	
-	public ExcelFactoryImpl(ServiceContext serviceContext,IObjectRegistry registry){		
-		this.serviceContext=serviceContext;
-		mObjectRegistry = registry;
+	public ExcelFactoryImpl(ILocalizedMessageProvider localMsgProvider){		
+		this.localMsgProvider = localMsgProvider;
 	}
 	public void createExcel(CompositeMap dataModel,CompositeMap column_config,OutputStream os) throws Exception {
 		this.dataModel = dataModel;
@@ -115,10 +114,8 @@ public class ExcelFactoryImpl {
 		}
 	}
 
-	String getPrompt(String key){
-		IMessageProvider mp = (IMessageProvider) mObjectRegistry
-		.getInstanceOfType(IMessageProvider.class);
-		String promptString=mp.getMessage(serviceContext.getSession().getString("lang"), key);
+	String getPrompt(String key){		
+		String promptString=localMsgProvider.getMessage(key);
 		promptString=promptString==null?key:promptString;
 		return promptString;
 	}
