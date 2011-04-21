@@ -12,33 +12,28 @@ import org.apache.poi.hssf.util.CellRangeAddress;
 import org.apache.poi.ss.usermodel.*;
 
 import aurora.i18n.ILocalizedMessageProvider;
-import aurora.i18n.IMessageProvider;
 import aurora.plugin.export.MergedHeader;
-import aurora.service.ServiceContext;
 import uncertain.composite.CompositeMap;
-import uncertain.ocm.IObjectRegistry;
 
 public class ExcelFactoryImpl {	
 	ILocalizedMessageProvider localMsgProvider;	
 	Workbook wb;
 	
-	CompositeMap dataModel;	
-	List<CompositeMap> headerList=new LinkedList<CompositeMap>();
-	
-	int headLevel=0;
+	CompositeMap dataModel;
+	CompositeMap headerConfig;
+	List<CompositeMap> headerList;
+	final int numberLimit=65535;
+	int headLevel;
 	HSSFCellStyle headstyle;	
 	public ExcelFactoryImpl(ILocalizedMessageProvider localMsgProvider){		
 		this.localMsgProvider = localMsgProvider;
 	}
 	public void createExcel(CompositeMap dataModel,CompositeMap column_config,OutputStream os) throws Exception {
 		this.dataModel = dataModel;
-		CompositeMap headerConfig=(new MergedHeader(column_config)).conifg;		
+		headerConfig=(new MergedHeader(column_config)).conifg;		
 		wb = new HSSFWorkbook();
 		setCellStyle(wb);//设置列style
-		Sheet sheet = wb.createSheet();
-		Row header=sheet.createRow(0);
-		createExcelHead(headerConfig,sheet,header,-1);
-		createExcelTable(sheet);
+		createExcel();
 		try{
 			wb.write(os);
 			os.flush();
@@ -75,43 +70,67 @@ public class ExcelFactoryImpl {
 			excelAlign=HSSFCellStyle.ALIGN_CENTER;
 		return excelAlign;
 	}
-	void createExcelTable(Sheet sheet) {
+	void createExcel(){
+		Sheet sheet = null;
+		Iterator iterator=this.dataModel.getChildIterator();
+		if(iterator!=null){		
+			while(iterator.hasNext()){
+				this.headLevel=0;		
+				sheet = wb.createSheet();
+				createExcelHeader(sheet);
+				createExcelTable(sheet,iterator);				
+			}
+		}else{
+			sheet = wb.createSheet();
+			createExcelHeader(sheet);
+		}
+	}
+	
+	void createExcelHeader(Sheet sheet){		
+		Row header=sheet.createRow(0);
+		headerList=new LinkedList<CompositeMap>();
+		generatExcelHead(headerConfig,sheet,header,-1);
+	}
+	
+	void createExcelTable(Sheet sheet,Iterator iterator) {
 		HSSFCellStyle columnstyle;
 		boolean is_setwidth=false;
 		this.headLevel++;
 		sheet.createFreezePane(0,this.headLevel);// 冻结		
 		int col=0;
 		String text;
-		Cell cell;
-		Iterator iterator=this.dataModel.getChildIterator();
-		if(iterator!=null){
-			while (iterator.hasNext()) {				
-				CompositeMap object = (CompositeMap) iterator.next();
-				Row row=sheet.getRow(this.headLevel);
-				if(row==null){
-					row=sheet.createRow(this.headLevel);
-				}
-				Iterator it=this.headerList.iterator();
-				while (it.hasNext()) {
-					cell=row.createCell(col);
-					CompositeMap record = (CompositeMap) it.next();				
-					text=object.getString(record.getString("name"));					
-					columnstyle=(HSSFCellStyle) wb.createCellStyle();
-					columnstyle.setAlignment(getExcelAlign(record.getString("align")));
-					cell.setCellStyle(columnstyle);
-					if(text!=null)
-						cell.setCellValue(new HSSFRichTextString(text));					
-					if(!is_setwidth){
-						int width=record.getInt("width", 100);
-						sheet.setColumnWidth(col, (short)(width*35.7));
-					}
-					col++;
-				}
-				is_setwidth=true;
-				this.headLevel++;
-				col=0;
+		Cell cell;	
+		
+		while (iterator.hasNext()) {
+			if(this.headLevel==numberLimit){
+				break;
 			}
+			CompositeMap object = (CompositeMap) iterator.next();
+			Row row=sheet.getRow(this.headLevel);
+			if(row==null){
+				row=sheet.createRow(this.headLevel);
+			}
+			Iterator it=this.headerList.iterator();
+			while (it.hasNext()) {
+				cell=row.createCell(col);
+				CompositeMap record = (CompositeMap) it.next();				
+				text=object.getString(record.getString("name"));					
+				columnstyle=(HSSFCellStyle) wb.createCellStyle();
+				columnstyle.setAlignment(getExcelAlign(record.getString("align")));
+				cell.setCellStyle(columnstyle);
+				if(text!=null)
+					cell.setCellValue(new HSSFRichTextString(text));					
+				if(!is_setwidth){
+					int width=record.getInt("width", 100);
+					sheet.setColumnWidth(col, (short)(width*35.7));
+				}
+				col++;
+			}
+			is_setwidth=true;			
+			col=0;			
+			this.headLevel++;
 		}
+		
 	}
 
 	String getPrompt(String key){		
@@ -128,7 +147,7 @@ public class ExcelFactoryImpl {
 	*    第三个参数：第一个单元格的列数（从0开始） 
 	*    第四个参数：第二个单元格的列数（从0开始） 
     */
-	int createExcelHead(CompositeMap columnConfigs,Sheet sheet,Row header,int col) {
+	int generatExcelHead(CompositeMap columnConfigs,Sheet sheet,Row header,int col) {
 		CompositeMap record;	
 		Long span;
 		int level;
@@ -156,7 +175,7 @@ public class ExcelFactoryImpl {
 						if(nextRow==null)						
 							nextRow=sheet.createRow(rownum+1);
 						CompositeMap object = (CompositeMap) it.next();
-						col=createExcelHead(object,sheet,nextRow,col-1);
+						col=generatExcelHead(object,sheet,nextRow,col-1);
 					}					
 				}else{
 					this.headerList.add(record);					
