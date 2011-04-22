@@ -20,18 +20,18 @@ import com.sap.conn.idoc.jco.JCoIDocServer;
 public class DataBaseUtil {
 	private Connection dbConn;
 	private ILogger logger;
-	public DataBaseUtil(IObjectRegistry registry, ILogger logger) {
+	public DataBaseUtil(IObjectRegistry registry, ILogger logger) throws ApplicationException {
 		dbConn = initConnection(registry);
 		this.logger = logger;
 	}
-	private Connection initConnection(IObjectRegistry registry) {
+	private Connection initConnection(IObjectRegistry registry) throws ApplicationException {
 		DataSource ds = (DataSource) registry.getInstanceOfType(DataSource.class);
 		try {
 			if (ds == null)
-				throw new IllegalArgumentException("Can not get DataSource from registry " + registry);
+				throw new ApplicationException("Can not get DataSource from registry " + registry);
 			return ds.getConnection();
 		} catch (SQLException e) {
-			throw new RuntimeException("Can not get Connection from DataSource", e);
+			throw new ApplicationException("Can not get Connection from DataSource", e);
 		}
 	}
 	public int registerSapServers(JCoIDocServer server) throws SQLException {
@@ -83,7 +83,7 @@ public class DataBaseUtil {
 		statement.executeUpdate(delete_sql);
 		statement.close();
 	}
-	public int addIdoc(int serverId, String filePath) throws SQLException {
+	public int addIdoc(int serverId, String filePath) throws SQLException, ApplicationException {
 		String get_idoc_id_sql = "select fnd_sap_idocs_s.nextval from dual";
 		Statement statement = dbConn.createStatement();
 		ResultSet rs = statement.executeQuery(get_idoc_id_sql);
@@ -91,7 +91,7 @@ public class DataBaseUtil {
 		if (rs.next()) {
 			idoc_id = rs.getInt(1);
 		} else {
-			throw new RuntimeException("Can not create idoc id !");
+			throw new ApplicationException("Can not create idoc id !");
 		}
 		rs.close();
 		String insert_sql = "insert into fnd_sap_idocs(IDOC_ID,SERVER_ID,FILE_PATH, CREATED_BY,CREATION_DATE,LAST_UPDATED_BY,LAST_UPDATE_DATE) values(?,?,?,0,sysdate,0,sysdate) ";
@@ -163,7 +163,7 @@ public class DataBaseUtil {
 			return null;
 		return childNode.getText();
 	}
-	public int registerInterfaceHeader(int idocId, CompositeMap controlNode) throws SQLException {
+	public int registerInterfaceHeader(int idocId, CompositeMap controlNode) throws SQLException, ApplicationException {
 		if (idocId < 1 || controlNode == null)
 			return -1;
 		String idoctyp = getChildNodeText(controlNode, IDocFile.IDOCTYP_NODE);
@@ -176,7 +176,7 @@ public class DataBaseUtil {
 		if (rs.next()) {
 			header_id = rs.getInt(1);
 		} else {
-			throw new RuntimeException("Can not create interface header id !");
+			throw new ApplicationException("Can not create interface header id !");
 		}
 		rs.close();
 		statement.close();
@@ -191,7 +191,7 @@ public class DataBaseUtil {
 		return header_id;
 
 	}
-	public String getTemplateCode(String idoctyp, String cimtyp) throws SQLException {
+	public String getTemplateCode(String idoctyp, String cimtyp) throws SQLException, ApplicationException {
 		StringBuffer query_sql = new StringBuffer("select TEMPLATE_CODE from FND_SAP_IDOC_TEMPLATES where IDOCTYP=? ");
 		if (cimtyp != null)
 			query_sql.append(" and CIMTYP=?");
@@ -204,13 +204,13 @@ public class DataBaseUtil {
 		if (rs.next()) {
 			templateCode = rs.getString(1);
 		} else {
-			throw new RuntimeException("IDOCTYP:" + idoctyp + " CIMTYP:" + cimtyp + "Can not get template code !");
+			throw new ApplicationException("IDOCTYP:" + idoctyp + " CIMTYP:" + cimtyp + "Can not get template code !");
 		}
 		rs.close();
 		statement.close();
 		return templateCode;
 	}
-	public void registerInterfaceLine(int headerId, CompositeMap contentNode) throws SQLException {
+	public void registerInterfaceLine(int headerId, CompositeMap contentNode) throws SQLException, ApplicationException {
 		if (headerId < 1 || contentNode == null)
 			return;
 		dbConn.setAutoCommit(false);
@@ -218,7 +218,8 @@ public class DataBaseUtil {
 		dbConn.commit();
 		dbConn.setAutoCommit(true);
 	}
-	private void handleContentNode(int headerId, int parent_id, CompositeMap node) throws SQLException {
+	private void handleContentNode(int headerId, int parent_id, CompositeMap node) throws SQLException,
+			ApplicationException {
 		StringBuffer insert_sql = new StringBuffer(
 				"insert into FND_INTERFACE_LINES(LINE_ID,HEADER_ID,CREATED_BY,CREATION_DATE,LAST_UPDATED_BY,LAST_UPDATE_DATE,"
 						+ " SOURCE_TABLE,PARENT_LINE_ID");
@@ -231,7 +232,7 @@ public class DataBaseUtil {
 				handleContentNode(headerId, line_id, child);
 				continue;
 			}
-			insert_sql.append(",ATTRIBUTE_" + (getFieldIndex(node.getName(),child.getName())));
+			insert_sql.append(",ATTRIBUTE_" + (getFieldIndex(node.getName(), child.getName())));
 			values_sql.append(",?");
 		}
 		insert_sql.append(")").append(values_sql).append(")");
@@ -251,7 +252,7 @@ public class DataBaseUtil {
 		statement.executeUpdate();
 		statement.close();
 	}
-	public int getLineId() throws SQLException {
+	public int getLineId() throws SQLException, ApplicationException {
 		String query_sql = "select FND_INTERFACE_LINES_s.nextval from dual";
 		Statement statement = dbConn.createStatement();
 		ResultSet rs = statement.executeQuery(query_sql);
@@ -259,7 +260,7 @@ public class DataBaseUtil {
 		if (rs.next()) {
 			lineId = rs.getInt(1);
 		} else {
-			throw new RuntimeException("Can not create idoc id !");
+			throw new ApplicationException("Can not create idoc id !");
 		}
 		rs.close();
 		statement.close();
@@ -284,7 +285,7 @@ public class DataBaseUtil {
 		statement.executeUpdate();
 		statement.close();
 	}
-	public String getExecutePkg(int idocId, CompositeMap controlNode) throws SQLException {
+	public String getExecutePkg(int idocId, CompositeMap controlNode) throws SQLException, ApplicationException {
 		if (idocId < 1 || controlNode == null)
 			return null;
 		String idoctyp = getChildNodeText(controlNode, IDocFile.IDOCTYP_NODE);
@@ -292,7 +293,7 @@ public class DataBaseUtil {
 		String templateCode = getTemplateCode(idoctyp, cimtyp);
 		return getExecutePkg(templateCode);
 	}
-	public String getExecutePkg(String template_code) throws SQLException {
+	public String getExecutePkg(String template_code) throws SQLException, ApplicationException {
 		String query_sql = "select execute_pkg from fnd_interface_templates where enabled_flag='Y' and template_code='"
 				+ template_code + "'";
 		Statement statement = dbConn.createStatement();
@@ -301,7 +302,7 @@ public class DataBaseUtil {
 		if (rs.next()) {
 			executePkg = rs.getString(1);
 		} else {
-			throw new RuntimeException("Can not get template_code：" + template_code + "'s execute_pkg !");
+			throw new ApplicationException("Can not get template_code：" + template_code + "'s execute_pkg !");
 		}
 		rs.close();
 		statement.close();
@@ -331,29 +332,27 @@ public class DataBaseUtil {
 		statement.executeUpdate(delete_sql);
 		statement.close();
 	}
-	public int getFieldIndex(String segmenttyp,String fieldname) throws SQLException{
-		String get_field_Index_sql = "select t.field_index from fnd_sap_fields t where t.segmenttyp ='"+segmenttyp+"' and t.fieldname='"+fieldname+"'";
+	public int getFieldIndex(String segmenttyp, String fieldname) throws SQLException, ApplicationException {
+		String get_field_Index_sql = "select t.field_index from fnd_sap_fields t where t.segmenttyp ='" + segmenttyp
+				+ "' and t.fieldname='" + fieldname + "'";
 		Statement statement = dbConn.createStatement();
 		ResultSet rs = statement.executeQuery(get_field_Index_sql);
 		int fieldIndex = -1;
 		if (rs.next()) {
 			fieldIndex = rs.getInt(1);
 		} else {
-			throw new RuntimeException("Can not get fieldIndex ."+" segmenttyp:"+segmenttyp+" fieldname:"+fieldname);
+			throw new ApplicationException("Can not get fieldIndex ." + " segmenttyp:" + segmenttyp + " fieldname:"
+					+ fieldname);
 		}
 		rs.close();
 		return fieldIndex;
 	}
-	public Connection getConnection(){
+	public Connection getConnection() {
 		return dbConn;
 	}
-	public void dispose() {
+	public void dispose() throws SQLException {
 		if (dbConn != null) {
-			try {
-				dbConn.close();
-			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			}
+			dbConn.close();
 		}
 	}
 }

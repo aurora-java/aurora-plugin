@@ -55,6 +55,8 @@ public class IDocXMLParser extends Thread {
 				iDocServer.handleException(e);
 			} catch (SQLException e) {
 				iDocServer.handleException(e);
+			} catch (ApplicationException e) {
+				iDocServer.handleException(e);
 			}
 		}
 	}

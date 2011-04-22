@@ -40,7 +40,11 @@ public class IDocServer {
 	public void start() {
 		logger = iDocServerInstance.getLogger();
 		log("get database connection for " + serverName);
-		dbUtil = new DataBaseUtil(iDocServerInstance.getRegistry(), logger);
+		try {
+			dbUtil = new DataBaseUtil(iDocServerInstance.getRegistry(), logger);
+		} catch (ApplicationException e1) {
+			handleException(e1);
+		}
 		try {
 			// see provided examples of configuration files MYSERVER.jcoServer
 			// and BCE.jcoDestination
@@ -202,9 +206,12 @@ public class IDocServer {
 		} catch (SQLException e1) {
 			log("reportException:exception " + e1 + " failed!");
 		}
-		dbUtil.dispose();
 		iDocServer.stop();
-
+		try {
+			dbUtil.dispose();
+		} catch (SQLException e1) {
+			log("dispose dbUtil " + e1 + " failed!");
+		}
 		if (e != null)
 			throw new RuntimeException(message, e);
 		else
