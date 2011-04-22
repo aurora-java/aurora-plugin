@@ -25,34 +25,40 @@ public class IDocXMLParser extends Thread {
 				CompositeMap iDocData = loader.loadByFile(file.getPath());
 				CompositeMap idoc_node = iDocData.getChild(IDocFile.IDOC_NODE);
 				if (idoc_node == null || idoc_node.getChildIterator() == null || idoc_node.getChilds().size() < 2) {
-					return;
+					continue;
 				}
-				iDocServer.log("handle "+file.getPath()+" control_node ");
+				iDocServer.log("handle " + file.getPath() + " control_node ");
 				CompositeMap control_node = (CompositeMap) idoc_node.getChilds().get(0);
 				int header_id = -1;
 				header_id = iDocServer.getDbUtil().registerInterfaceHeader(file.getIdocId(), control_node);
 				iDocServer.getDbUtil().updateIdocInfo(file.getIdocId(), control_node);
-				iDocServer.log("handle "+file.getPath()+" content_node ");
+				iDocServer.log("handle " + file.getPath() + " content_node ");
 				CompositeMap content_node = (CompositeMap) idoc_node.getChilds().get(1);
 				iDocServer.getDbUtil().registerInterfaceLine(header_id, content_node);
-				iDocServer.getDbUtil().updateInterfaceLineStatus(header_id, file.getIdocId());
 				if (iDocServer.isDeleteImmediately()) {
 					File deleteFile = new File(file.getPath());
 					if (deleteFile.exists()) {
 						iDocServer.log("delete file " + file.getPath() + " " + deleteFile.delete());
 					}
 				}
+				String executePkg = iDocServer.getDbUtil().getExecutePkg(file.getIdocId(), control_node);
+				iDocServer.log("get executePkg:" + executePkg);
+				String errorMessage = iDocServer.getDbUtil().executePkg(executePkg, header_id);
+				if (errorMessage != null && !"".equals(errorMessage)) {
+					iDocServer.handleException("executePkg " + executePkg + " failed:" + errorMessage);
+				}
+				iDocServer.log("executePkg:" + executePkg + " successful!");
+				iDocServer.getDbUtil().updateInterfaceLineStatus(header_id, file.getIdocId());
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+				iDocServer.handleException(e);
 			} catch (SAXException e) {
-				throw new RuntimeException(e);
+				iDocServer.handleException(e);
 			} catch (SQLException e) {
-				throw new RuntimeException(e);
+				iDocServer.handleException(e);
 			}
 		}
 	}
 	public boolean isFinished() {
 		return iDocServer.isShutDown();
 	}
-
 }

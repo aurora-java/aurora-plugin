@@ -1,10 +1,12 @@
 package aurora.plugin.sap.sync.idoc;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Iterator;
 
 import javax.sql.DataSource;
@@ -178,7 +180,7 @@ public class DataBaseUtil {
 		}
 		rs.close();
 		statement.close();
-		String insert_sql = "insert into FND_INTERFACE_HEADERS(HEADER_ID,TEMPLET_CODE,ATTRIBUTE_1,CREATED_BY,CREATION_DATE,LAST_UPDATED_BY,LAST_UPDATE_DATE)"
+		String insert_sql = "insert into FND_INTERFACE_HEADERS(HEADER_ID,TEMPLATE_CODE,ATTRIBUTE_1,CREATED_BY,CREATION_DATE,LAST_UPDATED_BY,LAST_UPDATE_DATE)"
 				+ " values(?,?,?,0,sysdate,0,sysdate)";
 		PreparedStatement pstatement = dbConn.prepareStatement(insert_sql);
 		pstatement.setInt(1, header_id);
@@ -229,7 +231,7 @@ public class DataBaseUtil {
 				handleContentNode(headerId, line_id, child);
 				continue;
 			}
-			insert_sql.append(",ATTRIBUTE_" + (index++));
+			insert_sql.append(",ATTRIBUTE_" + (getFieldIndex(node.getName(),child.getName())));
 			values_sql.append(",?");
 		}
 		insert_sql.append(")").append(values_sql).append(")");
@@ -271,10 +273,10 @@ public class DataBaseUtil {
 		}
 	}
 	public void updateInterfaceLineStatus(int headerId, int idocId) throws SQLException {
-		log("begin updateInterfaceLineStatus headerId:"+headerId+" idocId："+idocId);
+		log("begin updateInterfaceLineStatus headerId:" + headerId + " idocId：" + idocId);
 		String header_update_sql = "update FND_INTERFACE_HEADERS t set t.status='done' where t.header_id =?";
 		String idoc_update_sql = "update fnd_sap_idocs t set t.handled_flag='Y' where t.idoc_id =?";
-		PreparedStatement  statement = dbConn.prepareStatement(header_update_sql);
+		PreparedStatement statement = dbConn.prepareStatement(header_update_sql);
 		statement.setInt(1, headerId);
 		statement.executeUpdate();
 		statement = dbConn.prepareStatement(idoc_update_sql);
@@ -282,8 +284,71 @@ public class DataBaseUtil {
 		statement.executeUpdate();
 		statement.close();
 	}
-	public void dispose(){
-		if(dbConn != null){
+	public String getExecutePkg(int idocId, CompositeMap controlNode) throws SQLException {
+		if (idocId < 1 || controlNode == null)
+			return null;
+		String idoctyp = getChildNodeText(controlNode, IDocFile.IDOCTYP_NODE);
+		String cimtyp = getChildNodeText(controlNode, IDocFile.CIMTYP_NODE);
+		String templateCode = getTemplateCode(idoctyp, cimtyp);
+		return getExecutePkg(templateCode);
+	}
+	public String getExecutePkg(String template_code) throws SQLException {
+		String query_sql = "select execute_pkg from fnd_interface_templates where enabled_flag='Y' and template_code='"
+				+ template_code + "'";
+		Statement statement = dbConn.createStatement();
+		ResultSet rs = statement.executeQuery(query_sql);
+		String executePkg = null;
+		if (rs.next()) {
+			executePkg = rs.getString(1);
+		} else {
+			throw new RuntimeException("Can not get template_code：" + template_code + "'s execute_pkg !");
+		}
+		rs.close();
+		statement.close();
+		return executePkg;
+	}
+	public String executePkg(String executePkg, int headerId) throws SQLException {
+		dbConn.setAutoCommit(false);
+		CallableStatement proc = dbConn.prepareCall("{call ? := " + executePkg + "(?)}");
+		String errorMessage = null;
+		proc.registerOutParameter(1, Types.VARCHAR);
+		proc.setInt(2, headerId);
+		proc.execute();
+		errorMessage = proc.getString(1);
+		if (errorMessage == null || "".equals(errorMessage)) {
+			dbConn.commit();
+		} else {
+			dbConn.rollback();
+		}
+		dbConn.setAutoCommit(true);
+		return errorMessage;
+
+	}
+	public void stopSapServers(int serverId) throws SQLException {
+		String delete_sql = "update fnd_sap_servers s set s.status='Error occurred:please check the console or log for details.' where s.server_id="
+				+ serverId;
+		Statement statement = dbConn.createStatement();
+		statement.executeUpdate(delete_sql);
+		statement.close();
+	}
+	public int getFieldIndex(String segmenttyp,String fieldname) throws SQLException{
+		String get_field_Index_sql = "select t.field_index from fnd_sap_fields t where t.segmenttyp ='"+segmenttyp+"' and t.fieldname='"+fieldname+"'";
+		Statement statement = dbConn.createStatement();
+		ResultSet rs = statement.executeQuery(get_field_Index_sql);
+		int fieldIndex = -1;
+		if (rs.next()) {
+			fieldIndex = rs.getInt(1);
+		} else {
+			throw new RuntimeException("Can not get fieldIndex ."+" segmenttyp:"+segmenttyp+" fieldname:"+fieldname);
+		}
+		rs.close();
+		return fieldIndex;
+	}
+	public Connection getConnection(){
+		return dbConn;
+	}
+	public void dispose() {
+		if (dbConn != null) {
 			try {
 				dbConn.close();
 			} catch (SQLException e) {
