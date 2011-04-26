@@ -1,5 +1,6 @@
 package aurora.plugin.sap.sync.idoc;
 
+import java.io.File;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -53,6 +55,13 @@ public class DataBaseUtil {
 		ResultSet rs = statement.executeQuery();
 		if (rs.next()) {
 			server_id = rs.getInt(1);
+			rs.close();
+			statement.close();
+			String update_sql = "update fnd_sap_servers t set t.status = '',last_update_date=sysdate where t.server_id ="
+					+ server_id;
+			Statement st = dbConn.createStatement();
+			st.executeUpdate(update_sql);
+			st.close();
 			return server_id;
 		}
 		statement = dbConn.prepareStatement("select fnd_sap_servers_s.nextval from dual");
@@ -78,12 +87,14 @@ public class DataBaseUtil {
 		return server_id;
 	}
 	public void unRegisterSapServers(int serverId) throws SQLException {
+		log("unRegisterSapServers where  serverId:" + serverId);
 		String delete_sql = "delete from fnd_sap_servers s where s.server_id=" + serverId;
 		Statement statement = dbConn.createStatement();
 		statement.executeUpdate(delete_sql);
 		statement.close();
 	}
 	public int addIdoc(int serverId, String filePath) throws SQLException, ApplicationException {
+		log("addIdoc where  serverId:"+serverId);
 		String get_idoc_id_sql = "select fnd_sap_idocs_s.nextval from dual";
 		Statement statement = dbConn.createStatement();
 		ResultSet rs = statement.executeQuery(get_idoc_id_sql);
@@ -105,6 +116,7 @@ public class DataBaseUtil {
 		return idoc_id;
 	}
 	public void updateIdocInfo(int idocId, CompositeMap control_node) throws SQLException {
+		log("updateIdocInfo where  idocId:"+idocId);
 		if (idocId < 1 || control_node == null)
 			return;
 		String tabnam = getChildNodeText(control_node, IDocFile.TABNAM_NODE);
@@ -164,6 +176,7 @@ public class DataBaseUtil {
 		return childNode.getText();
 	}
 	public int registerInterfaceHeader(int idocId, CompositeMap controlNode) throws SQLException, ApplicationException {
+		log("registerInterfaceHeader where  idocId:"+idocId);
 		if (idocId < 1 || controlNode == null)
 			return -1;
 		String idoctyp = getChildNodeText(controlNode, IDocFile.IDOCTYP_NODE);
@@ -192,6 +205,7 @@ public class DataBaseUtil {
 
 	}
 	public String getTemplateCode(String idoctyp, String cimtyp) throws SQLException, ApplicationException {
+		log("getTemplateCode where  idoctyp:"+idoctyp+" cimtyp:"+cimtyp);
 		StringBuffer query_sql = new StringBuffer("select TEMPLATE_CODE from FND_SAP_IDOC_TEMPLATES where IDOCTYP=? ");
 		if (cimtyp != null)
 			query_sql.append(" and CIMTYP=?");
@@ -204,13 +218,14 @@ public class DataBaseUtil {
 		if (rs.next()) {
 			templateCode = rs.getString(1);
 		} else {
-			throw new ApplicationException("IDOCTYP:" + idoctyp + " CIMTYP:" + cimtyp + "Can not get template code !");
+			throw new ApplicationException("IDOCTYP:" + idoctyp + " CIMTYP:" + cimtyp + " Can not get template code !");
 		}
 		rs.close();
 		statement.close();
 		return templateCode;
 	}
 	public void registerInterfaceLine(int headerId, CompositeMap contentNode) throws SQLException, ApplicationException {
+		log("registerInterfaceLine where  headerId:"+headerId);
 		if (headerId < 1 || contentNode == null)
 			return;
 		dbConn.setAutoCommit(false);
@@ -253,6 +268,7 @@ public class DataBaseUtil {
 		statement.close();
 	}
 	public int getLineId() throws SQLException, ApplicationException {
+		log("getLineId ");
 		String query_sql = "select FND_INTERFACE_LINES_s.nextval from dual";
 		Statement statement = dbConn.createStatement();
 		ResultSet rs = statement.executeQuery(query_sql);
@@ -274,7 +290,7 @@ public class DataBaseUtil {
 		}
 	}
 	public void updateInterfaceLineStatus(int headerId, int idocId) throws SQLException {
-		log("begin updateInterfaceLineStatus headerId:" + headerId + " idocId：" + idocId);
+		log("updateInterfaceLineStatus where headerId:" + headerId + " idocId：" + idocId);
 		String header_update_sql = "update FND_INTERFACE_HEADERS t set t.status='done' where t.header_id =?";
 		String idoc_update_sql = "update fnd_sap_idocs t set t.handled_flag='Y' where t.idoc_id =?";
 		PreparedStatement statement = dbConn.prepareStatement(header_update_sql);
@@ -285,15 +301,28 @@ public class DataBaseUtil {
 		statement.executeUpdate();
 		statement.close();
 	}
-	public String getExecutePkg(int idocId, CompositeMap controlNode) throws SQLException, ApplicationException {
-		if (idocId < 1 || controlNode == null)
+	public String getExecutePkg(int idocId) throws SQLException, ApplicationException {
+		log("getExecutePkg from idocId:"+idocId);
+		if (idocId < 1)
 			return null;
-		String idoctyp = getChildNodeText(controlNode, IDocFile.IDOCTYP_NODE);
-		String cimtyp = getChildNodeText(controlNode, IDocFile.CIMTYP_NODE);
+		String query_sql = "select i.idoctyp,i.cimtyp from fnd_sap_idocs i where i.idoc_id = " + idocId;
+		Statement statement = dbConn.createStatement();
+		ResultSet rs = statement.executeQuery(query_sql);
+		String idoctyp = null;
+		String cimtyp = null;
+		if (rs.next()) {
+			idoctyp = rs.getString(1);
+			cimtyp = rs.getString(2);
+		} else {
+			throw new ApplicationException("Can not get idoctyp where idoc_id:" + idocId + "!");
+		}
+		rs.close();
+		statement.close();
 		String templateCode = getTemplateCode(idoctyp, cimtyp);
 		return getExecutePkg(templateCode);
 	}
 	public String getExecutePkg(String template_code) throws SQLException, ApplicationException {
+		log("getExecutePkg from template_code:"+template_code);
 		String query_sql = "select execute_pkg from fnd_interface_templates where enabled_flag='Y' and template_code='"
 				+ template_code + "'";
 		Statement statement = dbConn.createStatement();
@@ -309,6 +338,7 @@ public class DataBaseUtil {
 		return executePkg;
 	}
 	public String executePkg(String executePkg, int headerId) throws SQLException {
+		log("executePkg where executePkg:"+executePkg+" headerId:"+headerId);
 		dbConn.setAutoCommit(false);
 		CallableStatement proc = dbConn.prepareCall("{call ? := " + executePkg + "(?)}");
 		String errorMessage = null;
@@ -326,13 +356,15 @@ public class DataBaseUtil {
 
 	}
 	public void stopSapServers(int serverId) throws SQLException {
-		String delete_sql = "update fnd_sap_servers s set s.status='Error occurred:please check the console or log for details.' where s.server_id="
+		log("stopSapServers where serverId:"+serverId);
+		String delete_sql = "update fnd_sap_servers s set s.status='Error occurred:please check the console or log for details.',last_update_date=sysdate where s.server_id="
 				+ serverId;
 		Statement statement = dbConn.createStatement();
 		statement.executeUpdate(delete_sql);
 		statement.close();
 	}
 	public int getFieldIndex(String segmenttyp, String fieldname) throws SQLException, ApplicationException {
+		log("getFieldIndex from segmenttyp:"+segmenttyp+" fieldname:"+fieldname);
 		String get_field_Index_sql = "select t.field_index from fnd_sap_fields t where t.segmenttyp ='" + segmenttyp
 				+ "' and t.fieldname='" + fieldname + "'";
 		Statement statement = dbConn.createStatement();
@@ -345,12 +377,49 @@ public class DataBaseUtil {
 					+ fieldname);
 		}
 		rs.close();
+		statement.close();
 		return fieldIndex;
 	}
+	public void getHistoryIdocs(String program_id, List idocList) throws SQLException, ApplicationException {
+		log("getHistoryIdocs from program_id:"+program_id);
+		String get_HistoryIdocs_sql = "select i.idoc_id, i.server_id, i.file_path  from fnd_interface_headers t, "
+				+ "fnd_sap_idocs i, fnd_sap_servers s  where t.status is null and t.attribute_1 = i.idoc_id"
+				+ " and i.server_id = s.server_id" + " and s.program_id='" + program_id + "' order by i.idoc_id";
+		Statement statement = dbConn.createStatement();
+		ResultSet rs = statement.executeQuery(get_HistoryIdocs_sql);
+		while (rs.next()) {
+			int idoc_id = rs.getInt(1);
+			int server_id = rs.getInt(2);
+			String file_path = rs.getString(3);
+			File file = new File(file_path);
+			if (!file.exists()) {
+				throw new ApplicationException("file :" + file.getAbsolutePath() + " is not exits");
+			}
+			idocList.add(new IDocFile(file_path, idoc_id, server_id));
+		}
+		rs.close();
+		statement.close();
+	}
+	public int existHeaders(int idoc_id) throws SQLException {
+		log("get existHeaders from idocId:"+idoc_id);
+		String get_field_Index_sql = "select t.header_id " + " from fnd_interface_headers t, fnd_sap_idocs i "
+				+ " where t.attribute_1 = i.idoc_id and i.idoc_id = " + idoc_id;
+		Statement statement = dbConn.createStatement();
+		ResultSet rs = statement.executeQuery(get_field_Index_sql);
+		int server_id = -1;
+		if (rs.next()) {
+			server_id = rs.getInt(1);
+		}
+		rs.close();
+		statement.close();
+		return server_id;
+	}
+
 	public Connection getConnection() {
 		return dbConn;
 	}
 	public void dispose() throws SQLException {
+		log("dispose database connection.");
 		if (dbConn != null) {
 			dbConn.close();
 		}

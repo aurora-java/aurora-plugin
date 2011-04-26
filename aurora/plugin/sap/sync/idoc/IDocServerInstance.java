@@ -45,6 +45,7 @@ public class IDocServerInstance implements IGlobalInstance {
 		return SERVER_NAME_LIST;
 	}
 	public void run() {
+		log("IDOC_DIR:" + IDOC_DIR);
 		if (IDOC_DIR == null || "".equals(IDOC_DIR)) {
 			throw new IllegalArgumentException("IDOC_DIR can not be null !");
 		} else {

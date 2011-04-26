@@ -50,8 +50,14 @@ public class IDocServer {
 			// and BCE.jcoDestination
 			log("start IDocServer " + serverName);
 			iDocServer = JCoIDoc.getServer(serverName);
+			log("get HistoryIdocs " + iDocServer.getProgramID());
+			dbUtil.getHistoryIdocs(iDocServer.getProgramID(), idocFils);
 		} catch (JCoException e) {
 			handleException(serverName + " is not valid.", e);
+		} catch (SQLException e) {
+			handleException(" get HistoryIdocs " + iDocServer.getProgramID() + " failure!", e);
+		} catch (ApplicationException e) {
+			handleException(e);
 		}
 		MyIDocHandlerFactory idocHanlerFactory = new MyIDocHandlerFactory();
 		iDocServer.setIDocHandlerFactory(idocHanlerFactory);
@@ -196,7 +202,7 @@ public class IDocServer {
 	public void handleException(String message, Throwable e) {
 		if (message == null && e == null)
 			return;
-		if(logger!= null){
+		if (logger != null) {
 			logger.log(Level.SEVERE, message, e);
 		}
 		try {
@@ -206,7 +212,9 @@ public class IDocServer {
 		} catch (SQLException e1) {
 			log("reportException:exception " + e1 + " failed!");
 		}
+		log("stop iDocServer ");
 		iDocServer.stop();
+		log("close dbconnection ");
 		try {
 			dbUtil.dispose();
 		} catch (SQLException e1) {
