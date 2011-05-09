@@ -184,6 +184,13 @@ public class IDocServer {
 			System.out.println(message);
 		}
 	}
+	public void log(Throwable e) {
+		if (logger != null) {
+			logger.log(Level.SEVERE, "", e);
+		} else {
+			e.printStackTrace();
+		}
+	}
 	public int getServerId() {
 		return server_id;
 	}
