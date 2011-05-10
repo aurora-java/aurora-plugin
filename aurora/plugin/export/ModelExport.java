@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import aurora.application.config.BaseServiceConfig;
 import aurora.i18n.ILocalizedMessageProvider;
 import aurora.i18n.IMessageProvider;
-import aurora.plugin.export.excel.poi.ExcelExportImpl;
+import aurora.plugin.poi.ExcelExportImpl;
 import aurora.presentation.component.std.config.DataSetConfig;
 import aurora.service.ServiceContext;
 import aurora.service.ServiceInstance;
