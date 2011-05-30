@@ -31,10 +31,11 @@ public class IDocXMLParser extends Thread {
 				header_id = iDocServer.getDbUtil().existHeaders(file.getIdocId());
 				insertInterface(file);
 			} catch (Throwable e) {
-				if(idocType != null){
-					errorIdocTypes.add(idocType);
-				}
 				try {
+					iDocServer.log(e);
+					if (idocType != null) {
+						errorIdocTypes.add(idocType);
+					}
 					iDocServer.getDbUtil().updateIdocsStatus(file.getIdocId(), "failed");
 				} catch (Throwable e1) {
 					iDocServer.log(e1);
@@ -51,8 +52,8 @@ public class IDocXMLParser extends Thread {
 				} catch (SQLException e1) {
 					iDocServer.log(e1);
 				}
-				
-			} 
+
+			}
 		}
 	}
 	public boolean isFinished() {
@@ -69,16 +70,22 @@ public class IDocXMLParser extends Thread {
 					return;
 				}
 				CompositeMap control_node = (CompositeMap) idoc_node.getChilds().get(0);
-				CompositeMap content_node = (CompositeMap) idoc_node.getChilds().get(1);
+				
 				iDocServer.log("handle " + file.getPath() + " control_node ");
 				idocType = iDocServer.getDbUtil().getIdocType(control_node);
-				if(isStop()){
-					throw new ApplicationException("This idocType:"+idocType+" has error before");
+				if (isStop()) {
+					throw new ApplicationException("This idocType:" + idocType + " has error before");
 				}
+				iDocServer.getDbUtil().getConnection().setAutoCommit(false);
 				header_id = iDocServer.getDbUtil().registerInterfaceHeader(file.getIdocId(), control_node);
 				iDocServer.getDbUtil().updateIdocInfo(file.getIdocId(), control_node);
 				iDocServer.log("handle " + file.getPath() + " content_node ");
-				iDocServer.getDbUtil().registerInterfaceLine(header_id, content_node);
+				for(int i=1;i<idoc_node.getChilds().size();i++){
+					CompositeMap content_node = (CompositeMap) idoc_node.getChilds().get(i);
+					iDocServer.getDbUtil().registerInterfaceLine(header_id, content_node);
+				}
+				iDocServer.getDbUtil().getConnection().commit();
+				iDocServer.getDbUtil().getConnection().setAutoCommit(true);
 			}
 		} catch (IOException e) {
 			throw new ApplicationException(e);
@@ -86,6 +93,13 @@ public class IDocXMLParser extends Thread {
 			throw new ApplicationException(e);
 		} catch (SQLException e) {
 			throw new ApplicationException(e);
+		}finally{
+			try {
+				iDocServer.getDbUtil().getConnection().rollback();
+				iDocServer.getDbUtil().getConnection().setAutoCommit(true);
+			} catch (SQLException e) {
+				iDocServer.log(e);
+			}
 		}
 		if (iDocServer.isDeleteImmediately()) {
 			File deleteFile = new File(file.getPath());
@@ -105,12 +119,18 @@ public class IDocXMLParser extends Thread {
 			iDocServer.log("executePkg:" + executePkg + " successful!");
 			iDocServer.getDbUtil().updateInterfaceLineStatus(header_id, file.getIdocId(), "done");
 		} catch (SQLException e) {
+			try {
+				iDocServer.getDbUtil().getConnection().rollback();
+				iDocServer.getDbUtil().getConnection().setAutoCommit(true);
+			} catch (SQLException e1) {
+				iDocServer.log(e1);
+			}
 			throw new ApplicationException(e);
 		}
 	}
-	private boolean isStop() throws SQLException, ApplicationException{
+	private boolean isStop() throws SQLException, ApplicationException {
 		String handleModel = iDocServer.getDbUtil().getHandleModel(idocType.getIdoctyp(), idocType.getCimtyp());
-		if(SYNC.equals(handleModel)||errorIdocTypes.contains(idocType)){
+		if (SYNC.equals(handleModel) || errorIdocTypes.contains(idocType)) {
 			return true;
 		}
 		return false;

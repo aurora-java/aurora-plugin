@@ -255,10 +255,7 @@ public class DataBaseUtil {
 		log("registerInterfaceLine where  headerId:" + headerId);
 		if (headerId < 1 || contentNode == null)
 			return;
-		dbConn.setAutoCommit(false);
 		handleContentNode(headerId, 0, contentNode);
-		dbConn.commit();
-		dbConn.setAutoCommit(true);
 	}
 	private void handleContentNode(int headerId, int parent_id, CompositeMap node) throws SQLException,
 			ApplicationException {
@@ -317,7 +314,7 @@ public class DataBaseUtil {
 		}
 	}
 	public void updateInterfaceLineStatus(int headerId, int idocId, String status) throws SQLException {
-		log("updateInterfaceLineStatus where headerId:" + headerId + " idocId：" + idocId);
+		log("updateInterfaceLineStatus where headerId:" + headerId + " idocId：" + idocId+" status:"+status);
 		String header_update_sql = "update FND_INTERFACE_HEADERS t set t.status=? where t.header_id =?";
 		String idoc_update_sql = "update fnd_sap_idocs t set t.handled_status=? where t.idoc_id =?";
 		PreparedStatement statement = dbConn.prepareStatement(header_update_sql);
@@ -331,7 +328,7 @@ public class DataBaseUtil {
 		statement.close();
 	}
 	public void updateIdocsStatus(int idocId, String message) throws SQLException {
-		log("updateIdocsStatus where headerId:" + " idocId：" + idocId);
+		log("updateIdocsStatus where idocId:" + idocId+" message:"+message);
 		String idoc_update_sql = "update fnd_sap_idocs t set t.handled_status=? where t.idoc_id =?";
 		PreparedStatement statement = dbConn.prepareStatement(idoc_update_sql);
 		statement.setString(1, message);
@@ -402,7 +399,7 @@ public class DataBaseUtil {
 		statement.close();
 	}
 	public int getFieldIndex(String segmenttyp, String fieldname) throws SQLException, ApplicationException {
-		log("getFieldIndex from segmenttyp:" + segmenttyp + " fieldname:" + fieldname);
+//		log("getFieldIndex from segmenttyp:" + segmenttyp + " fieldname:" + fieldname);
 		String get_field_Index_sql = "select t.field_index from fnd_sap_fields t where t.segmenttyp ='" + segmenttyp
 				+ "' and t.fieldname='" + fieldname + "'";
 		Statement statement = dbConn.createStatement();
@@ -420,8 +417,8 @@ public class DataBaseUtil {
 	}
 	public void getHistoryIdocs(String program_id, List idocList) throws SQLException, ApplicationException {
 		log("getHistoryIdocs from program_id:" + program_id);
-		String get_HistoryIdocs_sql = "select i.idoc_id, i.server_id, i.file_path  from fnd_interface_headers t, "
-				+ "fnd_sap_idocs i, fnd_sap_servers s  where (t.status is null or t.status<>'done') and t.attribute_1 = i.idoc_id"
+		String get_HistoryIdocs_sql = "select i.idoc_id, i.server_id, i.file_path  from "
+				+ " fnd_sap_idocs i, fnd_sap_servers s  where (i.handled_status is null or i.handled_status<>'done') "
 				+ " and i.server_id = s.server_id" + " and s.program_id='" + program_id + "' order by i.idoc_id";
 		Statement statement = dbConn.createStatement();
 		ResultSet rs = statement.executeQuery(get_HistoryIdocs_sql);
