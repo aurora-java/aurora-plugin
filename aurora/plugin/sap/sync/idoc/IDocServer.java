@@ -71,7 +71,9 @@ public class IDocServer {
 			server_id = dbUtil.registerSapServers(iDocServer);
 			log("get server_id " + server_id);
 			iDocServer.start();
-			if (!JCoServerState.ALIVE.equals(iDocServer.getState())) {
+			if (!JCoServerState.ALIVE.equals(iDocServer.getState())
+					&& !JCoServerState.STARTED.equals(iDocServer.getState())) {
+				log(" start idocServer failed,the status is " + iDocServer.getState());
 				log("unRegisterSapServers server_id " + server_id);
 				dbUtil.unRegisterSapServers(server_id);
 				dbUtil.dispose();
