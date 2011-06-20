@@ -336,8 +336,8 @@ public class DataBaseUtil {
 		statement.executeUpdate();
 		statement.close();
 	}
-	public String getExecutePkg(int idocId) throws SQLException, ApplicationException {
-		log("getExecutePkg from idocId:" + idocId);
+	public String getMiddleExecutePkg(int idocId) throws SQLException, ApplicationException {
+		log("getMiddleExecutePkg from idocId:" + idocId);
 		if (idocId < 1)
 			return null;
 		String query_sql = "select i.idoctyp,i.cimtyp from fnd_sap_idocs i where i.idoc_id = " + idocId;
@@ -354,10 +354,10 @@ public class DataBaseUtil {
 		rs.close();
 		statement.close();
 		String templateCode = getTemplateCode(idoctyp, cimtyp);
-		return getExecutePkg(templateCode);
+		return getMiddleExecutePkg(templateCode);
 	}
-	public String getExecutePkg(String template_code) throws SQLException, ApplicationException {
-		log("getExecutePkg from template_code:" + template_code);
+	public String getMiddleExecutePkg(String template_code) throws SQLException, ApplicationException {
+		log("getMiddleExecutePkg from template_code:" + template_code);
 		String query_sql = "select execute_pkg from fnd_interface_templates where enabled_flag='Y' and template_code='"
 				+ template_code + "'";
 		Statement statement = dbConn.createStatement();
@@ -367,6 +367,45 @@ public class DataBaseUtil {
 			executePkg = rs.getString(1);
 		} else {
 			throw new ApplicationException("Can not get template_code：" + template_code + "'s execute_pkg !");
+		}
+		rs.close();
+		statement.close();
+		return executePkg;
+	}
+	public String getFormalExecutePkg(int idocId) throws SQLException, ApplicationException {
+		log("getFormalExecutePkg from idocId:" + idocId);
+		if (idocId < 1)
+			return null;
+		String query_sql = "select i.idoctyp,i.cimtyp from fnd_sap_idocs i where i.idoc_id = " + idocId;
+		Statement statement = dbConn.createStatement();
+		ResultSet rs = statement.executeQuery(query_sql);
+		String idoctyp = null;
+		String cimtyp = null;
+		if (rs.next()) {
+			idoctyp = rs.getString(1);
+			cimtyp = rs.getString(2);
+		} else {
+			throw new ApplicationException("Can not get idoctyp where idoc_id:" + idocId + "!");
+		}
+		rs.close();
+		statement.close();
+		return getFormalExecutePkg(idoctyp,cimtyp);
+	}
+	public String getFormalExecutePkg(String idoctyp, String cimtyp) throws SQLException, ApplicationException {
+		log("getFormalExecutePkg where  idoctyp:" + idoctyp + " cimtyp:" + cimtyp);
+		StringBuffer query_sql = new StringBuffer("select execute_pkg from fnd_sap_idoc_transactions where IDOCTYP=? ");
+		if (cimtyp != null)
+			query_sql.append(" and CIMTYP=?");
+		PreparedStatement statement = dbConn.prepareStatement(query_sql.toString());
+		statement.setString(1, idoctyp);
+		if (cimtyp != null)
+			statement.setString(2, cimtyp);
+		ResultSet rs = statement.executeQuery();
+		String executePkg = null;
+		if (rs.next()) {
+			executePkg = rs.getString(1);
+		} else {
+			throw new ApplicationException("IDOCTYP:" + idoctyp + " CIMTYP:" + cimtyp + " Can not get template code !");
 		}
 		rs.close();
 		statement.close();

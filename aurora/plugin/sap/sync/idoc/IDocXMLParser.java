@@ -36,19 +36,31 @@ public class IDocXMLParser extends Thread {
 					if (idocType != null) {
 						errorIdocTypes.add(idocType);
 					}
-					iDocServer.getDbUtil().updateIdocsStatus(file.getIdocId(), "failed");
+					iDocServer.getDbUtil().updateIdocsStatus(file.getIdocId(), "interface failed");
 				} catch (Throwable e1) {
 					iDocServer.log(e1);
 				}
 				continue;
 			}
 			try {
-				insertFormalTables(file);
-				iDocServer.log("handle idoc:" + file.getIdocId() + " successful!");
+				insertMiddleTables(file);
+				iDocServer.log("insert MiddleTables successful for idoc_id:" + file.getIdocId()+" !");
 			} catch (Throwable e) {
 				iDocServer.log(e);
 				try {
-					iDocServer.getDbUtil().updateInterfaceLineStatus(header_id, file.getIdocId(), "failed");
+					iDocServer.getDbUtil().updateInterfaceLineStatus(header_id, file.getIdocId(), "middle failed");
+				} catch (SQLException e1) {
+					iDocServer.log(e1);
+				}
+				continue;
+			}
+			try {
+				insertFormalTables(file);
+				iDocServer.log("handle formal tables successful for idoc:" + file.getIdocId() + " !");
+			} catch (Throwable e) {
+				iDocServer.log(e);
+				try {
+					iDocServer.getDbUtil().updateInterfaceLineStatus(header_id, file.getIdocId(), "formal failed");
 				} catch (SQLException e1) {
 					iDocServer.log(e1);
 				}
@@ -108,15 +120,35 @@ public class IDocXMLParser extends Thread {
 			}
 		}
 	}
-	private void insertFormalTables(IDocFile file) throws ApplicationException {
+	private void insertMiddleTables(IDocFile file) throws ApplicationException {
 		try {
-			String executePkg = iDocServer.getDbUtil().getExecutePkg(file.getIdocId());
-			iDocServer.log("get executePkg:" + executePkg);
+			String executePkg = iDocServer.getDbUtil().getMiddleExecutePkg(file.getIdocId());
+			iDocServer.log("get middle executePkg:" + executePkg);
 			String errorMessage = iDocServer.getDbUtil().executePkg(executePkg, header_id);
 			if (errorMessage != null && !"".equals(errorMessage)) {
-				iDocServer.handleException("executePkg " + executePkg + " failed:" + errorMessage);
+				throw new ApplicationException("execute middle Pkg " + executePkg + " failed:" + errorMessage);
 			}
-			iDocServer.log("executePkg:" + executePkg + " successful!");
+			iDocServer.log("execute middle pkg:" + executePkg + " successful!");
+			iDocServer.getDbUtil().updateInterfaceLineStatus(header_id, file.getIdocId(), "middle");
+		} catch (SQLException e) {
+			try {
+				iDocServer.getDbUtil().getConnection().rollback();
+				iDocServer.getDbUtil().getConnection().setAutoCommit(true);
+			} catch (SQLException e1) {
+				iDocServer.log(e1);
+			}
+			throw new ApplicationException(e);
+		}
+	}
+	private void insertFormalTables(IDocFile file) throws ApplicationException {
+		try {
+			String executePkg = iDocServer.getDbUtil().getFormalExecutePkg(file.getIdocId());
+			iDocServer.log("get execute Formal Pkg:" + executePkg);
+			String errorMessage = iDocServer.getDbUtil().executePkg(executePkg, header_id);
+			if (errorMessage != null && !"".equals(errorMessage)) {
+				throw new ApplicationException("execute Formal Pkg " + executePkg + " failed:" + errorMessage);
+			}
+			iDocServer.log("execute Formal Pkg:" + executePkg + " successful!");
 			iDocServer.getDbUtil().updateInterfaceLineStatus(header_id, file.getIdocId(), "done");
 		} catch (SQLException e) {
 			try {
