@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.logging.Level;
 
+import javax.management.RuntimeErrorException;
+
 import uncertain.logging.ILogger;
 
 import com.sap.conn.idoc.IDocDocumentList;
@@ -48,7 +50,7 @@ public class IDocServer {
 		try {
 			// see provided examples of configuration files MYSERVER.jcoServer
 			// and BCE.jcoDestination
-			log("start IDocServer " + serverName);
+			log("begin start IDocServer " + serverName + "...");
 			iDocServer = JCoIDoc.getServer(serverName);
 			log("get HistoryIdocs " + iDocServer.getProgramID());
 			dbUtil.getHistoryIdocs(iDocServer.getProgramID(), idocFils);
@@ -66,17 +68,22 @@ public class IDocServer {
 		MyThrowableListener listener = new MyThrowableListener();
 		iDocServer.addServerErrorListener(listener);
 		iDocServer.addServerExceptionListener(listener);
-		iDocServer.setConnectionCount(1);
+		log("getConnectionCount is "+iDocServer.getConnectionCount() );
+		if(iDocServer.getConnectionCount()==0){
+			iDocServer.setConnectionCount(1);
+		}
 		try {
 			server_id = dbUtil.registerSapServers(iDocServer);
 			log("get server_id " + server_id);
 			iDocServer.start();
+			log("idocServer’s status is " + iDocServer.getState());
 			if (!JCoServerState.ALIVE.equals(iDocServer.getState())
 					&& !JCoServerState.STARTED.equals(iDocServer.getState())) {
-				log(" start idocServer failed,the status is " + iDocServer.getState());
 				log("unRegisterSapServers server_id " + server_id);
-				dbUtil.unRegisterSapServers(server_id);
-				dbUtil.dispose();
+				if(dbUtil.getConnection()!=null&&!dbUtil.getConnection().isClosed()){
+					dbUtil.unRegisterSapServers(server_id);
+					dbUtil.dispose();
+				}
 				return;
 			}
 			log("start IDocXMLParser ");
@@ -99,8 +106,9 @@ public class IDocServer {
 			OutputStreamWriter osw = null;
 			try {
 				IDocXMLProcessor xmlProcessor = JCoIDoc.getIDocFactory().getIDocXMLProcessor();
-				String filePath = iDocServerInstance.getIdocDir() + File.separator + serverCtx.getTID() + "_idoc.xml";
-				log("receive idoc " + filePath);
+				String fileName=serverCtx.getTID() + "_idoc.xml";
+				String filePath = iDocServerInstance.getIdocDir() + File.separator + fileName;
+				log("receive idoc " + fileName);
 				fos = new FileOutputStream(filePath);
 				osw = new OutputStreamWriter(fos, "UTF8");
 				xmlProcessor.render(idocList, osw, IDocXMLProcessor.RENDER_WITH_TABS_AND_CRLF);
@@ -109,7 +117,7 @@ public class IDocServer {
 				log("add idoc_id " + idoc_id);
 				addIdocFile(new IDocFile(filePath, idoc_id, server_id));
 			} catch (Throwable thr) {
-				handleException(thr);
+				log(thr);
 			} finally {
 				try {
 					if (osw != null)
@@ -221,14 +229,17 @@ public class IDocServer {
 		} catch (SQLException e1) {
 			log("reportException:exception " + e1 + " failed!");
 		}
-		log("stop iDocServer ");
-		iDocServer.stop();
+		if (JCoServerState.ALIVE.equals(iDocServer.getState()) || JCoServerState.STARTED.equals(iDocServer.getState())) {
+			log("stop iDocServer ");
+			iDocServer.stop();
+		}
 		log("close dbconnection ");
 		try {
 			dbUtil.dispose();
 		} catch (SQLException e1) {
 			log("dispose dbUtil " + e1 + " failed!");
 		}
+		log("...........shutdown "+serverName+" finished.............. ");
 		if (e != null)
 			throw new RuntimeException(message, e);
 		else
