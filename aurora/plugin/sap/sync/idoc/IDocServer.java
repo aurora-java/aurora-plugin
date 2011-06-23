@@ -117,7 +117,7 @@ public class IDocServer {
 				log("add idoc_id " + idoc_id);
 				addIdocFile(new IDocFile(filePath, idoc_id, server_id));
 			} catch (Throwable thr) {
-				log(thr);
+				handleException(thr);
 			} finally {
 				try {
 					if (osw != null)
