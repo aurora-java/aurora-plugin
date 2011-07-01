@@ -1,5 +1,5 @@
 /*
- * Created on 2011-6-6 ÏÂÎç11:50:14
+ * Created on 2011-6-6 ï¿½ï¿½ï¿½ï¿½11:50:14
  * $Id$
  */
 package aurora.plugin.memcached;
@@ -13,9 +13,10 @@ import uncertain.cache.ICache;
 import uncertain.cache.ICacheReader;
 import uncertain.cache.ICacheWriter;
 import uncertain.cache.INamedCacheFactory;
+import uncertain.core.IStartable;
 import uncertain.ocm.IConfigureListener;
 
-public class MemcachedClientFactory implements INamedCacheFactory, IConfigureListener {
+public class MemcachedClientFactory implements INamedCacheFactory, IConfigureListener, IStartable {
     
     MemcachedClient         mClient;
     String                  mServerList;
@@ -24,6 +25,11 @@ public class MemcachedClientFactory implements INamedCacheFactory, IConfigureLis
     
     int                    operationTimeout;
     boolean                addNameToKey;
+    
+    public MemcachedClientFactory(){
+
+
+    }
     
     private MemcachedClientWrapper createWrapper(String name){
         MemcachedClientWrapper wrapper = new MemcachedClientWrapper(name, mClient);
@@ -67,15 +73,28 @@ public class MemcachedClientFactory implements INamedCacheFactory, IConfigureLis
     }
 
     public void endConfigure() {
+        startup();
+    }
+    
+    public boolean startup(){
         try{
-        mClient = new MemcachedClient(
-                new BinaryConnectionFactory(),
-                AddrUtil.getAddresses(mServerList));
-        mDefaultWrapper = createWrapper(null);
+            mClient = new MemcachedClient(
+                    new BinaryConnectionFactory(),
+                    AddrUtil.getAddresses(mServerList));
+            mDefaultWrapper = createWrapper(null);
         }catch(IOException ex){
             ex.printStackTrace();
             throw new RuntimeException(ex);
         }
+        return true;
+    }
+    
+    public void shutdown(){
+        if(mClient!=null)
+            mClient.shutdown();
+        mClient = null;
+        mDefaultWrapper.clear();
+        mDefaultWrapper = null;
     }
 
 }
