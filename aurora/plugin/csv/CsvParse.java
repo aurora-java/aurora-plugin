@@ -1,4 +1,4 @@
-package aurora.plugin.cvs;
+package aurora.plugin.csv;
 
 import java.io.BufferedReader;
 import java.io.File;
