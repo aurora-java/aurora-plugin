@@ -13,8 +13,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import uncertain.composite.CompositeMap;
 
-public class ParseExcel {
-	public CompositeMap parseXls(InputStream is,String suffix) throws Exception{
+public class ExcelParse {
+	public static CompositeMap parseFile(InputStream is,String suffix) throws Exception{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Workbook wb = null;
 		Sheet sheet = null;

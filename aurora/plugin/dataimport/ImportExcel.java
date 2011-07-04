@@ -22,12 +22,18 @@ import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 
 import aurora.database.service.SqlServiceContext;
-import aurora.plugin.poi.ParseExcel;
+import aurora.plugin.cvs.CsvParse;
+import aurora.plugin.poi.ExcelParse;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 
 public class ImportExcel extends AbstractEntry{
 	public static final String DEFAULT_SUCCESS_FLAG = "/parameter/@ImportSuccess";
+	public static final String XLS_KEY=".xls";
+	public static final String XLSX_KEY=".xlsx";
+	public static final String CSV_KEY=".csv";
+	public static final String TXT_KEY=".txt";
+	public String separator;
 	public String header_id;
 	public String user_id;
 	public String job_id;
@@ -53,17 +59,26 @@ public class ImportExcel extends AbstractEntry{
 		Iterator i = items.iterator();
 		while (i.hasNext()) {
 			FileItem fileItem = (FileItem) i.next();
-			if (!fileItem.isFormField()) {
-				ParseExcel parseExcel=new ParseExcel();
+			if (!fileItem.isFormField()) {			
 				String fileName=fileItem.getName();
 				String suffix=fileName.substring(fileName.lastIndexOf("."));
-				CompositeMap data=parseExcel.parseXls(fileItem.getInputStream(), suffix);				
+				CompositeMap data=parseFile(fileItem.getInputStream(), suffix.toLowerCase());				
 	            result=save(conn,data);
 			}
 		}
         context.putObject(status_field, result,true);              
 	}
-	
+	CompositeMap parseFile(InputStream is,String suffix)throws Exception{
+		CompositeMap data=null;
+		if(XLS_KEY.equals(suffix)||XLSX_KEY.equals(suffix)){
+			data=ExcelParse.parseFile(is,suffix);
+		}else if(CSV_KEY.equals(suffix)||TXT_KEY.equals(suffix)){
+			if(separator==null)
+				throw new IllegalArgumentException("separator is undefined");
+			data=CsvParse.parseFile(is, this.separator);
+		}
+		return data;
+	}
 	void validatePara(CompositeMap context){
 		header_id=TextParser.parse(header_id, context);
 		if(header_id==null&&"".equals(header_id))
@@ -92,7 +107,8 @@ public class ImportExcel extends AbstractEntry{
 			else
 				cstm.setLong(2, new Long(job_id));
 			cstm.setString(3, "NEW");
-			cstm.setLong(4, new Long(user_id));
+			cstm.setString(4, user_id);
+//			cstm.setLong(4, new Long(user_id));
 			if(template_code==null)
 				cstm.setNull(5, java.sql.Types.VARCHAR);
 			else
@@ -197,6 +213,14 @@ public class ImportExcel extends AbstractEntry{
 
 	public void setHeader_id(String header_id) {
 		this.header_id = header_id;
+	}	
+	
+	public String getSeparator() {
+		return separator;
+	}
+
+	public void setSeparator(String separator) {
+		this.separator = separator;
 	}
 
 	public String getUser_id() {
@@ -274,12 +298,11 @@ public class ImportExcel extends AbstractEntry{
 	
 	public static void main(String[] args){
 		String pathname="/Users/zoulei/Desktop/11.xls";
-		File file=new File(pathname);
-		ParseExcel parseExcel=new ParseExcel();
+		File file=new File(pathname);		
 		InputStream is=null;
 		try {
 			is = new FileInputStream(file);
-			CompositeMap data=parseExcel.parseXls(is, ".xls");			
+			CompositeMap data=ExcelParse.parseFile(is, ".xls");			
 			System.out.print(data.toXML());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
