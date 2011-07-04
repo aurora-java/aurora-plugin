@@ -187,7 +187,8 @@ public class ImportExcel extends AbstractEntry{
 			cstm.setLong(1, new Long(header_id));
 			cstm.setNull(2,java.sql.Types.VARCHAR);
 			cstm.setNull(3,java.sql.Types.VARCHAR);		
-			cstm.setLong(4, new Long(user_id));
+//			cstm.setLong(4, new Long(user_id));
+			cstm.setString(4, user_id);
 			cstm.setNull(5,java.sql.Types.NUMERIC);	
 			cstm.setNull(6,java.sql.Types.VARCHAR);
 			cstm.setNull(7,java.sql.Types.NUMERIC);		
