@@ -65,6 +65,7 @@ public class DataBaseUtil {
 				Statement st = dbConn.createStatement();
 				st.executeUpdate(update_sql);
 				st.close();
+				statement.close();
 				return server_id;
 			}
 			statement = dbConn.prepareStatement("select fnd_sap_servers_s.nextval from dual");
@@ -73,6 +74,7 @@ public class DataBaseUtil {
 				server_id = rs.getInt(1);
 			}
 			rs.close();
+			statement.close();
 			String insert_sql = "insert into fnd_sap_servers(" + "SERVER_ID,PROGRAM_ID,REPOSITORY_NAME,GATEWAY_HOST,"
 					+ "GATEWAY_SERVICE,RESPOSITORY_DESTINATION,STATUS,CREATED_BY,"
 					+ "CREATION_DATE,LAST_UPDATED_BY,LAST_UPDATE_DATE" + ") values"
@@ -114,6 +116,7 @@ public class DataBaseUtil {
 	public int addIdoc(int serverId, String filePath) throws SQLException, ApplicationException {
 		String get_idoc_id_sql = "select fnd_sap_idocs_s.nextval from dual";
 		Statement statement = null;
+		PreparedStatement pStatement = null;
 		ResultSet rs = null;
 		int idoc_id = -1;
 		try {
@@ -125,8 +128,9 @@ public class DataBaseUtil {
 				throw new ApplicationException("execute sql:" + get_idoc_id_sql + " failed.");
 			}
 			rs.close();
+			statement.close();
 			String insert_sql = "insert into fnd_sap_idocs(IDOC_ID,SERVER_ID,FILE_PATH, CREATED_BY,CREATION_DATE,LAST_UPDATED_BY,LAST_UPDATE_DATE) values(?,?,?,0,sysdate,0,sysdate) ";
-			PreparedStatement pStatement = dbConn.prepareStatement(insert_sql);
+			pStatement = dbConn.prepareStatement(insert_sql);
 			int index = 1;
 			pStatement.setInt(index++, idoc_id);
 			pStatement.setInt(index++, serverId);
@@ -139,6 +143,9 @@ public class DataBaseUtil {
 			}
 			if (statement != null) {
 				statement.close();
+			}
+			if (pStatement != null) {
+				pStatement.close();
 			}
 		}
 		return idoc_id;
@@ -217,6 +224,7 @@ public class DataBaseUtil {
 		String templateCode = getTemplateCode(idoctyp, cimtyp);
 		String get_interface_header_sql = "select FND_INTERFACE_HEADERS_s.nextval from dual";
 		Statement statement = null;
+		PreparedStatement pstatement = null;
 		ResultSet rs = null;
 		int header_id = -1;
 		try {
@@ -231,7 +239,7 @@ public class DataBaseUtil {
 			statement.close();
 			String insert_sql = "insert into FND_INTERFACE_HEADERS(HEADER_ID,TEMPLATE_CODE,ATTRIBUTE_1,CREATED_BY,CREATION_DATE,LAST_UPDATED_BY,LAST_UPDATE_DATE)"
 					+ " values(?,?,?,0,sysdate,0,sysdate)";
-			PreparedStatement pstatement = dbConn.prepareStatement(insert_sql);
+			pstatement = dbConn.prepareStatement(insert_sql);
 			pstatement.setInt(1, header_id);
 			pstatement.setString(2, templateCode);
 			pstatement.setString(3, String.valueOf(idocId));
@@ -243,6 +251,9 @@ public class DataBaseUtil {
 			}
 			if (statement != null) {
 				statement.close();
+			}
+			if(pstatement != null){
+				pstatement.close();
 			}
 		}
 		return header_id;
@@ -302,7 +313,6 @@ public class DataBaseUtil {
 			if (cimtyp != null)
 				statement.setString(2, cimtyp);
 			rs = statement.executeQuery();
-
 			if (rs.next()) {
 				handleModel = rs.getString(1);
 			} else {
@@ -416,6 +426,7 @@ public class DataBaseUtil {
 			statement.setString(1, status);
 			statement.setInt(2, headerId);
 			statement.executeUpdate();
+			statement.close();
 			statement = dbConn.prepareStatement(idoc_update_sql);
 			statement.setString(1, status);
 			statement.setInt(2, idocId);
@@ -507,18 +518,29 @@ public class DataBaseUtil {
 		if (idocId < 1)
 			return null;
 		String query_sql = "select i.idoctyp,i.cimtyp from fnd_sap_idocs i where i.idoc_id = " + idocId;
-		Statement statement = dbConn.createStatement();
-		ResultSet rs = statement.executeQuery(query_sql);
+		Statement statement = null;
+		ResultSet rs = null;
 		String idoctyp = null;
 		String cimtyp = null;
-		if (rs.next()) {
-			idoctyp = rs.getString(1);
-			cimtyp = rs.getString(2);
-		} else {
-			throw new ApplicationException("execute sql:" + query_sql + " failed!");
+		try {
+			statement = dbConn.createStatement();
+			rs = statement.executeQuery(query_sql);
+			if (rs.next()) {
+				idoctyp = rs.getString(1);
+				cimtyp = rs.getString(2);
+			} else {
+				throw new ApplicationException("execute sql:" + query_sql + " failed!");
+			}
+			rs.close();
+			statement.close();
+		} finally {
+			if(rs != null){
+				rs.close();
+			}
+			if(statement != null){
+				statement.close();
+			}
 		}
-		rs.close();
-		statement.close();
 		return getFormalExecutePkg(idoctyp, cimtyp);
 	}
 	public String getFormalExecutePkg(String idoctyp, String cimtyp) throws SQLException, ApplicationException {

@@ -15,7 +15,7 @@ public class IDocServerInstance implements IGlobalInstance {
 	public ILogger logger;
 	public static final String SEPARATOR = ",";
 	public String DeleteImmediately = "Y";
-
+	private String version = "1.1";
 	public IDocServerInstance(IObjectRegistry registry) {
 		this.registry = registry;
 	}
@@ -45,6 +45,7 @@ public class IDocServerInstance implements IGlobalInstance {
 		return SERVER_NAME_LIST;
 	}
 	public void run() {
+		log("idoc version: "+version);
 		log("IDOC_DIR:" + IDOC_DIR);
 		if (IDOC_DIR == null || "".equals(IDOC_DIR)) {
 			throw new IllegalArgumentException("IDOC_DIR can not be null !");
