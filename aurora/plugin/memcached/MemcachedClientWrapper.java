@@ -1,12 +1,17 @@
 /*
- * Created on 2011-6-6 ÏÂÎç11:51:45
+ * Created on 2011-6-6 ï¿½ï¿½ï¿½ï¿½11:51:45
  * $Id$
  */
 package aurora.plugin.memcached;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import net.spy.memcached.MemcachedClient;
 import uncertain.cache.ICache;
@@ -54,6 +59,7 @@ public class MemcachedClientWrapper implements ICache {
 
     public Object getValue(Object key) {
         checkKey(key);
+        key = DigestUtils.md5Hex(key.toString());
         return mClient.get(key.toString());
     }
 
@@ -77,6 +83,7 @@ public class MemcachedClientWrapper implements ICache {
 
     public boolean setValue(Object key, int timeout, Object value) {
         checkKey(key);
+        key = DigestUtils.md5Hex(key.toString());
         Future<Boolean> b = mClient.set(key.toString(),timeout,value);
         Boolean result = checkResult(b, "Error when trying to set value to memcached server");
         return result==null?false:result.booleanValue();
@@ -84,7 +91,8 @@ public class MemcachedClientWrapper implements ICache {
     }
 
     public void remove(Object key) {
-        checkKey(key);        
+        checkKey(key); 
+        key = DigestUtils.md5Hex(key.toString());
         Future<Boolean> f = mClient.delete(key.toString());
         checkResult(f,"Error when removing key "+key+" from memcached server");
 
@@ -94,5 +102,8 @@ public class MemcachedClientWrapper implements ICache {
         //TODO clear?
 
     }
+    
+    
+    
 
 }
