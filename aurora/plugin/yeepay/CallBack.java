@@ -48,7 +48,7 @@ public class CallBack extends AbstractEntry {
 		isOK = PaymentForOnlineService.verifyCallback(hmac,p1_MerId,r0_Cmd,r1_Code, 
 				r2_TrxId,r3_Amt,r4_Cur,r5_Pid,r6_Order,r7_Uid,r8_MP,r9_BType,keyValue);
 		model.putString("r1_Code", r1_Code);
-		
+		model.putString("r9_BType", r9_BType);
 		if(isOK){
 			para.putString("r5_Pid", r5_Pid);
 			para.putString("r8_MP", r8_MP);
