@@ -578,9 +578,10 @@ public class DataBaseUtil {
 	}
 	public String executePkg(String executePkg, int headerId) throws SQLException {
 		String errorMessage = null;
+		CallableStatement proc = null;
 		try {
 			dbConn.setAutoCommit(false);
-			CallableStatement proc = dbConn.prepareCall("{call ? := " + executePkg + "(?)}");
+			proc = dbConn.prepareCall("{call ? := " + executePkg + "(?)}");
 			proc.registerOutParameter(1, Types.VARCHAR);
 			proc.setInt(2, headerId);
 			proc.execute();
@@ -590,8 +591,11 @@ public class DataBaseUtil {
 			} else {
 				dbConn.rollback();
 			}
+			proc.close();
 			dbConn.setAutoCommit(true);
 		} finally {
+			if(proc != null)
+				proc.close();
 			dbConn.rollback();
 			dbConn.setAutoCommit(true);
 		}

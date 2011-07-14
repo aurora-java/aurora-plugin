@@ -70,7 +70,7 @@ public class IDocXMLParser extends Thread {
 				} catch (SQLException e1) {
 					iDocServer.log(e1);
 				}
-
+				continue;
 			}
 			iDocServer.log("idoc:" + file.getIdocId() + " execute successful !");
 		}

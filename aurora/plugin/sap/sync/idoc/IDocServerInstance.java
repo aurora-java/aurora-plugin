@@ -15,7 +15,7 @@ public class IDocServerInstance implements IGlobalInstance {
 	public ILogger logger;
 	public static final String SEPARATOR = ",";
 	public String DeleteImmediately = "Y";
-	private String version = "1.1";
+	private String version = "1.2";
 	public IDocServerInstance(IObjectRegistry registry) {
 		this.registry = registry;
 	}
