@@ -15,8 +15,10 @@ import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.exception.GeneralException;
 import uncertain.ocm.IConfigurable;
 import uncertain.ocm.IObjectRegistry;
+import uncertain.proc.IProcedureManager;
 import uncertain.proc.Procedure;
 import uncertain.proc.ProcedureRunner;
+import uncertain.util.resource.ILocatable;
 
 public class DefaultMessageHandler implements MessageHandler,IConfigurable {
 
@@ -42,17 +44,25 @@ public class DefaultMessageHandler implements MessageHandler,IConfigurable {
 				client.getILogger().log("receive message text:"+((TextMessage)message).getText());
 				client.getILogger().log("load procedure:"+procedure);
 				UncertainEngine ue = (UncertainEngine)registry.getInstanceOfType(UncertainEngine.class);
-				ProcedureRunner runner = ue.getProcedureManager().createProcedureRunner();
-		        Procedure proc = ue.getProcedureManager().loadProcedure(procedure);
+				ILocatable location = null;
+				if(ue == null){
+					throw new GeneralException(MessageCodes.INSTANCE_NOT_FOUND_ERROR,new Object[]{UncertainEngine.class.getCanonicalName()},location);
+				}
+				IProcedureManager pm = ue.getProcedureManager();
+				if(ue == null){
+					throw new GeneralException(MessageCodes.INSTANCE_NOT_FOUND_ERROR,new Object[]{IProcedureManager.class.getCanonicalName()},location);
+				}
+				ProcedureRunner runner = pm.createProcedureRunner();
+		        Procedure proc = pm.loadProcedure(procedure);
 		        if(proc==null)
 		            throw new IllegalArgumentException("Can't load procedure "+procedure);
 		        runner.call(proc);
 			} catch (JMSException e) {
 				throw new GeneralException(MessageCodes.JMSEXCEPTION_ERROR, new Object[]{e.getMessage()}, e); 
 			} catch (IOException e) {
-				throw new GeneralException(MessageCodes.GENEANL_SYS_RAISE_ERROR, new Object[]{"IProcedureManager.loadProcedure}",procedure}, e);  
+				throw new GeneralException(MessageCodes.IO_ERROR, new Object[]{procedure}, e);  
 			} catch (SAXException e) {
-				throw new GeneralException(MessageCodes.GENEANL_SYS_RAISE_ERROR, new Object[]{"IProcedureManager.loadProcedure}",procedure}, e); 
+				throw new GeneralException(MessageCodes.SAX_ERRORR, new Object[]{procedure}, e); 
 			}		
 		}
 		else
