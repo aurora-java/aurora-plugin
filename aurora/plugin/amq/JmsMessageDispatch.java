@@ -1,9 +1,11 @@
 package aurora.plugin.amq;
 
-import uncertain.composite.CompositeMap;
+import java.util.logging.Level;
+
 import uncertain.composite.TextParser;
 import uncertain.exception.BuiltinExceptionFactory;
-import uncertain.exception.GeneralException;
+import uncertain.logging.ILogger;
+import uncertain.logging.LoggingContext;
 import uncertain.ocm.IConfigurable;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.AbstractEntry;
@@ -17,23 +19,25 @@ public class JmsMessageDispatch extends AbstractEntry implements IConfigurable{
 	public JmsMessageDispatch(IObjectRegistry registry) {
 		this.registry = registry;
 	}
+	
 	@Override
 	public void run(ProcedureRunner runner) throws Exception {
+	    if(event==null)
+	        BuiltinExceptionFactory.createAttributeMissing(this, EVENT_ATTR);
+	    
+	    ILogger logger = LoggingContext.getLogger(runner.getContext(), AMQClientInstance.PLUGIN);
+	    
 		AMQClientInstance amqClient = (AMQClientInstance)registry.getInstanceOfType(AMQClientInstance.class);
 		if(amqClient == null){
-			ILocatable locatable = null;
-			throw new GeneralException(MessageCodes.INSTANCE_NOT_FOUND_ERROR, new Object[]{AMQClientInstance.class.getCanonicalName()}, locatable);
+			//throw new GeneralException(MessageCodes.INSTANCE_NOT_FOUND_ERROR, new Object[]{AMQClientInstance.class.getCanonicalName()}, locatable);
+			throw BuiltinExceptionFactory.createInstanceNotFoundException(this, AMQClientInstance.class );
 		}
 		String message = TextParser.parse(event, runner.getContext());
-		amqClient.getILogger().log("send message:"+message);
 		amqClient.getProducer().sendTextMessage(message);	
+        logger.log(Level.CONFIG, "Message:{0} sent", new Object[]{message});
+
 	}
-    public void beginConfigure(CompositeMap config){
-    	if(config.get(EVENT_ATTR) ==null){
-    		throw BuiltinExceptionFactory.createAttributeMissing(config.asLocatable(), EVENT_ATTR);
-    	}
-       super.beginConfigure(config);
-    }
+
 
 	
 	public String getEvent() {
