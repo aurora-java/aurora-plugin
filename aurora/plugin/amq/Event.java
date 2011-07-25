@@ -25,13 +25,10 @@ public class Event implements IConfigurable{
 		if(config.get(MESSAGE_ATTR)==null){
 			throw BuiltinExceptionFactory.createAttributeMissing(config.asLocatable(), MESSAGE_ATTR);
 		}
-		if(config.get(HANDLER_ATTR)==null){
-			throw BuiltinExceptionFactory.createAttributeMissing(config.asLocatable(), HANDLER_ATTR);
-		}
-		
+//		if(config.get(HANDLER_ATTR)==null){
+//			throw BuiltinExceptionFactory.createAttributeMissing(config.asLocatable(), HANDLER_ATTR);
+//		}
 	}
 	public void endConfigure() {
-		// TODO Auto-generated method stub
-		
 	}
 }

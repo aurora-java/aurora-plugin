@@ -1,7 +1,9 @@
 package aurora.plugin.amq;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -16,60 +18,56 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 import uncertain.composite.CompositeMap;
 import uncertain.exception.BuiltinExceptionFactory;
+import uncertain.exception.ConfigurationFileException;
 import uncertain.exception.GeneralException;
 import uncertain.ocm.IConfigurable;
 import uncertain.util.resource.ILocatable;
 
 public class Consumer implements IConfigurable, MessageListener {
-	private String Url;
-	private String Topic;
-	private String Client;
+	private String topic;
+	private String client;
 	private CompositeMap config;
 	private Session session;
+	private Connection connection;
 	private MessageConsumer messageConsumer;
 	private Event[] events;
-	private MessageHandler[] messageHandlers;
-	private Map handlersMap = new HashMap(); 
 	private Map eventMap = new HashMap(); 
 	private AMQClientInstance amqClient;
 
 	public void init(AMQClientInstance amqClient) throws Exception {
-		amqClient.getILogger().log("init Consumer");
-		this.amqClient = amqClient;
-		if(Url ==null){
-			throw BuiltinExceptionFactory.createAttributeMissing(config.asLocatable(), "url");
-		}
-		amqClient.getILogger().log("create ConnectionFactory with Url "+Url);
-		ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(Url);
-		Connection connection = factory.createConnection();
-		connection.setClientID(Client);
-		Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		if(Topic ==null){
+		if(topic ==null){
 			throw BuiltinExceptionFactory.createAttributeMissing(config.asLocatable(), "topic");
 		}
-		amqClient.getILogger().log("create Topic "+Topic);
-		Topic topic = session.createTopic(Topic);
-		if(Client ==null){
-			throw BuiltinExceptionFactory.createAttributeMissing(config.asLocatable(), "client");
+		amqClient.getLogger().log(Level.CONFIG,"init Consumer");
+		this.amqClient = amqClient;
+		ActiveMQConnectionFactory factory = amqClient.getFactory();
+		connection = factory.createConnection();
+		if(client == null){
+			client = getAutoClient(topic);
 		}
-		messageConsumer = session.createDurableSubscriber(topic, Topic);
+		connection.setClientID(client);
+		session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		Topic amqTopic = session.createTopic(topic);
+		amqClient.getLogger().log(Level.CONFIG,"create Topic:{0}",new Object[]{topic});
+		messageConsumer = session.createDurableSubscriber(amqTopic, topic);
 		messageConsumer.setMessageListener(this);
 		for (int i = 0; i < events.length; i++) {
 			Event event = events[i];
-			Object messageHandler = handlersMap.get(event.getHandler());
-			if(messageHandler == null){
-				throw new RuntimeException("test");
-			}
-			eventMap.put(event.getMessage(), messageHandler);
+			if(event.getHandler() != null)
+				eventMap.put(event.getMessage(), event.getHandler());
 		}
-		amqClient.getILogger().log("start Consumer connection");
 		connection.start();
-		amqClient.getILogger().log("start Consumer successfull!");
+		amqClient.getLogger().log(Level.CONFIG,"start Consumer successfull!");
+	}
+	public void onShutdown(){
+		JMSUtil.freeMessageConsumer(messageConsumer);
+		JMSUtil.freeJMSSession(session);
+		JMSUtil.freeJMSSession(session);
 	}
 	public void onMessage(Message message) {
 		if(!(message instanceof TextMessage)){
 			ILocatable locatable = null;
-			throw new GeneralException(MessageCodes.MESSAGE_TYPE_ERROR, new Object[]{TextMessage.class.getName(),message.getClass().getName()}, locatable);
+			throw new GeneralException(MessageCodes.MESSAGE_TYPE_ERROR, new Object[]{TextMessage.class.getName(),message.getClass().getCanonicalName()}, locatable);
 		}
 		String messageText = null;
 		try {
@@ -77,24 +75,21 @@ public class Consumer implements IConfigurable, MessageListener {
 		} catch (JMSException e) {
 			throw new GeneralException(MessageCodes.JMSEXCEPTION_ERROR, new Object[]{e.getMessage()}, e);
 		}
-		MessageHandler handler = (MessageHandler)eventMap.get(messageText);
-		if(handler == null){
-			ILocatable locatable = null;
-			throw new GeneralException(MessageCodes.MESSAGE_TYPE_ERROR, new Object[]{messageText}, locatable);
+		String handlerName = (String)eventMap.get(messageText);
+		if(handlerName != null){
+			MessageHandler handler = amqClient.getMessageHandler(handlerName);
+			if(handler == null){
+				throw new ConfigurationFileException(MessageCodes.HANDLER_NOT_FOUND_ERROR, new Object[]{handler}, config.asLocatable());
+			}
+			handler.onMessage(message);
 		}
-		handler.onMessage(amqClient,message);
-	}
-	public String getUrl() {
-		return Url;
-	}
-	public void setUrl(String url) {
-		Url = url;
+		
 	}
 	public String getTopic() {
-		return Topic;
+		return topic;
 	}
 	public void setTopic(String topic) {
-		Topic = topic;
+		this.topic = topic;
 	}
 	public void setSession(Session session) {
 		this.session = session;
@@ -109,25 +104,13 @@ public class Consumer implements IConfigurable, MessageListener {
 		return events;
 	}
 	public String getClient() {
-		return Client;
+		return client;
 	}
 	public void setClient(String client) {
-		Client = client;
+		this.client = client;
 	}
-	public void setMessageConsumer(MessageConsumer messageProducer) {
-		this.messageConsumer = messageProducer;;
-	}
-	public MessageConsumer getMessageConsumer() {
-		return messageConsumer;
-	}
-	public MessageHandler[] getMessageHandlers() {
-		return messageHandlers;
-	}
-	public void setMessageHandlers(MessageHandler[] messageHandlers) {
-		this.messageHandlers = messageHandlers;
-		for(int i= 0;i<messageHandlers.length;i++){
-			handlersMap.put(messageHandlers[i].getName(), messageHandlers[i]);
-		}
+	public String getAutoClient(String topic){
+		return Calendar.getInstance().getTimeInMillis()+(topic!= null?topic:"");
 	}
 	public void beginConfigure(CompositeMap config) {
 		this.config = config;
