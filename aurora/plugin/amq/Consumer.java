@@ -62,7 +62,7 @@ public class Consumer implements IConfigurable, MessageListener {
 	public void onShutdown(){
 		JMSUtil.freeMessageConsumer(messageConsumer);
 		JMSUtil.freeJMSSession(session);
-		JMSUtil.freeJMSSession(session);
+		JMSUtil.freeJMSConnection(connection);
 	}
 	public void onMessage(Message message) {
 		if(!(message instanceof TextMessage)){
