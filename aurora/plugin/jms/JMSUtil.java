@@ -1,4 +1,4 @@
-package aurora.plugin.amq;
+package aurora.plugin.jms;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;

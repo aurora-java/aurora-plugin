@@ -1,4 +1,4 @@
-package aurora.plugin.amq;
+package aurora.plugin.jms;
 
 import uncertain.composite.CompositeMap;
 import uncertain.exception.BuiltinExceptionFactory;

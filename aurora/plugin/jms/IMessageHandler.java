@@ -1,9 +1,9 @@
-package aurora.plugin.amq;
+package aurora.plugin.jms;
 
 import javax.jms.Message;
 import javax.jms.MessageListener;
 
-public interface MessageHandler extends MessageListener{
+public interface IMessageHandler extends MessageListener{
 	public String getName();
 	public void setName(String name) ;
 }

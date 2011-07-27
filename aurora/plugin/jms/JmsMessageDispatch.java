@@ -1,13 +1,14 @@
-package aurora.plugin.amq;
+package aurora.plugin.jms;
 
 import java.util.logging.Level;
 
 import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.Topic;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
+import aurora.plugin.amq.AMQClientInstance;
 
 import uncertain.composite.TextParser;
 import uncertain.exception.BuiltinExceptionFactory;
@@ -19,9 +20,9 @@ import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 
 public class JmsMessageDispatch extends AbstractEntry implements IConfigurable{
-	public static final String EVENT_ATTR = "event";
+	public static final String MESSAGE_ATTR = "message";
 	public static final String TOPIC_ATTR = "topic";
-	private String event;
+	private String message;
 	private String topic;
 	private IObjectRegistry registry;
 	public JmsMessageDispatch(IObjectRegistry registry) {
@@ -30,14 +31,15 @@ public class JmsMessageDispatch extends AbstractEntry implements IConfigurable{
 	
 	@Override
 	public void run(ProcedureRunner runner) throws Exception {
-		event = TextParser.parse(event, runner.getContext());
-	    if(event==null)
-	        BuiltinExceptionFactory.createAttributeMissing(this, EVENT_ATTR);
-	    topic = TextParser.parse(topic, runner.getContext());
+	    if(message==null )
+	        BuiltinExceptionFactory.createAttributeMissing(this, MESSAGE_ATTR);
 	    if(topic==null)
 	        BuiltinExceptionFactory.createAttributeMissing(this, TOPIC_ATTR);
 	    ILogger logger = LoggingContext.getLogger(runner.getContext(), AMQClientInstance.PLUGIN);
-	    ActiveMQConnectionFactory connectionFactory = (ActiveMQConnectionFactory)registry.getInstanceOfType(ActiveMQConnectionFactory.class);
+	    ConnectionFactory connectionFactory = (ConnectionFactory)registry.getInstanceOfType(ConnectionFactory.class);
+	    if(connectionFactory==null){
+	        throw BuiltinExceptionFactory.createInstanceNotFoundException(this, ConnectionFactory.class);
+	    }
 	    Connection connection = null;
 	    Session session = null;
 	    MessageProducer messageProducer = null;
@@ -50,20 +52,20 @@ public class JmsMessageDispatch extends AbstractEntry implements IConfigurable{
 			logger.log(Level.CONFIG,"start producer connection");
 			connection.start();
 			logger.log(Level.CONFIG,"start producer successfull!");
-			String message = TextParser.parse(event, runner.getContext());
-			messageProducer.send(session.createTextMessage(message));	
-	        logger.log(Level.CONFIG, "Message:{0} sent", new Object[]{message});
+			String real_message = TextParser.parse(message, runner.getContext());
+			messageProducer.send(session.createTextMessage(real_message));	
+	        logger.log(Level.CONFIG, "Message:{0} sent", new Object[]{real_message});
 	    }finally{
 	       JMSUtil.freeMessageProducer(messageProducer);
 	       JMSUtil.freeJMSSession(session);
 	       JMSUtil.freeJMSConnection(connection);
 	    }
 	}
-	public String getEvent() {
-		return event;
+	public String getMessage() {
+		return message;
 	}
-	public void setEvent(String event) {
-		this.event = event;
+	public void setMessage(String event) {
+		this.message = event;
 	}
 	public String getTopic() {
 		return topic;

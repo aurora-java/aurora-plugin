@@ -1,4 +1,4 @@
-package aurora.plugin.amq;
+package aurora.plugin.jms;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -16,10 +16,13 @@ import javax.jms.Topic;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
+import aurora.plugin.amq.AMQClientInstance;
+
 import uncertain.composite.CompositeMap;
 import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.exception.ConfigurationFileException;
 import uncertain.exception.GeneralException;
+import uncertain.logging.ILogger;
 import uncertain.ocm.IConfigurable;
 import uncertain.util.resource.ILocatable;
 
@@ -33,12 +36,14 @@ public class Consumer implements IConfigurable, MessageListener {
 	private Event[] events;
 	private Map eventMap = new HashMap(); 
 	private AMQClientInstance amqClient;
+	private ILogger logger;
 
 	public void init(AMQClientInstance amqClient) throws Exception {
 		if(topic ==null){
 			throw BuiltinExceptionFactory.createAttributeMissing(config.asLocatable(), "topic");
 		}
-		amqClient.getLogger().log(Level.CONFIG,"init Consumer");
+		logger = amqClient.getLogger();
+		logger.log(Level.CONFIG,"init Consumer");
 		this.amqClient = amqClient;
 		ActiveMQConnectionFactory factory = amqClient.getFactory();
 		connection = factory.createConnection();
@@ -48,7 +53,7 @@ public class Consumer implements IConfigurable, MessageListener {
 		connection.setClientID(client);
 		session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		Topic amqTopic = session.createTopic(topic);
-		amqClient.getLogger().log(Level.CONFIG,"create Topic:{0}",new Object[]{topic});
+		logger.log(Level.CONFIG,"create Topic:{0}",new Object[]{topic});
 		messageConsumer = session.createDurableSubscriber(amqTopic, topic);
 		messageConsumer.setMessageListener(this);
 		for (int i = 0; i < events.length; i++) {
@@ -57,7 +62,7 @@ public class Consumer implements IConfigurable, MessageListener {
 				eventMap.put(event.getMessage(), event.getHandler());
 		}
 		connection.start();
-		amqClient.getLogger().log(Level.CONFIG,"start Consumer successfull!");
+		logger.log(Level.CONFIG,"start Consumer successfull!");
 	}
 	public void onShutdown(){
 		JMSUtil.freeMessageConsumer(messageConsumer);
@@ -77,9 +82,12 @@ public class Consumer implements IConfigurable, MessageListener {
 		}
 		String handlerName = (String)eventMap.get(messageText);
 		if(handlerName != null){
-			MessageHandler handler = amqClient.getMessageHandler(handlerName);
+			IMessageHandler handler = amqClient.getMessageHandler(handlerName);
 			if(handler == null){
-				throw new ConfigurationFileException(MessageCodes.HANDLER_NOT_FOUND_ERROR, new Object[]{handler}, config.asLocatable());
+				ConfigurationFileException ex = new ConfigurationFileException(MessageCodes.HANDLER_NOT_FOUND_ERROR, new Object[]{handlerName}, config.asLocatable());
+				logger.log(Level.SEVERE,"Error when handle jsm message", ex);
+				throw ex;
+				
 			}
 			handler.onMessage(message);
 		}

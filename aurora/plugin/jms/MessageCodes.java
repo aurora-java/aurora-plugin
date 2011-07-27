@@ -1,4 +1,4 @@
-package aurora.plugin.amq;
+package aurora.plugin.jms;
 
 public final class MessageCodes {
 	public static final String MESSAGE_TYPE_ERROR = "aurora.plugin.amq.message_type_error";

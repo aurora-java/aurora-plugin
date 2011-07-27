@@ -3,7 +3,12 @@ package aurora.plugin.amq;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jms.ConnectionFactory;
+
 import org.apache.activemq.ActiveMQConnectionFactory;
+
+import aurora.plugin.jms.Consumer;
+import aurora.plugin.jms.IMessageHandler;
 
 import uncertain.composite.CompositeMap;
 import uncertain.exception.BuiltinExceptionFactory;
@@ -17,11 +22,11 @@ public class AMQClientInstance implements IConfigurable{
 	/**
 	 * 配置样本
 	<?xml version="1.0" encoding="UTF-8"?>
-	<amq:AMQ-client-instance xmlns:amq="aurora.plugin.amq" url="failover:tcp://localhost:61616">
-	    <amq:messageHandlers>
-	        <amq:defaultMessageHandler name="handler1" procedure="init.load_priviledge_check_data"/>
-	    </amq:messageHandlers>
-	    <amq:consumers >
+	<amq:AMQ-client-instance xmlns:amq="aurora.plugin.amq" xmlns:jms="aurora.plugin.jms" url="failover:tcp://localhost:61616">
+	    <jms:messageHandlers>
+	        <jms:defaultMessageHandler name="handler1" procedure="init.load_priviledge_check_data"/>
+	    </jms:messageHandlers>
+	    <jms:consumers >
 	        <amq:consumer topic="test1">
 	            <amq:events>
 	                <amq:event handler="handler1" message="resource_update"/>
@@ -32,7 +37,7 @@ public class AMQClientInstance implements IConfigurable{
 	 * 
 	 */
 	public static final String PLUGIN = "aurora.plugin.amq";
-	private MessageHandler[] messageHandlers;
+	private IMessageHandler[] mMessageHandlers;
 	private Consumer[] consumers;
 	private CompositeMap config;
 	private String url;
@@ -43,6 +48,7 @@ public class AMQClientInstance implements IConfigurable{
 	public AMQClientInstance(IObjectRegistry registry) {
 		this.registry = registry;
 	}
+	
 	// Framework function
 	public void onInitialize() throws Exception {
 		logger = LoggingContext.getLogger(PLUGIN, registry);
@@ -51,7 +57,9 @@ public class AMQClientInstance implements IConfigurable{
 			BuiltinExceptionFactory.createOneAttributeMissing(config.asLocatable(), "url");
 		}
 		factory = new ActiveMQConnectionFactory(url);
-		registry.registerInstance(ActiveMQConnectionFactory.class, factory);
+		registry.registerInstance(ConnectionFactory.class, factory);
+		// javax.jms.QueueConnectionFactory, javax.jms.TopicConnectionFactory
+
 		if(consumers != null){
 			for(int i= 0;i<consumers.length;i++){
 				consumers[i].init(this);
@@ -65,8 +73,8 @@ public class AMQClientInstance implements IConfigurable{
 			}
 		}
 	}
-	public MessageHandler getMessageHandler(String name){
-		return (MessageHandler)handlersMap.get(name);
+	public IMessageHandler getMessageHandler(String name){
+		return (IMessageHandler)handlersMap.get(name);
 	}
 	public void beginConfigure(CompositeMap config) {
 		this.config = config;
@@ -79,11 +87,12 @@ public class AMQClientInstance implements IConfigurable{
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	public MessageHandler[] getMessageHandlers() {
-		return messageHandlers;
+	
+	public IMessageHandler[] getHandlers() {
+		return mMessageHandlers;
 	}
-	public void setMessageHandlers(MessageHandler[] messageHandlers) {
-		this.messageHandlers = messageHandlers;
+	public void setHandlers(IMessageHandler[] messageHandlers) {
+		this.mMessageHandlers = messageHandlers;
 		for(int i= 0;i<messageHandlers.length;i++){
 			handlersMap.put(messageHandlers[i].getName(), messageHandlers[i]);
 		}
