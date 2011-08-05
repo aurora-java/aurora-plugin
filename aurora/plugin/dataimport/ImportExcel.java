@@ -197,9 +197,9 @@ public class ImportExcel extends AbstractEntry{
 			for(int i=0;i<maxcell;i++){
 				valueString=data.getString("C"+i);
 				if(valueString==null)
-					cstm.setNull(9+i,java.sql.Types.VARCHAR);	
+					cstm.setNull(8+i,java.sql.Types.VARCHAR);	
 				else 
-					cstm.setString(9+i,valueString);				
+					cstm.setString(8+i,valueString);				
 			}
 			cstm.execute();
 		}catch (SQLException e) {
