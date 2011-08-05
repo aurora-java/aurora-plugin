@@ -33,6 +33,7 @@ public class ImportExcel extends AbstractEntry{
 	public static final String XLSX_KEY=".xlsx";
 	public static final String CSV_KEY=".csv";
 	public static final String TXT_KEY=".txt";
+	public String fileName;
 	public String separator;
 	public String header_id;
 	public String user_id;
@@ -60,7 +61,7 @@ public class ImportExcel extends AbstractEntry{
 		while (i.hasNext()) {
 			FileItem fileItem = (FileItem) i.next();
 			if (!fileItem.isFormField()) {			
-				String fileName=fileItem.getName();
+				fileName=fileItem.getName();				
 				String suffix=fileName.substring(fileName.lastIndexOf("."));
 				CompositeMap data=parseFile(fileItem.getInputStream(), suffix.toLowerCase());				
 	            result=save(conn,data);
@@ -100,7 +101,7 @@ public class ImportExcel extends AbstractEntry{
 		CallableStatement cstm=null;
 		ResultSet rs = null;
 		try{
-			cstm=conn.prepareCall("{call fnd_interface_load_pkg.ins_fnd_interface_headers(?,?,?,?,?,?,?,?,?,?)}");		
+			cstm=conn.prepareCall("{call fnd_interface_load_pkg.ins_fnd_interface_headers(?,?,?,?,?,?,?,?,?,?,?)}");		
 			cstm.setLong(1, new Long(header_id));
 			if(job_id==null)
 				cstm.setNull(2, java.sql.Types.NUMERIC);
@@ -108,31 +109,31 @@ public class ImportExcel extends AbstractEntry{
 				cstm.setLong(2, new Long(job_id));
 			cstm.setString(3, "NEW");
 			cstm.setString(4, user_id);
-//			cstm.setLong(4, new Long(user_id));
+			cstm.setString(5, fileName);
 			if(template_code==null)
-				cstm.setNull(5, java.sql.Types.VARCHAR);
-			else
-				cstm.setString(5, template_code);
-			if(attribute1==null)
 				cstm.setNull(6, java.sql.Types.VARCHAR);
 			else
-				cstm.setString(6, attribute1);
-			if(attribute2==null)
+				cstm.setString(6, template_code);
+			if(attribute1==null)
 				cstm.setNull(7, java.sql.Types.VARCHAR);
 			else
-				cstm.setString(7, attribute2);
-			if(attribute3==null)
+				cstm.setString(7, attribute1);
+			if(attribute2==null)
 				cstm.setNull(8, java.sql.Types.VARCHAR);
 			else
-				cstm.setString(8, attribute3);
-			if(attribute4==null)
+				cstm.setString(8, attribute2);
+			if(attribute3==null)
 				cstm.setNull(9, java.sql.Types.VARCHAR);
 			else
-				cstm.setString(9, attribute4);
-			if(attribute5==null)
+				cstm.setString(9, attribute3);
+			if(attribute4==null)
 				cstm.setNull(10, java.sql.Types.VARCHAR);
 			else
-				cstm.setString(10, attribute5);
+				cstm.setString(10, attribute4);
+			if(attribute5==null)
+				cstm.setNull(11, java.sql.Types.VARCHAR);
+			else
+				cstm.setString(11, attribute5);
 			cstm.execute();
 			saveLines(conn,data);
 			if(template_code!=null){
@@ -163,17 +164,18 @@ public class ImportExcel extends AbstractEntry{
 	
 	void saveLines(Connection conn,CompositeMap data) throws SQLException{
 		Iterator it=null;
-		Iterator iterator=data.getChildIterator();
+		Iterator iterator=data.getChildIterator();		
 		while (iterator.hasNext()) {
 			CompositeMap sheet = (CompositeMap) iterator.next();
 			it=sheet.getChildIterator();
-			while (it.hasNext()) {
+			int rownum=0;
+			while (it.hasNext()) {				
 				CompositeMap row = (CompositeMap) it.next();
-				saveLine(conn,row);
+				saveLine(conn,row,rownum++);				
 			}
 		}		
 	}
-	void saveLine(Connection conn,CompositeMap data) throws SQLException{
+	void saveLine(Connection conn,CompositeMap data,int rownum) throws SQLException{
 		if(data.getLong("maxCell")==null)return;
 		int maxcell=data.getLong("maxCell").intValue();	
 		StringBuffer stringBuffer=new StringBuffer("fnd_interface_load_pkg.ins_fnd_interface_lines(?,?,?,?,?,?,?");
@@ -186,19 +188,18 @@ public class ImportExcel extends AbstractEntry{
 			cstm=conn.prepareCall("{call "+stringBuffer+"}");			
 			cstm.setLong(1, new Long(header_id));
 			cstm.setNull(2,java.sql.Types.VARCHAR);
-			cstm.setNull(3,java.sql.Types.VARCHAR);		
-//			cstm.setLong(4, new Long(user_id));
+			cstm.setNull(3,java.sql.Types.VARCHAR);	
 			cstm.setString(4, user_id);
-			cstm.setNull(5,java.sql.Types.NUMERIC);	
+			cstm.setLong(5, rownum);			
 			cstm.setNull(6,java.sql.Types.VARCHAR);
 			cstm.setNull(7,java.sql.Types.NUMERIC);		
 			String valueString;
 			for(int i=0;i<maxcell;i++){
 				valueString=data.getString("C"+i);
 				if(valueString==null)
-					cstm.setNull(8+i,java.sql.Types.VARCHAR);	
+					cstm.setNull(9+i,java.sql.Types.VARCHAR);	
 				else 
-					cstm.setString(8+i,valueString);				
+					cstm.setString(9+i,valueString);				
 			}
 			cstm.execute();
 		}catch (SQLException e) {
