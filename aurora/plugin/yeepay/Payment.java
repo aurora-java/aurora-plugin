@@ -1,8 +1,8 @@
 package aurora.plugin.yeepay;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import uncertain.composite.CompositeMap;
+import uncertain.composite.TextParser;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 import aurora.service.ServiceContext;
@@ -14,7 +14,19 @@ import com.yeepay.PaymentForOnlineService;
 
 
 public class Payment extends AbstractEntry {
-
+	
+	private String order;
+	private String amt;
+	private String cur;
+	private String pid;
+	private String pcat;
+	private String pdesc;
+	private String url;
+	private String saf;
+	private String mp;
+	private String frpid;
+	private String needresponse;
+	
 	public void run(ProcedureRunner runner) throws Exception {
 		CompositeMap context = runner.getContext();
 		HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance.getInstance(context);
@@ -26,18 +38,23 @@ public class Payment extends AbstractEntry {
 		String keyValue = YeePay.formatString(Configuration.getInstance().getValue(YeePay.KEY_KEY_VALUE)); // 商家密钥
 		String nodeAuthorizationURL = YeePay.formatString(Configuration.getInstance().getValue(YeePay.KEY_COMMON_REQ_URL)); // 交易请求地址
 		// 商家设置用户购买商品的支付信息
-		String p0_Cmd = YeePay.formatString(YeePay.KEY_BUY); // 在线支付请求，固定值 ”Buy”
+		String p0_Cmd = YeePay.formatString(YeePay.KEY_BUY); //在线支付请求，固定值 ”Buy”
 		String p1_MerId = YeePay.formatString(Configuration.getInstance().getValue(YeePay.KEY_P1_MER_ID)); // 商户编号
-		String p2_Order = YeePay.formatString(request.getParameter(YeePay.KEY_P2_ORDER)); // 商户订单号
-		String p3_Amt = YeePay.formatString(request.getParameter(YeePay.KEY_P3_ATM)); // 支付金额
+		
+		String p2_Order = YeePay.formatString(getValue(context,getOrder()));//request.getParameter(YeePay.KEY_P2_ORDER)); // 商户订单号
+		String p3_Amt = YeePay.formatString(getValue(context,getAmt()));//request.getParameter(YeePay.KEY_P3_ATM)); // 支付金额
+		
 		String p4_Cur = YeePay.formatString(YeePay.KEY_CNY); // 交易币种
-		String p5_Pid = YeePay.formatString(request.getParameter(YeePay.KEY_P5_PID)); // 商品名称
-		String p6_Pcat = YeePay.formatString(request.getParameter(YeePay.KEY_P6_PCAT)); // 商品种类
-		String p7_Pdesc = YeePay.formatString(request.getParameter(YeePay.KEY_P7_PDESC)); // 商品描述
-		String p8_Url = YeePay.formatString(request.getParameter(YeePay.KEY_P8_URL)); // 商户接收支付成功数据的地址
-		String p9_SAF = YeePay.formatString(request.getParameter(YeePay.KEY_P9_SAF)); // 需要填写送货信息 0：不需要  1:需要
-		String pa_MP = YeePay.formatString(request.getParameter(YeePay.KEY_PA_MP)); // 商户扩展信息
-		String pd_FrpId = YeePay.formatString(request.getParameter(YeePay.KEY_PD_FRPID)); // 支付通道编码		
+		
+		String p5_Pid = YeePay.formatString(getValue(context,getPid()));//request.getParameter(YeePay.KEY_P5_PID)); // 商品名称
+		String p6_Pcat = YeePay.formatString(getValue(context,getPcat()));//request.getParameter(YeePay.KEY_P6_PCAT)); // 商品种类
+		String p7_Pdesc = YeePay.formatString(getValue(context,getPdesc()));//request.getParameter(YeePay.KEY_P7_PDESC)); // 商品描述
+		String p8_Url = YeePay.formatString(getValue(context,getUrl()));//request.getParameter(YeePay.KEY_P8_URL)); // 商户接收支付成功数据的地址
+		String p9_SAF = YeePay.formatString(getValue(context,getSaf()));//request.getParameter(YeePay.KEY_P9_SAF)); // 需要填写送货信息 0：不需要  1:需要
+		String pa_MP = YeePay.formatString(getValue(context,getMp()));//request.getParameter(YeePay.KEY_PA_MP)); // 商户扩展信息
+		String pd_FrpId = YeePay.formatString(getValue(context,getFrpid()));//request.getParameter(YeePay.KEY_PD_FRPID)); // 支付通道编码		
+		
+		
 		pd_FrpId = pd_FrpId.toUpperCase();// 银行编号必须大写
 		String pr_NeedResponse = YeePay.formatString("1"); // 默认为"1"，需要应答机制
 		String hmac = YeePay.formatString(""); // 交易签名串
@@ -62,6 +79,104 @@ public class Payment extends AbstractEntry {
 		model.put(YeePay.KEY_NEED_RESPONSE, pr_NeedResponse);
 		model.put(YeePay.KEY_HMAC, hmac);
 		model.put(YeePay.KEY_URL, nodeAuthorizationURL);
+	}
+	
+	private String getValue(CompositeMap context, String key){
+		if(key!=null){
+			return TextParser.parse(key, context);
+		}else{
+			return null;
+		}
+		
+	}
+
+
+	public String getOrder() {
+		return order;
+	}
+
+	public void setOrder(String order) {
+		this.order = order;
+	}
+
+	public String getAmt() {
+		return amt;
+	}
+
+	public void setAmt(String amt) {
+		this.amt = amt;
+	}
+
+	public String getCur() {
+		return cur;
+	}
+
+	public void setCur(String cur) {
+		this.cur = cur;
+	}
+
+	public String getPid() {
+		return pid;
+	}
+
+	public void setPid(String pid) {
+		this.pid = pid;
+	}
+
+	public String getPcat() {
+		return pcat;
+	}
+
+	public void setPcat(String pcat) {
+		this.pcat = pcat;
+	}
+
+	public String getPdesc() {
+		return pdesc;
+	}
+
+	public void setPdesc(String pdesc) {
+		this.pdesc = pdesc;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getSaf() {
+		return saf;
+	}
+
+	public void setSaf(String saf) {
+		this.saf = saf;
+	}
+
+	public String getMp() {
+		return mp;
+	}
+
+	public void setMp(String mp) {
+		this.mp = mp;
+	}
+
+	public String getFrpid() {
+		return frpid;
+	}
+
+	public void setFrpid(String frpid) {
+		this.frpid = frpid;
+	}
+
+	public String getNeedresponse() {
+		return needresponse;
+	}
+
+	public void setNeedresponse(String needresponse) {
+		this.needresponse = needresponse;
 	}
 	
 	
