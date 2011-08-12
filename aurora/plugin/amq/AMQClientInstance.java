@@ -2,6 +2,7 @@ package aurora.plugin.amq;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.jms.ConnectionFactory;
 
@@ -59,12 +60,29 @@ public class AMQClientInstance implements IConfigurable{
 		factory = new ActiveMQConnectionFactory(url);
 		registry.registerInstance(ConnectionFactory.class, factory);
 		// javax.jms.QueueConnectionFactory, javax.jms.TopicConnectionFactory
-
-		if(consumers != null){
-			for(int i= 0;i<consumers.length;i++){
-				consumers[i].init(this);
+		(new Thread(){
+			public void run(){
+				if(consumers != null){
+					for(int i= 0;i<consumers.length;i++){
+						try {
+							consumers[i].init(factory,handlersMap);
+						} catch (Exception e) {
+							logger.log(Level.SEVERE,"init jms consumers failed!",e);
+						}
+					}
+				}
 			}
-		}
+		}).start();
+		Runtime.getRuntime().addShutdownHook(new Thread(){
+			public void run(){
+				try {
+					onShutdown();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		
 	}
 	public void onShutdown() throws Exception{
 		if(consumers != null){
@@ -88,10 +106,10 @@ public class AMQClientInstance implements IConfigurable{
 		this.url = url;
 	}
 	
-	public IMessageHandler[] getHandlers() {
+	public IMessageHandler[] getMessageHandlers() {
 		return mMessageHandlers;
 	}
-	public void setHandlers(IMessageHandler[] messageHandlers) {
+	public void setMessageHandlers(IMessageHandler[] messageHandlers) {
 		this.mMessageHandlers = messageHandlers;
 		for(int i= 0;i<messageHandlers.length;i++){
 			handlersMap.put(messageHandlers[i].getName(), messageHandlers[i]);
