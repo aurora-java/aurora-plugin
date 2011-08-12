@@ -72,7 +72,7 @@ public class ModelExport {
 		//get ILocalizedMessageProvider
 		IMessageProvider msgProvider = (IMessageProvider) mObjectRegistry
 				.getInstanceOfType(IMessageProvider.class);
-		String langString = context.getSession().getString("lang");
+		String langString = context.getSession().getString("lang","ZHS");
 		ILocalizedMessageProvider localMsgProvider = msgProvider.getLocalizedMessageProvider(langString);
 
 		ServiceInstance svc = ServiceInstance.getInstance(context.getObjectContext());		
