@@ -5,10 +5,27 @@
 新增CSV和TXT导入功能
 	导入时import-excel标记需要配置separator属性,说明分隔符 
 
-2011-04-14
+2011-8-8
 ------------------------------------
+下面两者只能两选一
+
 添加了excel导出功能 － 邹磊
+poi方式导出excel2003
+service-listener.config 需要添加
+	<participant class="aurora.plugin.export.ModelExport" />
+依赖包
+	poi-3.7-20101029.jar
+--------------------------------------------------------------------	
+biggrid导出方式导出excel2007
 需要做如下配置：	
 	service-listener.config 需要添加
-	<participant class="aurora.plugin.export.ModelExport" />
-	
+	<participant class="aurora.plugin.export.ModelOutput" />
+	uncertain.xml添加
+	<class-mapping className="aurora.plugin.poi.Excel2007Output" elementName="output-excel" nameSpace="http://www.aurora-framework.org/application"/>
+POI依赖包
+	dom4j-1.6.1.jar
+	geronimo-stax-api_1.0_spec-1.0.jar	
+	poi-3.7-20101029.jar
+	poi-ooxml-3.7-20101029.jar
+	poi-ooxml-schemas-3.7-20101029.jar
+	xmlbeans-2.3.0.jar
