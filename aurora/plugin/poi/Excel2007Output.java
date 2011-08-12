@@ -217,8 +217,10 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 
 	}
 	public void newRow(String row_name) {
+		this.headLevel++;
+		if(headLevel>excel2007.getRowLimit())return;
 		try {
-			sw.insertRow(++this.headLevel);
+			sw.insertRow(this.headLevel);
 			rowMap=new HashMap<String, Object>();
 		} catch (IOException e) {			
 			try {
@@ -242,7 +244,7 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 				String key=(String)iterator.next();						
 				Object att=rowMap.get(columnMap.get(key).getString("name"));
 				int col=Integer.valueOf(key);
-					
+				if(col>excel2007.getColLimit())break;	
 				if (att != null) {
 	                if (att instanceof Number) {
 	                    sw.createCell(col, ((Number) att).doubleValue());
