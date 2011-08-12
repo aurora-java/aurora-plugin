@@ -26,7 +26,7 @@ import aurora.database.service.SqlServiceContext;
 import aurora.i18n.ILocalizedMessageProvider;
 import aurora.i18n.IMessageProvider;
 import aurora.plugin.export.MergedHeader;
-import aurora.plugin.export.ModelExport;
+import aurora.plugin.export.ModelOutput;
 import aurora.service.ServiceContext;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
@@ -94,7 +94,7 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 	
 	CompositeMap getHeaderConfig() throws ServletException{		
 		CompositeMap columnConfig = (CompositeMap) context.getParameter()
-		.getObject(ModelExport.KEY_COLUMN_CONFIG + "/" + ModelExport.KEY_COLUMN);
+		.getObject(ModelOutput.KEY_COLUMN_CONFIG + "/" + ModelOutput.KEY_COLUMN);
 		if (columnConfig == null) {			
 			throw new ServletException(
 					"service-output tag and output attibute must be defined");
