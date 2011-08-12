@@ -1,6 +1,5 @@
 package aurora.plugin.jms;
 
-import javax.jms.Message;
 import javax.jms.MessageListener;
 
 public interface IMessageHandler extends MessageListener{

@@ -8,8 +8,6 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.Topic;
 
-import aurora.plugin.amq.AMQClientInstance;
-
 import uncertain.composite.TextParser;
 import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.logging.ILogger;
@@ -35,7 +33,7 @@ public class JmsMessageDispatch extends AbstractEntry implements IConfigurable{
 	        BuiltinExceptionFactory.createAttributeMissing(this, MESSAGE_ATTR);
 	    if(topic==null)
 	        BuiltinExceptionFactory.createAttributeMissing(this, TOPIC_ATTR);
-	    ILogger logger = LoggingContext.getLogger(runner.getContext(), AMQClientInstance.PLUGIN);
+	    ILogger logger = LoggingContext.getLogger(runner.getContext(), JMSUtil.PLUGIN);
 	    ConnectionFactory connectionFactory = (ConnectionFactory)registry.getInstanceOfType(ConnectionFactory.class);
 	    if(connectionFactory==null){
 	        throw BuiltinExceptionFactory.createInstanceNotFoundException(this, ConnectionFactory.class);
@@ -47,8 +45,8 @@ public class JmsMessageDispatch extends AbstractEntry implements IConfigurable{
 		    connection = connectionFactory.createConnection();
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			logger.log(Level.CONFIG,"create createTopic {0}", new Object[]{topic});
-			Topic jsmTopic = session.createTopic(topic);
-			messageProducer = session.createProducer(jsmTopic);
+			Topic jmsTopic = session.createTopic(topic);
+			messageProducer = session.createProducer(jmsTopic);
 			logger.log(Level.CONFIG,"start producer connection");
 			connection.start();
 			logger.log(Level.CONFIG,"start producer successfull!");

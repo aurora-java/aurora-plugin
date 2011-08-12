@@ -19,7 +19,6 @@ import uncertain.ocm.IConfigurable;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.IProcedureManager;
 import uncertain.proc.Procedure;
-import aurora.plugin.amq.AMQClientInstance;
 import aurora.service.IServiceFactory;
 import aurora.service.ServiceInvoker;
 
@@ -64,7 +63,7 @@ public class DefaultMessageHandler extends AbstractLocatableObject implements IM
     	if(procedure==null){
     		throw BuiltinExceptionFactory.createAttributeMissing( this, "procedure");
     	}
-		ILogger logger = LoggingContext.getLogger(AMQClientInstance.PLUGIN,registry);
+		ILogger logger = LoggingContext.getLogger(JMSUtil.PLUGIN,registry);
 		if(message == null){
 			logger.log(Level.WARNING, "message is null");
 			return ;

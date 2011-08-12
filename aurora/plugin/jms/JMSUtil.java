@@ -7,7 +7,8 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 public class JMSUtil {
-
+	public static final String PLUGIN = "aurora.plugin.jms";
+	
 	public static void freeMessageProducer(MessageProducer messageProducer) {
 		if (messageProducer != null) {
 			try {
