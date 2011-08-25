@@ -21,23 +21,37 @@ import com.sap.mw.jco.JCO;
 import com.sap.mw.jco.JCO.ParameterList;
 
 public class JcoInvoke extends AbstractEntry {
-    
-    SapInstance         sapInstance;
+	SapConfig           sapConfig;
+    ISapInstance         sapInstance;
     ILogger              logger;
 
     public Parameter[]  Parameters;
+    public String       Sid;
     public Table[]      Tables;
     public Structure[]  Structures;
     public String       Function;
     public String       Return_target;    
   
-    public JcoInvoke(SapInstance    si){
-        sapInstance = si;
-        //System.out.println(this+" constructed ");
+    public JcoInvoke(SapConfig config){
+    	sapConfig = config;    	
+    }
+    
+    public JcoInvoke(SapInstance si){    	
+    	sapInstance=si;        
     }
     
     public void run(ProcedureRunner runner) throws Exception {
-        CompositeMap context = runner.getContext();
+        CompositeMap context = runner.getContext();        
+        if(sapConfig!=null){
+        	Sid=TextParser.parse(Sid, context);
+	        if(Sid==null){
+	        	sapInstance=sapConfig.getSapInstance();
+	        	if(sapInstance==null)
+	        		throw new IllegalArgumentException("jco-invoke: sid attribute is null");  
+	        }else{
+	        	sapInstance=sapConfig.getSapInstance(Sid);
+	        }
+        }
         logger = LoggingContext.getLogger(context, "aurora.plugin.sap");
         logger.config("jco-invoke");
         logger.config("===================================");
@@ -70,7 +84,7 @@ public class JcoInvoke extends AbstractEntry {
                 // client = JCO.getClient(sapInstance.SID);
                 client = sapInstance.getClient();
                 
-                logger.config("connected to "+sapInstance.SERVER_IP+":"+sapInstance.SID);
+                logger.config("connected to "+sapInstance.getServer_ip()+":"+sapInstance.getSid());
                 
                 JCO.ParameterList input  = function.getImportParameterList();
                 JCO.ParameterList output = function.getExportParameterList();

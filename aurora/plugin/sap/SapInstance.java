@@ -5,18 +5,18 @@ import uncertain.core.IGlobalInstance;
 
 import com.sap.mw.jco.IRepository;
 import com.sap.mw.jco.JCO;
-public class SapInstance implements IGlobalInstance {
+public class SapInstance implements ISapInstance,IGlobalInstance{
     
     public static final String LOGGING_TOPIC = "aurora.plugin.sap";
     
-    public String SID;
-    public String USERID;
-    public String PASSWORD;
-    public String SERVER_IP;
-    public String DEFAULT_LANG;
-    public int    MAX_CONN;
-    public String SAP_CLIENT;
-    public String SYSTEM_NUMBER;
+    public String sid;
+    public String userid;
+    public String password;
+    public String server_ip;
+    public String default_lang;
+    public int    max_conn;
+    public String sap_client;
+    public String system_number;
     
     Logger        logger;
     
@@ -35,16 +35,16 @@ public class SapInstance implements IGlobalInstance {
     public void prepare(){
         if(!inited){
             JCO.addClientPool(
-                    SID,          // Alias for this pool
-                    MAX_CONN,     // Max. number of connections
-                    SAP_CLIENT,   // SAP client
-                    USERID,       // userid
-                    PASSWORD,     // password
-                    DEFAULT_LANG,                     // language
-                    SERVER_IP,    // host name
-                   SYSTEM_NUMBER );
-            repository = JCO.createRepository("MYRepository", SID);            
-            if(logger!=null) logger.info("SAP connection pool "+SID+" created");
+            		sid,          // Alias for this pool
+            		max_conn,     // Max. number of connections
+            		sap_client,   // SAP client
+            		userid,       // userid
+            		password,     // password
+                    default_lang,                     // language
+                    server_ip,    // host name
+                    system_number );
+            repository = JCO.createRepository("MYRepository", sid);            
+            if(logger!=null) logger.info("SAP connection pool "+sid+" created");
             inited = true;
         }
     }
@@ -57,8 +57,8 @@ public class SapInstance implements IGlobalInstance {
     }
     
     public void release(){
-        JCO.removeClientPool(SID);
-        if(logger!=null) logger.info("SAP connection pool "+SID+" released");
+        JCO.removeClientPool(sid);
+        if(logger!=null) logger.info("SAP connection pool "+sid+" released");
         inited = false;
     }
     
@@ -66,13 +66,73 @@ public class SapInstance implements IGlobalInstance {
     public JCO.Client getClient() {
         if(!inited)
             prepare();
-        JCO.Client client = JCO.getClientPoolManager().getClient(SID);        
+        JCO.Client client = JCO.getClientPoolManager().getClient(sid);        
         return client;
     }
-    
-    public void onShutdown(){
-        release();
-    }
+
+	public String getSid() {
+		return sid;
+	}
+
+	public void setSid(String sid) {
+		this.sid = sid;
+	}
+
+	public String getUserid() {
+		return userid;
+	}
+
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getServer_ip() {
+		return server_ip;
+	}
+
+	public void setServer_ip(String server_ip) {
+		this.server_ip = server_ip;
+	}
+
+	public String getDefault_lang() {
+		return default_lang;
+	}
+
+	public void setDefault_lang(String default_lang) {
+		this.default_lang = default_lang;
+	}
+
+	public int getMax_conn() {
+		return max_conn;
+	}
+
+	public void setMax_conn(int max_conn) {
+		this.max_conn = max_conn;
+	}
+
+	public String getSap_client() {
+		return sap_client;
+	}
+
+	public void setSap_client(String sap_client) {
+		this.sap_client = sap_client;
+	}
+
+	public String getSystem_number() {
+		return system_number;
+	}
+
+	public void setSystem_number(String system_number) {
+		this.system_number = system_number;
+	}
 
 }
 
