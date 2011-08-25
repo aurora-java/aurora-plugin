@@ -1,5 +1,42 @@
 1.1.6
+
 =====
+2011-8-25
+--------------------------------------------------
+增加sap多client支持，同时兼容原来的标记
+需要支持多client，需要修改sap.config
+demo如下：
+<?xml version="1.0" encoding="UTF-8"?>
+<jco:sap-config xmlns:jco="aurora.plugin.sap">
+	<jco:instances>
+		<jco:instance-config 
+					   server_ip="192.168.11.238"
+					   sid="dev"
+					   sap_client="200"
+					   userid="handdev"
+					   password="handdev"
+					   default_lang="ZH"
+					   max_conn="30"
+	                   system_number="00">
+		</jco:instance-config>
+		<jco:instance-config 
+					   server_ip="192.168.11.238"
+					   sid="test"
+					   sap_client="200"
+					   userid="handdev"
+					   password="handdev"
+					   default_lang="ZH"
+					   max_conn="30"
+	                   system_number="00">
+		</jco:instance-config>
+	</jco:instances>
+</jco:sap-config>
+如果sap-config只配置一个instance，则在sap-invoke标记中不设置sid属性，也会取默认配置。
+如果sap-config只配置多于一个instance，则在sap-invoke标记中必须设置sid属性
+
+
+
+
 2011-7-4
 -----------------------------------
 新增CSV和TXT导入功能
