@@ -16,7 +16,6 @@ import uncertain.logging.ILogger;
 import uncertain.logging.LoggingContext;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
-import aurora.plugin.sap.Parameter;
 
 import aurora.service.http.HttpServiceInstance;
 
