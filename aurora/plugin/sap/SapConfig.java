@@ -6,17 +6,18 @@ import java.util.Map;
 import uncertain.core.IGlobalInstance;
 
 public class SapConfig implements IGlobalInstance{
-	Map sapInstanceMap=new HashMap();
-	ISapInstance defaultSapInstance;
-	public ISapInstance getSapInstance(String sid){
-		return (ISapInstance)sapInstanceMap.get(sid);
+	Map<String,InstanceConfig> sapInstanceMap=new HashMap<String,InstanceConfig>();
+	InstanceConfig defaultSapInstance;
+
+	public InstanceConfig getSapInstance(String sid){
+		return sapInstanceMap.get(sid);
 	}
 	
-	public ISapInstance getSapInstance(){
+	public InstanceConfig getSapInstance(){
 		return defaultSapInstance;
 	}
 	
-	public void addInstances(InstanceConfig[] instances) {
+	public void addInstances(InstanceConfig[] instances) {		
 		InstanceConfig instance;
 		int l=instances.length;
 		for(int i=0;i<l;i++){
@@ -25,5 +26,5 @@ public class SapConfig implements IGlobalInstance{
 		}
 		if(l==1)
 			defaultSapInstance=instances[0];
-	}	
+	}
 }
