@@ -20,7 +20,7 @@ import uncertain.proc.ProcedureRunner;
 import aurora.service.http.HttpServiceInstance;
 
 public class JcoInvoke extends AbstractEntry {
-	public static final String LOGGING_TOPIC = "aurora.plugin.sap";
+	public static final String LOGGING_TOPIC = "aurora.plugin.sap.jco3";
 	
 	public Parameter[] parameters;
 	public String sid;
