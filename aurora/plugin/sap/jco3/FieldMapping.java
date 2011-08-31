@@ -3,9 +3,6 @@
  */
 package aurora.plugin.sap.jco3;
 
-public class FieldMapping {    
-    public String   Name;    
-    public String   Source_field;
-    public Object   Value;
-    public String   Return_field;
+public class FieldMapping extends aurora.plugin.sap.FieldMapping{   
+  
 }
