@@ -2,9 +2,10 @@
 
 =====
 2011-8-30
+
+增加sap jco3的支持。 － 邹磊
 sapjco3.jar需要3.0.2之后的版本
-增加sap jco3的支持。
-将xmlns:jco修改为xmlns:jco=aurora.plugin.sap.jco3
+将xmlns:jco修改为xmlns:jco=aurora.plugin.sap.jco3（包括jco-invoke和sap.config）
 在uncertain.xml添加
 <package-mapping packageName="aurora.plugin.sap.jco3"/>
 去掉
@@ -12,7 +13,7 @@ sapjco3.jar需要3.0.2之后的版本
 
 2011-8-25
 --------------------------------------------------
-增加sap多client支持，同时兼容原来的标记
+增加sap多client支持，同时兼容原来的标记 － 邹磊
 需要支持多client，需要修改sap.config
 demo如下：
 <?xml version="1.0" encoding="UTF-8"?>
