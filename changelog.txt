@@ -1,6 +1,14 @@
 1.1.6
 
 =====
+2011-8-30
+增加sap jco3的支持。
+将xmlns:jco修改为xmlns:jco=aurora.plugin.sap.jco3
+在uncertain.xml添加
+<package-mapping packageName="aurora.plugin.sap.jco3"/>
+去掉
+<package-mapping packageName="aurora.plugin.sap"/>
+
 2011-8-25
 --------------------------------------------------
 增加sap多client支持，同时兼容原来的标记
