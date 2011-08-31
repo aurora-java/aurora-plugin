@@ -2,6 +2,7 @@
 
 =====
 2011-8-30
+sapjco3.jar需要3.0.2之后的版本
 增加sap jco3的支持。
 将xmlns:jco修改为xmlns:jco=aurora.plugin.sap.jco3
 在uncertain.xml添加
