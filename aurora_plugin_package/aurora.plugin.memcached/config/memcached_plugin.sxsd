@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhoufan  
+    $Date: 2011-9-2 下午01:06:11  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<ss:schema xmlns:mcp="aurora.plugin.memcached" xmlns:ss="http://www.uncertain-framework.org/schema/simple-schema">
+    <ss:elements>
+        <ss:element name="mcp:memcached-client-factory">
+            <ss:attributes>
+                <ss:attribute name="serverList" document="用逗号分隔的memcached server地址及端口号，如192.168.1.12:9000,192.168.1.13:8999"/>
+            </ss:attributes>
+        </ss:element>
+    </ss:elements>
+</ss:schema>
