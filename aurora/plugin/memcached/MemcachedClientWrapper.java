@@ -99,8 +99,7 @@ public class MemcachedClientWrapper implements ICache {
     }
 
     public void clear() {
-        //TODO clear?
-
+        mClient.flush();
     }
     
     
