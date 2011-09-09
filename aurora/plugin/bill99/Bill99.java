@@ -28,6 +28,27 @@ public class Bill99 {
 	// /详细见文档错误代码列表
 	public static final String errCode = "errCode";
 
+	public static final String merchant_id = "merchant_id";
+
+	public static final String drawback_version = "drawback_version";
+
+	public static final String command_type = "command_type";
+
+	public static final String drawbackUrl = "drawbackUrl";
+
+	public static final String merchant_key = "merchant_key";
+
+	public static final String txOrder = "txOrder";
+
+	public static final String postdate = "postdate";
+
+	public static final String amount = "amount";
+
+	public static final String orderid = "orderid";
+
+	public static final String mac = "mac";
+	
+
 	// 人民币网关账户号
 	// /请登录快钱系统获取用户编号，用户编号后加01即为人民币网关账户号。
 	public static String merchantAcctId = "merchantAcctId";
