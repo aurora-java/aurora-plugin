@@ -11,7 +11,6 @@ import aurora.service.ServiceContext;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 
-import com.yeepay.Configuration;
 
 public class Receive extends AbstractEntry {
 	// 获取人民币网关账户号
