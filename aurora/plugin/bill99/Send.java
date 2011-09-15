@@ -123,7 +123,7 @@ public class Send extends AbstractEntry {
 	// /如未和快钱签订代理合作协议，不需要填写本参数
 	private String pid;
 	// 快钱付款地址
-	public static String payUrl;
+	private String payUrl;
 
 	public void run(ProcedureRunner runner) throws Exception {
 		CompositeMap context = runner.getContext();
