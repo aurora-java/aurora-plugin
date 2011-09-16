@@ -89,7 +89,7 @@ public class Drawback extends AbstractEntry {
 
 		String xml = drawbackRequest(drawbackUrl, reParams);
 		CompositeMap map = CompositeLoader.createInstanceForOCM()
-				.loadFromString(xml,"utf-8");
+				.loadFromString(xml, "utf-8");
 		List childs = map.getChilds();
 		for (int i = 0; i < childs.size(); i++) {
 			CompositeMap child = (CompositeMap) childs.get(i);
@@ -142,18 +142,30 @@ public class Drawback extends AbstractEntry {
 		// 生成加密签名串
 		// /请务必按照如下顺序和规则组成加密串！
 		String macstr = "";
-		macstr = Bill99.appendParam(macstr, Bill99.merchant_id, merchant_id);
-		macstr = Bill99.appendParam(macstr, Bill99.version, version);
-		macstr = Bill99.appendParam(macstr, Bill99.command_type, command_type);
-		macstr = Bill99.appendParam(macstr, Bill99.orderid, orderid);
-		macstr = Bill99.appendParam(macstr, Bill99.amount, amount);
-		macstr = Bill99.appendParam(macstr, Bill99.postdate, postdate);
-		macstr = Bill99.appendParam(macstr, Bill99.txOrder, txOrder);
-		macstr = Bill99.appendParam(macstr, Bill99.merchant_key, merchant_key);
+		macstr = appendParam(macstr, Bill99.merchant_id, merchant_id);
+		macstr = appendParam(macstr, Bill99.version, version);
+		macstr = appendParam(macstr, Bill99.command_type, command_type);
+		macstr = appendParam(macstr, Bill99.orderid, orderid);
+		macstr = appendParam(macstr, Bill99.amount, amount);
+		macstr = appendParam(macstr, Bill99.postdate, postdate);
+		macstr = appendParam(macstr, Bill99.txOrder, txOrder);
+		macstr = appendParam(macstr, Bill99.merchant_key, merchant_key);
 
-		String mac = MD5Util.md5Hex(macstr.getBytes("gb2312")).toUpperCase();
-
+		String mac = MD5Util.md5Hex(macstr.getBytes("utf-8")).toUpperCase();
 		return mac;
+	}
+
+	public String appendParam(String returns, String paramId, String paramValue) {
+		if (returns != "") {
+			if (paramValue != "") {
+				returns += paramId + "=" + paramValue;
+			}
+		} else {
+			if (paramValue != "") {
+				returns = paramId + "=" + paramValue;
+			}
+		}
+		return returns;
 	}
 
 	private String getVaule(String key) {

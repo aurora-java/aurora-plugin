@@ -53,11 +53,12 @@ public class HttpUtils {
     }
     log.debug("strtTotalURL:" + strtTotalURL);
     URL url = new URL(strtTotalURL);
+    
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
-    con.setUseCaches(false);
-    con.setFollowRedirects(true);
+//    con.setUseCaches(false);
+//    con.setFollowRedirects(true);
     BufferedReader in = new BufferedReader(
-        new InputStreamReader(con.getInputStream()),SIZE);
+        new InputStreamReader(con.getInputStream(),"utf-8"),SIZE);
     while (true) {
       String line = in.readLine();
       if (line == null) {
