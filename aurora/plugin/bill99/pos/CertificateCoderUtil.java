@@ -14,14 +14,12 @@ import javax.crypto.Cipher;
 
 import org.apache.commons.codec.binary.Base64;
 
-import sun.misc.BASE64Encoder;
-
 public class CertificateCoderUtil {
 	public static final String KEY_STORE = "PKCS12";
 	public static final String X509 = "X.509";
 
 	/**
-	 * ��KeyStore���˽Կ
+	
 	 * 
 	 * @param keyStorePath
 	 * @param alias
@@ -37,7 +35,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ��Certificate��ù�Կ
+	 
 	 * 
 	 * @param certificatePath
 	 * @return
@@ -51,7 +49,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ���Certificate
+	 *Certificate
 	 * 
 	 * @param certificatePath
 	 * @return
@@ -70,7 +68,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ���Certificate
+	 * Certificate
 	 * 
 	 * @param keyStorePath
 	 * @param alias
@@ -87,7 +85,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ���KeyStore
+	 * KeyStore
 	 * 
 	 * @param keyStorePath
 	 * @param password
@@ -104,7 +102,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ˽Կ����
+	 *
 	 * 
 	 * @param data
 	 * @param keyStorePath
@@ -115,10 +113,10 @@ public class CertificateCoderUtil {
 	 */
 	public static byte[] encryptByPrivateKey(byte[] data, String keyStorePath,
 			String alias, String password) throws Exception {
-		// ȡ��˽Կ
+		//
 		PrivateKey privateKey = getPrivateKey(keyStorePath, alias, password);
 
-		// ����ݼ���
+		// 
 		Cipher cipher = Cipher.getInstance(privateKey.getAlgorithm());
 		cipher.init(Cipher.ENCRYPT_MODE, privateKey);
 
@@ -127,7 +125,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ˽Կ����
+	 * 
 	 * 
 	 * @param data
 	 * @param keyStorePath
@@ -138,10 +136,9 @@ public class CertificateCoderUtil {
 	 */
 	public static byte[] decryptByPrivateKey(byte[] data, String keyStorePath,
 			String alias, String password) throws Exception {
-		// ȡ��˽Կ
 		PrivateKey privateKey = getPrivateKey(keyStorePath, alias, password);
 
-		// ����ݼ���
+		
 		Cipher cipher = Cipher.getInstance(privateKey.getAlgorithm());
 		cipher.init(Cipher.DECRYPT_MODE, privateKey);
 
@@ -150,7 +147,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ��Կ����
+	 * 
 	 * 
 	 * @param data
 	 * @param certificatePath
@@ -160,9 +157,9 @@ public class CertificateCoderUtil {
 	public static byte[] encryptByPublicKey(byte[] data, String certificatePath)
 			throws Exception {
 
-		// ȡ�ù�Կ
+		
 		PublicKey publicKey = getPublicKey(certificatePath);
-		// ����ݼ���
+		
 		Cipher cipher = Cipher.getInstance(publicKey.getAlgorithm());
 		cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
@@ -171,7 +168,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ��Կ����
+	 * 
 	 * 
 	 * @param data
 	 * @param certificatePath
@@ -180,10 +177,10 @@ public class CertificateCoderUtil {
 	 */
 	public static byte[] decryptByPublicKey(byte[] data, String certificatePath)
 			throws Exception {
-		// ȡ�ù�Կ
+		
 		PublicKey publicKey = getPublicKey(certificatePath);
 
-		// ����ݼ���
+		
 		Cipher cipher = Cipher.getInstance(publicKey.getAlgorithm());
 		cipher.init(Cipher.DECRYPT_MODE, publicKey);
 
@@ -192,7 +189,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ��֤Certificate
+	 * Certificate
 	 * 
 	 * @param certificatePath
 	 * @return
@@ -202,7 +199,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ��֤Certificate�Ƿ���ڻ���Ч
+	 * Certificate
 	 * 
 	 * @param date
 	 * @param certificatePath
@@ -211,9 +208,9 @@ public class CertificateCoderUtil {
 	public static boolean verifyCertificate(Date date, String certificatePath) {
 		boolean status = true;
 		try {
-			// ȡ��֤��
+			//
 			Certificate certificate = getCertificate(certificatePath);
-			// ��֤֤���Ƿ���ڻ���Ч
+			// 
 			status = verifyCertificate(date, certificate);
 		} catch (Exception e) {
 			status = false;
@@ -222,7 +219,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ��֤֤���Ƿ���ڻ���Ч
+	 *
 	 * 
 	 * @param date
 	 * @param certificate
@@ -240,7 +237,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ǩ��
+	 * 
 	 * 
 	 * @param keyStorePath
 	 * @param alias
@@ -251,22 +248,23 @@ public class CertificateCoderUtil {
 	 */
 	public static String sign(byte[] sign, String keyStorePath, String alias,
 			String password) throws Exception {
-		// ��ȡ˽Կ
+		// 
 		KeyStore ks = getKeyStore(keyStorePath, password);
-		// ȡ��˽Կ
-		PrivateKey privateKey = (PrivateKey) ks.getKey(alias, password.toCharArray());
+		//
+		PrivateKey privateKey = (PrivateKey) ks.getKey(alias,
+				password.toCharArray());
 
-		// ����ǩ��
+		// 
 		Signature signature = Signature.getInstance("SHA1WithRSA");
 		signature.initSign(privateKey);
 		signature.update(sign);
-		
-		//linuxϵͳ�س�����Ϊ\n
+
+		// 
 		return encryptBASE64(signature.sign()).replaceAll("\r\n", "");
 	}
-	
+
 	/**
-	 * ǩ��
+	 * 
 	 * 
 	 * @param keyStorePath
 	 * @param alias
@@ -276,11 +274,14 @@ public class CertificateCoderUtil {
 	 * @throws Exception
 	 */
 	public static String sign(byte[] sign) throws Exception {
-		return sign(sign, CertificateCoderUtil.class.getClassLoader().getResource("10411004511700190.pfx").getPath(), "10411004511700190", "vpos123");//10411004511603390
+		return sign(sign, CertificateCoderUtil.class.getClassLoader()
+				.getResource("10411004511700190.pfx").getPath(),
+				"10411004511700190", "vpos123");// 10411004511603390
 	}
 
 	/**
-	 * ��֤ǩ��
+	 * 
+	 * 
 	 * @param data
 	 * @param sign
 	 * @param certificatePath
@@ -289,11 +290,11 @@ public class CertificateCoderUtil {
 	 */
 	public static boolean verify(byte[] data, String sign,
 			String certificatePath) throws Exception {
-		// ���֤��
+		
 		X509Certificate x509Certificate = (X509Certificate) getCertificate(certificatePath);
-		// ��ù�Կ
+	
 		PublicKey publicKey = x509Certificate.getPublicKey();
-		// ����ǩ��
+	
 		Signature signature = Signature.getInstance("SHA1WithRSA");
 		signature.initVerify(publicKey);
 		signature.update(data);
@@ -301,13 +302,14 @@ public class CertificateCoderUtil {
 		return signature.verify(decryptBASE64(sign));
 
 	}
-	
+
 	public static boolean verify(byte[] data, String sign) throws Exception {
-		return verify(data, sign, CertificateCoderUtil.class.getClassLoader().getResource("mgw.cer").getPath());
+		return verify(data, sign, CertificateCoderUtil.class.getClassLoader()
+				.getResource("mgw.cer").getPath());
 	}
 
 	/**
-	 * ��֤Certificate
+	 * Certificate
 	 * 
 	 * @param keyStorePath
 	 * @param alias
@@ -328,7 +330,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * ��֤Certificate
+	 * Certificate
 	 * 
 	 * @param keyStorePath
 	 * @param alias
@@ -341,7 +343,7 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * BASE64����
+	 * BASE64
 	 * 
 	 * @param key
 	 * @return
@@ -352,13 +354,16 @@ public class CertificateCoderUtil {
 	}
 
 	/**
-	 * BASE64����
+	 * BASE64
 	 * 
 	 * @param key
 	 * @return
 	 * @throws Exception
 	 */
 	public static String encryptBASE64(byte[] key) throws Exception {
-		return (new BASE64Encoder()).encodeBuffer(key);
+		// 使用这些类库是有风险的。
+		// http://java.sun.com/products/jdk/faq/faq-sun-packages.html
+		// 使用非eclipse环境自带的jdk可以解决编译错误。
+		return (new sun.misc.BASE64Encoder()).encodeBuffer(key);
 	}
 }
