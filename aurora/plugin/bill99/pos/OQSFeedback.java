@@ -1,6 +1,6 @@
 package aurora.plugin.bill99.pos;
 
-import java.io.PrintWriter;
+import java.io.BufferedWriter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -72,17 +72,23 @@ public class OQSFeedback extends AbstractEntry {
 
 		sbr.append("</message>");
 		sbr.append("</MessageContent>");
-		String signed = CertificateCoderUtil.sign(sbr.toString().getBytes(
-				"utf-8"));
-		String result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><ResponseMessage> <MAC>"
-				+ signed + "</MAC>" + sbr.toString() + "</ResponseMessage>";
 
+		Pkipair pk = new Pkipair();
+		String signMAC = pk.signMsg(sbr.toString());
+
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+				+ "<ResponseMessage>" + "<MAC>"
+				+ signMAC.replaceAll("\r", "").replaceAll("\n", "") + "</MAC>"
+				+ sbr.toString() + "</ResponseMessage>";
 		HttpServletResponse response = serviceInstance.getResponse();
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("text/html;charset=gbk");
-		PrintWriter out = serviceInstance.getResponse().getWriter();
-		out.write(result);
-		out.close();
+		BufferedWriter outW = new BufferedWriter(response.getWriter());
+		String str = new String(xml.getBytes("gbk"));
+		outW.write(str);
+		outW.flush();
+		outW.close();
+
 	}
 
 	private StringBuffer createExtXml(CompositeMap context) {

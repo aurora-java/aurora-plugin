@@ -129,6 +129,7 @@ public class Send extends AbstractEntry {
 		CompositeMap context = runner.getContext();
 		HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance
 				.getInstance(context);
+
 		HttpServletRequest request = serviceInstance.getRequest();
 		request.setCharacterEncoding("GBK");
 		ServiceContext service = ServiceContext.createServiceContext(context);

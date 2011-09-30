@@ -37,11 +37,7 @@ public class POSDrawback extends AbstractEntry {
 		request.setCharacterEncoding("utf-8");
 		RefundFunction pu = new RefundFunction();
 		MRefund pf = new MRefund();
-		//
-		//
-		//
-		//
-		//
+	
 		// pos_refund_orignalTxnType文档和例子没有说明目前无意义，也没处理。请与快钱确认
 		//
 		String version = getValue(context, this.getVersion());

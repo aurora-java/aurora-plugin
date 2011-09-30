@@ -16,7 +16,7 @@ public class MNPReceive extends AbstractEntry {
 		HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance
 				.getInstance(context);
 		HttpServletRequest request = serviceInstance.getRequest();
-		request.setCharacterEncoding("GBK");
+		request.setCharacterEncoding("utf-8");
 		ServiceContext service = ServiceContext.createServiceContext(context);
 		CompositeMap model = service.getModel();
 
