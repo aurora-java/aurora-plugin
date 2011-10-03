@@ -13,10 +13,10 @@ import uncertain.cache.ICache;
 import uncertain.cache.ICacheReader;
 import uncertain.cache.ICacheWriter;
 import uncertain.cache.INamedCacheFactory;
-import uncertain.core.IStartable;
+import uncertain.core.ILifeCycle;
 import uncertain.ocm.IConfigureListener;
 
-public class MemcachedClientFactory implements INamedCacheFactory, IConfigureListener, IStartable {
+public class MemcachedClientFactory implements INamedCacheFactory, IConfigureListener, ILifeCycle {
     
     MemcachedClient         mClient;
     String                  mServerList;
@@ -93,7 +93,6 @@ public class MemcachedClientFactory implements INamedCacheFactory, IConfigureLis
         if(mClient!=null)
             mClient.shutdown();
         mClient = null;
-        mDefaultWrapper.clear();
         mDefaultWrapper = null;
     }
 
