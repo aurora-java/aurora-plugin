@@ -90,11 +90,11 @@ public class SpnegoConfig {
 	String domain;
 	String host;
 	String procedure;
-	boolean allowBasic = false;
+	boolean allowBasic = true;
 	boolean allowDelegation = false;
 	boolean allowLocalhost = false;
 	boolean allowUnsecure = true;
-	boolean promptIfNtlm = false;
+	boolean promptIfNtlm = true;
 	String clientModuleName = "spnego-client";
 	String serverModuleName = "spnego-server";	
 	
