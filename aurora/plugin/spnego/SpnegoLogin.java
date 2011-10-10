@@ -11,6 +11,9 @@ import aurora.service.ServiceContext;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 import uncertain.composite.CompositeMap;
+import uncertain.logging.ILogger;
+import uncertain.logging.LoggingContext;
+import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.IProcedureManager;
 import uncertain.proc.ProcedureRunner;
@@ -18,29 +21,36 @@ import uncertain.proc.ProcedureRunner;
 public class SpnegoLogin extends AbstractEntry {
 	SpnegoConfig config;
 	IProcedureManager procedureManager;
-
-	public SpnegoLogin(SpnegoConfig config, IProcedureManager procedureManager) {
+	IObjectRegistry mObjectRegistry;
+	public SpnegoLogin(SpnegoConfig config, IProcedureManager procedureManager,IObjectRegistry registry) {
 		this.config = config;
 		this.procedureManager = procedureManager;
+		mObjectRegistry=registry;
 	}
 
 	public void run(ProcedureRunner runner) throws Exception {
+		ILogger mLogger = LoggingContext.getLogger("aurora.plugin.spnego",mObjectRegistry);
 		ServiceContext context = ServiceContext.createServiceContext(runner
 				.getContext());
 		HttpServiceInstance svc = (HttpServiceInstance) ServiceInstance
 				.getInstance(context.getObjectContext());
 		HttpServletRequest httpRequest = svc.getRequest();
 		String username;
+		mLogger.info("user_id:"+httpRequest.getSession().getAttribute("user_id"));
 		if (httpRequest.getSession().getAttribute("user_id") == null) {
-			String serviceNmae = httpRequest.getRequestURI().substring(
+			String serviceName = httpRequest.getRequestURI().substring(
 					httpRequest.getContextPath().length() + 1);
 
-			context.getParameter().putString("service_name", serviceNmae);
+			context.getParameter().putString("service_name", serviceName);
+			mLogger.info("excute procedure "+config.getProcedure());
 			doLogin(runner);
 			List<CompositeMap> list = svc.getContextMap().getChild("spnego")
 					.getChilds();
-			if (list!=null)
+			mLogger.info("context:"+svc.getContextMap().toXML());
+			if (list!=null){
+				mLogger.info(serviceName+" is not login required");
 				return;
+			}
 
 			SpnegoHttpServletResponse spnegoResponse = new SpnegoHttpServletResponse(
 					(HttpServletResponse) svc.getResponse());
@@ -71,10 +81,12 @@ public class SpnegoLogin extends AbstractEntry {
 				return;
 			}
 			httpRequest = new SpnegoHttpServletRequest(httpRequest, principal);
-			username = httpRequest.getRemoteUser();
+			username = httpRequest.getRemoteUser();			
 			context.getParameter().put("user_name", username.toUpperCase());
+			mLogger.info("username:"+username);
 			context.getParameter().put("status_code", "Y");
 			doLogin(runner);
+			mLogger.info("doLogin context:"+svc.getContextMap().toXML());
 		}
 	}
 
