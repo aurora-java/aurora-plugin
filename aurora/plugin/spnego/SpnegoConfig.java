@@ -90,6 +90,7 @@ public class SpnegoConfig {
 	String domain;
 	String host;
 	String procedure;
+	String loginchekpath;
 	boolean allowBasic = true;
 	boolean allowDelegation = false;
 	boolean allowLocalhost = false;
@@ -98,6 +99,12 @@ public class SpnegoConfig {
 	String clientModuleName = "spnego-client";
 	String serverModuleName = "spnego-server";	
 	
+	public String getLoginchekpath() {
+		return loginchekpath;
+	}
+	public void setLoginchekpath(String loginchekpath) {
+		this.loginchekpath = loginchekpath;
+	}
 	public String getProcedure() {
 		return procedure;
 	}

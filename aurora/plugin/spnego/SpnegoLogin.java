@@ -1,6 +1,7 @@
 package aurora.plugin.spnego;
 
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,8 +45,12 @@ public class SpnegoLogin extends AbstractEntry {
 			context.getParameter().putString("service_name", serviceName);
 			mLogger.info("excute procedure "+config.getProcedure());
 			doLogin(runner);
-			List<CompositeMap> list = svc.getContextMap().getChild("spnego")
-					.getChilds();
+			Object result=svc.getContextMap().getObject(config.getLoginchekpath());
+			if(result==null){
+				mLogger.log(Level.SEVERE, config.getLoginchekpath()+" is null");
+				return;
+			}
+			List<CompositeMap> list = ((CompositeMap)result).getChilds();
 			mLogger.info("context:"+svc.getContextMap().toXML());
 			if (list!=null){
 				mLogger.info(serviceName+" is not login required");
