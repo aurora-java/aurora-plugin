@@ -80,8 +80,8 @@ public class JcoInvoke extends AbstractEntry {
 				if (param.Return_field == null) {
 					Object o = param.Source_field == null ? param.Value
 							: context.getObject(param.Source_field);
-					String value = o == null ? "" : o.toString();
-					input.setValue(value, param.Name);
+					String value = o == null ? "" : o.toString();					
+					input.setValue(param.Name,value);
 					logger.log(Level.CONFIG, "parameter {0} -> {1}",
 							new Object[] { param.Name, value });
 				}
