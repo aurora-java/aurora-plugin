@@ -117,6 +117,7 @@ public class ExcelExportImpl {
 				text=object.getString(record.getString("name"));					
 				columnstyle=(HSSFCellStyle) wb.createCellStyle();
 				columnstyle.setAlignment(getExcelAlign(record.getString("align")));
+				cell.setCellType(Cell.CELL_TYPE_STRING);
 				cell.setCellStyle(columnstyle);
 				if(text!=null)
 					cell.setCellValue(new HSSFRichTextString(text));					
