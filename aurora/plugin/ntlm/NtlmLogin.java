@@ -43,16 +43,16 @@ public class NtlmLogin extends AbstractEntry {
 		mLogger.info("user_id:"+httpRequest.getSession().getAttribute("user_id"));		
 		
 		if (httpRequest.getSession().getAttribute("user_id") == null) {
-			String serviceName = context.getServiceName();
+			String serviceName = context.getObjectContext().getString("service_name");
 			context.getParameter().putString("service_name", serviceName);
 			mLogger.info("excute procedure "+ntlmConfig.getProcedure());
 			runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));
-			Object result=svc.getContextMap().getObject(ntlmConfig.getReturnPath());
+			Object result=context.getObjectContext().getObject(ntlmConfig.getReturnPath());
 			if(result==null){
 				mLogger.log(Level.SEVERE, ntlmConfig.getReturnPath()+" is null");
 				return;
 			}
-			if(!((CompositeMap)result).isEmpty()){
+			if(((CompositeMap)result).getChilds()!=null){
 				mLogger.info(serviceName+" is not login required");
 				return;
 			}
