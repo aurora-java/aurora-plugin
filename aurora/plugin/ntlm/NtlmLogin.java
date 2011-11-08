@@ -73,7 +73,7 @@ public class NtlmLogin extends AbstractEntry {
 			mLogger.info("username:"+username);
 			context.getParameter().put("status_code", "Y");
 			runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));
-			mLogger.info("doLogin context:"+svc.getContextMap().toXML());			
+			mLogger.info("doLogin context:"+context.getObjectContext().toXML());			
 		}
 	}
 }
