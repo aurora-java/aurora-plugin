@@ -79,6 +79,7 @@ public class NtlmLogin extends AbstractEntry {
 	}
 
 	NtlmPasswordAuthentication authenticate(ProcedureRunner runner) {
+		ILogger mLogger = LoggingContext.getLogger("aurora.plugin.ntlm",mObjectRegistry);	
 		NtlmPasswordAuthentication ntlm;
 		HttpServiceInstance svc = (HttpServiceInstance) ServiceInstance
 				.getInstance(runner.getContext());
@@ -92,6 +93,7 @@ public class NtlmLogin extends AbstractEntry {
 			}
 		} catch (Exception e) {
 			// 域验证不通过，跳入普通处理方式
+			mLogger.log(Level.SEVERE,"NTLM authenticate fail");
 			return null;
 		}
 		return ntlm;
