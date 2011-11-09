@@ -32,48 +32,68 @@ public class NtlmLogin extends AbstractEntry {
 	}
 
 	public void run(ProcedureRunner runner) throws Exception {
-		ILogger mLogger = LoggingContext.getLogger("aurora.plugin.ntlm",mObjectRegistry);
+		ILogger mLogger = LoggingContext.getLogger("aurora.plugin.ntlm",mObjectRegistry);		
 		ServiceContext context = ServiceContext.createServiceContext(runner.getContext());
-		HttpServiceInstance svc = (HttpServiceInstance) ServiceInstance
-				.getInstance(context.getObjectContext());
-		
+		HttpServiceInstance svc = (HttpServiceInstance) ServiceInstance.getInstance(context.getObjectContext());
 		HttpServletRequest httpRequest = svc.getRequest();
-		HttpServletResponse httpResponse =svc.getResponse();
-			
-		mLogger.info("user_id:"+httpRequest.getSession().getAttribute("user_id"));		
-		
+		String msg=httpRequest.getHeader("Authorization");
 		if (httpRequest.getSession().getAttribute("user_id") == null) {
-			String serviceName = context.getObjectContext().getString("service_name");
-			context.getParameter().putString("service_name", serviceName);
-			mLogger.info("excute procedure "+ntlmConfig.getProcedure());
-			runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));
-			Object result=context.getObjectContext().getObject(ntlmConfig.getReturnPath());
-			if(result==null){
-				mLogger.log(Level.SEVERE, ntlmConfig.getReturnPath()+" is null");
-				return;
-			}
-			if(((CompositeMap)result).getChilds()!=null){
-				mLogger.info(serviceName+" is not login required");
-				return;
-			}
-			
-			NtlmPasswordAuthentication ntlm = null;
-			try {
-				if ((ntlm = new NtlmAuthenticator(ntlmConfig).authenticate(httpRequest,
-						httpResponse)) == null) {
-					runner.stop();
+			if(msg==null||!msg.startsWith("NTLM")){			
+				String serviceName = context.getObjectContext().getString(
+						"service_name");
+				context.getParameter().putString("service_name", serviceName);
+				mLogger.info("excute procedure " + ntlmConfig.getProcedure());
+				runner.call(procedureManager.loadProcedure(ntlmConfig
+						.getProcedure()));
+				Object result = context.getObjectContext().getObject(
+						ntlmConfig.getReturnPath());
+				if (result == null) {
+					mLogger.log(Level.SEVERE, ntlmConfig.getReturnPath()
+							+ " is null");
 					return;
 				}
-			} catch (Exception e) {
-				//域验证不通过，跳入普通处理方式
+				
+				if (((CompositeMap) result).getChilds() != null) {
+					mLogger.info(serviceName + " is not login required");
+					return;
+				}
+			}
+			NtlmPasswordAuthentication ntlm=authenticate(runner);
+			if(ntlm==null){
 				return;
 			}
-			String username=ntlm.getUsername();
+			
+			String username = ntlm.getUsername();
 			context.getParameter().put("user_name", username.toUpperCase());
-			mLogger.info("username:"+username);
+			mLogger.info("username:" + username);
 			context.getParameter().put("status_code", "Y");
-			runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));
-			mLogger.info("doLogin context:"+context.getObjectContext().toXML());			
+			runner.call(procedureManager.loadProcedure(ntlmConfig
+					.getProcedure()));
+			mLogger.info("doLogin context:"	+ context.getObjectContext().toXML());
+		} else {			
+			if ("POST".equals(httpRequest.getMethod().toUpperCase())) {
+				if(msg!=null&&msg.startsWith("NTLM"))
+					authenticate(runner);
+			}
 		}
+	}
+
+	NtlmPasswordAuthentication authenticate(ProcedureRunner runner) {
+		NtlmPasswordAuthentication ntlm;
+		HttpServiceInstance svc = (HttpServiceInstance) ServiceInstance
+				.getInstance(runner.getContext());
+		HttpServletRequest httpRequest = svc.getRequest();
+		HttpServletResponse httpResponse = svc.getResponse();
+		try {
+			if ((ntlm = new NtlmAuthenticator(ntlmConfig).authenticate(
+					httpRequest, httpResponse)) == null) {
+				runner.stop();
+				return null;
+			}
+		} catch (Exception e) {
+			// 域验证不通过，跳入普通处理方式
+			return null;
+		}
+		return ntlm;
 	}
 }
