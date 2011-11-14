@@ -37,13 +37,17 @@ public class NtlmAuthenticator {
 			byte[] token = Base64.decode(msg.substring(5));
 			if (token[8] == 1) {
 				type1 = new Type1Message(token);
-				defaultDomain = type1.getSuppliedDomain();				
+				defaultDomain = type1.getSuppliedDomain();					
 			} else if (token[8] == 3) {
 				type3 = new Type3Message(token);
 				defaultDomain = type3.getDomain();
 			}
-			DomainInstance domainInstance = (DomainInstance) this.ntlmConfig
-					.getDomainInstance(defaultDomain);
+			DomainInstance domainInstance;
+			if(defaultDomain==null){
+				domainInstance = (DomainInstance) this.ntlmConfig.getDefaultDomainInstance();
+			}else	{
+				domainInstance = (DomainInstance) this.ntlmConfig.getDomainInstance(defaultDomain);
+			}
 			if (domainInstance == null)
 				throw new RuntimeException("DomainInstance is null;defaultDomain:"+defaultDomain+";Workstation:"+type1.getSuppliedWorkstation());
 			domainController=domainInstance.getDomainController();
