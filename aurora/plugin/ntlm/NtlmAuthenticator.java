@@ -46,7 +46,6 @@ public class NtlmAuthenticator {
 			if(defaultDomain==null){
 				domainInstance = (DomainInstance) this.ntlmConfig.getDefaultDomainInstance();
 			}else	{
-				defaultDomain="MAS";
 				domainInstance = (DomainInstance) this.ntlmConfig.getDomainInstance(defaultDomain);
 			}			
 			if (domainInstance == null)
