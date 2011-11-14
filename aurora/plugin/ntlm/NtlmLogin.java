@@ -37,10 +37,9 @@ public class NtlmLogin extends AbstractEntry {
 		HttpServiceInstance svc = (HttpServiceInstance) ServiceInstance.getInstance(context.getObjectContext());
 		HttpServletRequest httpRequest = svc.getRequest();
 		String msg=httpRequest.getHeader("Authorization");
+		String serviceName = context.getObjectContext().getString("service_name");
 		if (httpRequest.getSession().getAttribute("user_id") == null) {
-			if(msg==null||!msg.startsWith("NTLM")){			
-				String serviceName = context.getObjectContext().getString(
-						"service_name");
+			if(msg==null||!msg.startsWith("NTLM")){					
 				context.getParameter().putString("service_name", serviceName);
 				mLogger.info("excute procedure " + ntlmConfig.getProcedure());
 				runner.call(procedureManager.loadProcedure(ntlmConfig
@@ -54,7 +53,7 @@ public class NtlmLogin extends AbstractEntry {
 				}
 				
 				if (((CompositeMap) result).getChilds() != null) {
-					mLogger.info(serviceName + " is not login required");
+					mLogger.info(serviceName + " is not login required");					
 					return;
 				}
 			}
@@ -93,8 +92,7 @@ public class NtlmLogin extends AbstractEntry {
 			}
 		} catch (Exception e) {
 			// 域验证不通过，跳入普通处理方式
-			mLogger.log(Level.SEVERE,"NTLM authenticate fail");
-			mLogger.log(Level.SEVERE,e.getMessage());
+			mLogger.log(Level.SEVERE,"NTLM authenticate fail",e);
 			return null;
 		}
 		return ntlm;

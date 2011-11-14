@@ -46,13 +46,14 @@ public class NtlmAuthenticator {
 			if(defaultDomain==null){
 				domainInstance = (DomainInstance) this.ntlmConfig.getDefaultDomainInstance();
 			}else	{
+				defaultDomain="MAS";
 				domainInstance = (DomainInstance) this.ntlmConfig.getDomainInstance(defaultDomain);
-			}
+			}			
 			if (domainInstance == null)
 				throw new RuntimeException("DomainInstance is null;defaultDomain:"+defaultDomain+";Workstation:"+type1.getSuppliedWorkstation());
 			domainController=domainInstance.getDomainController();
 			
-			Config.setProperty("jcifs.smb.client.domain", defaultDomain);
+			Config.setProperty("jcifs.smb.client.domain", domainInstance.getDomain());
 			Config.setProperty("jcifs.smb.client.username", domainInstance.getUserName());
 			Config.setProperty("jcifs.smb.client.password", domainInstance.getPassword());
 			
