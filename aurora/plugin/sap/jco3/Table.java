@@ -11,8 +11,6 @@ import uncertain.composite.CompositeMap;
 import uncertain.core.ConfigurationError;
 import uncertain.logging.ILogger;
 
-import aurora.plugin.sap.FieldMapping;
-
 import com.sap.conn.jco.JCoField;
 import com.sap.conn.jco.JCoParameterList;
 import com.sap.conn.jco.JCoTable;
