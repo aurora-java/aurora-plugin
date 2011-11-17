@@ -1,7 +1,6 @@
 package aurora.plugin.sap.jco3;
 
 import java.util.Properties;
-import aurora.plugin.sap.jco3.JCo3Provider;
 
 import com.sap.conn.jco.JCoDestination;
 import com.sap.conn.jco.JCoDestinationManager;
