@@ -28,7 +28,7 @@ import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 
 public class ImportExcel extends AbstractEntry{
-	public static final String DEFAULT_SUCCESS_FLAG = "/parameter/@ImportSuccess";
+	public static final String DEFAULT_SUCCESS_FLAG = "/parameter/@is_success";
 	public static final String XLS_KEY=".xls";
 	public static final String XLSX_KEY=".xlsx";
 	public static final String CSV_KEY=".csv";
@@ -36,7 +36,7 @@ public class ImportExcel extends AbstractEntry{
 	public String fileName;
 	public String separator;
 	public String header_id;
-	public String user_id;
+	public String user_id="${/session/@user_id}";
 	public String job_id;
 	public String template_code;
 	public String attribute1;
