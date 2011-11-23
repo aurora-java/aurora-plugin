@@ -54,13 +54,12 @@ public class NtlmLogin extends AbstractEntry {
 					return;
 				}
 			}
-//			NtlmPasswordAuthentication ntlm=authenticate(runner);
-//			if(ntlm==null){
-//				return;
-//			}
+			NtlmPasswordAuthentication ntlm=authenticate(runner);
+			if(ntlm==null){
+				return;
+			}
 			
-//			String username = ntlm.getUsername().toUpperCase();
-			String username="ADMIN";
+			String username = ntlm.getUsername().toUpperCase();
 			mLogger.info("username:" + username);
 			context.putObject("/spnego/@user_name", username,true);
 			context.putObject("/spnego/@status_code", "Y",true);			
