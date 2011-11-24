@@ -34,7 +34,7 @@ public class ImportExcel extends AbstractEntry{
 	public static final String CSV_KEY=".csv";
 	public static final String TXT_KEY=".txt";
 	public String fileName;
-	public String separator;
+	public String separator=",";
 	public String header_id;
 	public String user_id="${/session/@user_id}";
 	public String job_id;
