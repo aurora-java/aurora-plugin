@@ -1,13 +1,13 @@
 package aurora.plugin.sap.sync.idoc;
 
-public class IdocType {
+public class IDocType {
 	public String idoctyp;
 	public String cimtyp;
 	/**
 	 * @param idoctyp
 	 * @param cimtyp
 	 */
-	public IdocType(String idoctyp, String cimtyp) {
+	public IDocType(String idoctyp, String cimtyp) {
 		super();
 		this.idoctyp = idoctyp;
 		this.cimtyp = cimtyp;

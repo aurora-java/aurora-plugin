@@ -1,6 +1,12 @@
 package aurora.plugin.sap.sync.idoc;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.logging.Level;
+
+import javax.sql.DataSource;
 
 import uncertain.core.IGlobalInstance;
 import uncertain.logging.ILogger;
@@ -9,44 +15,47 @@ import uncertain.ocm.IObjectRegistry;
 
 public class IDocServerInstance implements IGlobalInstance {
 	public static final String PLUGIN = "aurora.plugin.sap.sync.idoc";
-	public String SERVER_NAME_LIST;
-	public String IDOC_DIR;
-	private IObjectRegistry registry;
-	public ILogger logger;
 	public static final String SEPARATOR = ",";
 	public String DeleteImmediately = "Y";
-	private String version = "1.2";
+	public String SERVER_NAME_LIST;
+	public String IDOC_DIR;
+	public String RECONNECT_TIME = "60000";// 1 minute
+	public String MAX_RECONNECT_TIME = "3600000";// 1 hour
+	private List serverList;
+	private IObjectRegistry registry;
+	private String version = "1.4";
+
 	public IDocServerInstance(IObjectRegistry registry) {
 		this.registry = registry;
-	}
-	public ILogger getLogger() {
-		return logger;
-	}
-	public IObjectRegistry getRegistry() {
-		return registry;
+		serverList = new LinkedList();
 	}
 
-	public void log(String message) {
-		if (logger != null) {
-			logger.info(message);
-		} else {
-			System.out.println(message);
-		}
-	}
 	// Framework function
 	public void onInitialize() throws Exception {
-		logger = LoggingContext.getLogger(PLUGIN, registry);
+		initLoggerUtil();
 		run();
 	}
-	public String getIdocDir() {
-		return IDOC_DIR;
+
+	private void initLoggerUtil() {
+		ILogger logger = LoggingContext.getLogger(PLUGIN, registry);
+		if (logger == null)
+			throw new RuntimeException("Can not get logger from registry!");
+		LoggerUtil.setLogger(logger);
 	}
-	public String getServerNameList() {
-		return SERVER_NAME_LIST;
+
+	public void onShutdown() throws Exception {
+		if (serverList != null && !serverList.isEmpty()) {
+			for (Iterator it = serverList.iterator(); it.hasNext();) {
+				IDocServer server = (IDocServer) it.next();
+				server.setShutdownByCommand(true);
+				server.shutdown();
+			}
+		}
 	}
-	public void run() {
-		log("idoc version: "+version);
-		log("IDOC_DIR:" + IDOC_DIR);
+
+	public void run() throws AuroraIDocException {
+		LoggerUtil.getLogger().info("Aurora IDoc Plugin version: " + version);
+		LoggerUtil.getLogger().info("IDoc Dir:" + IDOC_DIR);
 		if (IDOC_DIR == null || "".equals(IDOC_DIR)) {
 			throw new IllegalArgumentException("IDOC_DIR can not be null !");
 		} else {
@@ -55,27 +64,31 @@ public class IDocServerInstance implements IGlobalInstance {
 				throw new IllegalArgumentException("IDOC_DIR:" + IDOC_DIR + " is not exists!");
 			}
 		}
-
-		log("SERVER_NAME_LIST:" + SERVER_NAME_LIST);
+		LoggerUtil.getLogger().info("Server name list:" + SERVER_NAME_LIST);
 		if (SERVER_NAME_LIST == null || SERVER_NAME_LIST.equals("")) {
 			throw new IllegalArgumentException("SERVER_NAME_LIST can not be null !");
 		}
+		int reconnectTime = Integer.parseInt(RECONNECT_TIME);
+		int maxReconnectTime = Integer.parseInt(MAX_RECONNECT_TIME);
 		String[] servers = SERVER_NAME_LIST.split(SEPARATOR);
-		String serverName = null;
-		IDocServer server = null;
+
+		DataSource ds = (DataSource) registry.getInstanceOfType(DataSource.class);
+		if (ds == null)
+			throw new AuroraIDocException("Can not get DataSource from registry " + registry);
 		for (int i = 0; i < servers.length; i++) {
-			serverName = servers[i];
-			server = new IDocServer(this, serverName);
-			server.start();
+			String serverName = servers[i];
+			try {
+				IDocServer server = new IDocServer(IDOC_DIR, ds, serverName, isDeleteFileImmediately(), reconnectTime,
+						maxReconnectTime);
+				server.start();
+				serverList.add(server);
+			} catch (Throwable e) {
+				LoggerUtil.getLogger().log(Level.SEVERE, "start server " + serverName + " failed!", e);
+			}
 		}
 	}
-	public void setLogger(ILogger logger) {
-		this.logger = logger;
-	}
-	public void setRegistry(IObjectRegistry registry) {
-		this.registry = registry;
-	}
-	public boolean isDeleteImmediately() {
+
+	public boolean isDeleteFileImmediately() {
 		return "Y".equals(DeleteImmediately);
 	}
 }
