@@ -34,6 +34,17 @@ public class IDocServerInstance implements IGlobalInstance {
 	public void onInitialize() throws Exception {
 		initLoggerUtil();
 		run();
+		Runnable shutdownHook = new Runnable() {  
+	        public void run() {  
+	        	try {
+					onShutdown();
+					System.out.println("shutdown idoc finished!");
+				} catch (Exception e) {
+					e.printStackTrace();
+				} 
+	        }  
+	    }; 
+		Runtime.getRuntime().addShutdownHook(new Thread(shutdownHook));
 	}
 
 	private void initLoggerUtil() {
@@ -50,6 +61,7 @@ public class IDocServerInstance implements IGlobalInstance {
 				server.setShutdownByCommand(true);
 				server.shutdown();
 			}
+			serverList = null;
 		}
 	}
 

@@ -324,7 +324,11 @@ public class IDocServer {
 		shutdownDB();
 		LoggerUtil.getLogger().log("stop iDocServer ：" + serverName);
 		shutdownIDocServer();
+		if(shutdownByCommand){
+			reConnect.interrupt();
+		}
 		LoggerUtil.getLogger().log("...........shutdown " + serverName + " finished.............. ");
+		
 	}
 	private void shutdownDB() {
 		if (dbUtil != null) {
