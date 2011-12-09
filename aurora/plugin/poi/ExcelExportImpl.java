@@ -106,7 +106,7 @@ public class ExcelExportImpl {
 				break;
 			}
 			CompositeMap object = (CompositeMap) iterator.next();
-			if(!"record".equals(object.getName()))break;
+			if(!"record".equals(object.getName()))continue;
 			Row row=sheet.getRow(this.headLevel);
 			if(row==null){
 				row=sheet.createRow(this.headLevel);
