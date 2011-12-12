@@ -1,12 +1,8 @@
 package aurora.plugin.dataimport;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
@@ -18,205 +14,195 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
+import uncertain.core.UncertainEngine;
+import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 
 import aurora.database.service.SqlServiceContext;
 import aurora.plugin.csv.CsvParse;
 import aurora.plugin.poi.ExcelParse;
+import aurora.plugin.poi.eventmodel.XLSParse;
+import aurora.plugin.poi.eventmodel.XLSXParse;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 
-public class ImportExcel extends AbstractEntry{
-	public static final String DEFAULT_SUCCESS_FLAG = "/parameter/@is_success";
-	public static final String XLS_KEY=".xls";
-	public static final String XLSX_KEY=".xlsx";
-	public static final String CSV_KEY=".csv";
-	public static final String TXT_KEY=".txt";
+public class ImportExcel extends AbstractEntry {
+	public static final String XLS_KEY = ".xls";
+	public static final String XLSX_KEY = ".xlsx";
+	public static final String CSV_KEY = ".csv";
+	public static final String TXT_KEY = ".txt";
 	public String fileName;
-	public String separator=",";
+	public String separator = ",";
 	public String header_id;
-	public String user_id="${/session/@user_id}";
+	public String user_id = "${/session/@user_id}";
 	public String job_id;
-	public String template_code;
 	public String attribute1;
 	public String attribute2;
 	public String attribute3;
 	public String attribute4;
 	public String attribute5;
-	public String status_field=DEFAULT_SUCCESS_FLAG;	
+	public String dataSourceName;
+	UncertainEngine mUncertainEngine;
+	Connection conn;	
+	
+	public ImportExcel(UncertainEngine uncertainEngine){
+		mUncertainEngine=uncertainEngine;
+	}
+	public String getDataSourceName() {
+		return dataSourceName;
+	}
+
+	public void setDataSourceName(String dataSourceName) {
+		this.dataSourceName = dataSourceName;
+	}	
 
 	public void run(ProcedureRunner runner) throws Exception {
-		int result=-1;		
 		CompositeMap context = runner.getContext();
 		validatePara(context);
-		HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance.getInstance(context);
+		HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance
+				.getInstance(context);
+		SqlServiceContext sqlServiceContext = SqlServiceContext
+				.createSqlServiceContext(context);
+		
+		conn = sqlServiceContext.getNamedConnection(dataSourceName);
+		
+		if(conn==null){
+			sqlServiceContext.initConnection(mUncertainEngine.getObjectRegistry(),dataSourceName);
+			conn = sqlServiceContext.getNamedConnection(dataSourceName);
+		}
+		
+		saveHead();
 		
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload up = new ServletFileUpload(factory);
-		SqlServiceContext sqlServiceContext = SqlServiceContext.createSqlServiceContext(context);
-		Connection conn = sqlServiceContext.getConnection();
 		List items = up.parseRequest(serviceInstance.getRequest());
 		Iterator i = items.iterator();
 		while (i.hasNext()) {
 			FileItem fileItem = (FileItem) i.next();
-			if (!fileItem.isFormField()) {			
-				fileName=fileItem.getName();				
-				String suffix=fileName.substring(fileName.lastIndexOf("."));
-				CompositeMap data=parseFile(fileItem.getInputStream(), suffix.toLowerCase());				
-	            result=save(conn,data);
+			if (!fileItem.isFormField()) {
+				fileName = fileItem.getName();
+				String suffix = fileName.substring(fileName.lastIndexOf("."));
+				parseFile(fileItem.getInputStream(), suffix.toLowerCase(), this);
 			}
 		}
-        context.putObject(status_field, result,true);              
 	}
-	CompositeMap parseFile(InputStream is,String suffix)throws Exception{
-		CompositeMap data=null;
-		if(XLS_KEY.equals(suffix)||XLSX_KEY.equals(suffix)){
-			data=ExcelParse.parseFile(is,suffix);
-		}else if(CSV_KEY.equals(suffix)||TXT_KEY.equals(suffix)){
-			if(separator==null)
-				throw new IllegalArgumentException("separator is undefined");
-			data=CsvParse.parseFile(is, this.separator);
-		}
-		return data;
-	}
-	void validatePara(CompositeMap context){
-		header_id=TextParser.parse(header_id, context);
-		if(header_id==null&&"".equals(header_id))
-			throw new IllegalArgumentException("header_id is undefined");
-		user_id=TextParser.parse(user_id, context);
-		if(user_id==null&&"".equals(user_id))
-			throw new IllegalArgumentException("user_id is undefined");
-		job_id=TextParser.parse(job_id, context);
-		template_code=TextParser.parse(template_code, context);
-		attribute1=TextParser.parse(attribute1, context);
-		attribute2=TextParser.parse(attribute2, context);
-		attribute3=TextParser.parse(attribute3, context);
-		attribute4=TextParser.parse(attribute4, context);
-		attribute5=TextParser.parse(attribute5, context);		
-	}
-	int save(Connection conn,CompositeMap data) throws SQLException {
-		int is_success=0;
-		PreparedStatement pstm = null;
-		CallableStatement cstm=null;
-		ResultSet rs = null;
-		try{
-			cstm=conn.prepareCall("{call fnd_interface_load_pkg.ins_fnd_interface_headers(?,?,?,?,?,?,?,?,?,?,?)}");		
+
+	void saveHead() throws SQLException {
+		CallableStatement cstm = null;
+		String headSql = "fnd_interface_load_pkg.ins_fnd_interface_headers(?,?,?,?,?,?,?,?,?,?,?)";
+		try {
+			cstm = conn.prepareCall("{call "+headSql+"}");
 			cstm.setLong(1, new Long(header_id));
-			if(job_id==null)
+			if (job_id == null)
 				cstm.setNull(2, java.sql.Types.NUMERIC);
 			else
 				cstm.setLong(2, new Long(job_id));
 			cstm.setString(3, "NEW");
 			cstm.setString(4, user_id);
 			cstm.setString(5, fileName);
-			if(template_code==null)
-				cstm.setNull(6, java.sql.Types.VARCHAR);
-			else
-				cstm.setString(6, template_code);
-			if(attribute1==null)
+			cstm.setNull(6, java.sql.Types.VARCHAR);
+			if (attribute1 == null)
 				cstm.setNull(7, java.sql.Types.VARCHAR);
 			else
 				cstm.setString(7, attribute1);
-			if(attribute2==null)
+			if (attribute2 == null)
 				cstm.setNull(8, java.sql.Types.VARCHAR);
 			else
 				cstm.setString(8, attribute2);
-			if(attribute3==null)
+			if (attribute3 == null)
 				cstm.setNull(9, java.sql.Types.VARCHAR);
 			else
 				cstm.setString(9, attribute3);
-			if(attribute4==null)
+			if (attribute4 == null)
 				cstm.setNull(10, java.sql.Types.VARCHAR);
 			else
 				cstm.setString(10, attribute4);
-			if(attribute5==null)
+			if (attribute5 == null)
 				cstm.setNull(11, java.sql.Types.VARCHAR);
 			else
 				cstm.setString(11, attribute5);
 			cstm.execute();
-			saveLines(conn,data);
-			if(template_code!=null){
-				pstm = conn.prepareStatement("select t.execute_pkg from fnd_interface_templates t where t.enabled_flag='Y' and t.template_code='"+template_code.trim()+"'");
-				rs=pstm.executeQuery();			
-				if (rs.next()){
-					String execute_pkg=rs.getString(1);
-					if(execute_pkg!=null){
-						cstm=conn.prepareCall("{call "+execute_pkg+"(?,?)}");
-						cstm.setLong(1, new Long(header_id));
-						cstm.registerOutParameter(2, java.sql.Types.NUMERIC);
-						cstm.execute();
-						Long result=cstm.getLong(2);
-						is_success=result.intValue();
-					}
-				}
-			}
-		}catch (SQLException e) {
-			throw e;
-		}finally{
-			if(cstm!=null)
+		} finally {
+			if (cstm != null)
 				cstm.close();
-			if(pstm!=null)
-				pstm.close();
 		}
-		return is_success;
 	}
-	
-	void saveLines(Connection conn,CompositeMap data) throws SQLException{
-		Iterator it=null;
-		Iterator iterator=data.getChildIterator();		
-		while (iterator.hasNext()) {
-			CompositeMap sheet = (CompositeMap) iterator.next();
-			it=sheet.getChildIterator();
-			int rownum=0;
-			while (it.hasNext()) {				
-				CompositeMap row = (CompositeMap) it.next();
-				saveLine(conn,row,rownum++);				
-			}
-		}		
-	}
-	void saveLine(Connection conn,CompositeMap data,int rownum) throws SQLException{
-		if(data.getLong("maxCell")==null)return;
-		int maxcell=data.getLong("maxCell").intValue();	
-		StringBuffer stringBuffer=new StringBuffer("fnd_interface_load_pkg.ins_fnd_interface_lines(?,?,?,?,?,?,?");
-		for(int i=0;i<maxcell;i++){
-			stringBuffer.append(",?");
+
+	void parseFile(InputStream is, String suffix, ImportExcel importExcel)
+			throws Exception {
+		if(XLS_KEY.equals(suffix)){
+			XLSParse xlsParse=new XLSParse();
+			xlsParse.parseFile(is, importExcel);
 		}
-		stringBuffer.append(")");
-		CallableStatement cstm=null;
-		try{
-			cstm=conn.prepareCall("{call "+stringBuffer+"}");			
+		if (XLSX_KEY.equals(suffix)) {
+			XLSXParse xlsxParse=new XLSXParse();
+			xlsxParse.parseFile(is, importExcel);		
+		} else if (CSV_KEY.equals(suffix) || TXT_KEY.equals(suffix)) {
+			if (separator == null)
+				throw new IllegalArgumentException("separator is undefined");
+			CsvParse cvsParser = new CsvParse();
+			cvsParser.parseFile(is, importExcel);
+		}
+	}
+
+	void validatePara(CompositeMap context) {
+		header_id = TextParser.parse(header_id, context);
+		if (header_id == null && "".equals(header_id))
+			throw new IllegalArgumentException("header_id is undefined");
+		user_id = TextParser.parse(user_id, context);
+		if (user_id == null && "".equals(user_id))
+			throw new IllegalArgumentException("user_id is undefined");
+		job_id = TextParser.parse(job_id, context);
+		attribute1 = TextParser.parse(attribute1, context);
+		attribute2 = TextParser.parse(attribute2, context);
+		attribute3 = TextParser.parse(attribute3, context);
+		attribute4 = TextParser.parse(attribute4, context);
+		attribute5 = TextParser.parse(attribute5, context);
+	}
+
+	public void saveLine(CompositeMap data, int rownum) throws SQLException {
+		StringBuffer lineSql = new StringBuffer("fnd_interface_load_pkg.ins_fnd_interface_lines(?,?,?,?,?,?,?");
+		if (data.getLong("maxCell") == null)
+			return;
+		int maxcell = data.getInt("maxCell");
+		for (int i = 0; i < maxcell; i++) {
+			lineSql.append(",?");
+		}
+		lineSql.append(")");
+		CallableStatement cstm = null;
+		try {
+			cstm = conn.prepareCall("{call " + lineSql + "}");
 			cstm.setLong(1, new Long(header_id));
-			cstm.setNull(2,java.sql.Types.VARCHAR);
-			cstm.setNull(3,java.sql.Types.VARCHAR);	
+			cstm.setNull(2, java.sql.Types.VARCHAR);
+			cstm.setNull(3, java.sql.Types.VARCHAR);
 			cstm.setString(4, user_id);
-			cstm.setLong(5, rownum);			
-			cstm.setNull(6,java.sql.Types.VARCHAR);
-			cstm.setNull(7,java.sql.Types.NUMERIC);		
+			cstm.setLong(5, rownum);
+			cstm.setNull(6, java.sql.Types.VARCHAR);
+			cstm.setNull(7, java.sql.Types.NUMERIC);
 			String valueString;
-			for(int i=0;i<maxcell;i++){
-				valueString=data.getString("C"+i);
-				if(valueString==null)
-					cstm.setNull(8+i,java.sql.Types.VARCHAR);	
-				else 
-					cstm.setString(8+i,valueString);				
+			for (int i = 0; i < maxcell; i++) {
+				valueString = data.getString("C" + i);
+				if (valueString == null)
+					cstm.setNull(8 + i, java.sql.Types.VARCHAR);
+				else
+					cstm.setString(8 + i, valueString);
 			}
 			cstm.execute();
-		}catch (SQLException e) {
-			throw e;
-		}finally{
-			if(cstm!=null)
+		} finally {
+			if (cstm != null)
 				cstm.close();
-		}		
+		}
 	}
+
 	public String getHeader_id() {
 		return header_id;
 	}
 
 	public void setHeader_id(String header_id) {
 		this.header_id = header_id;
-	}	
-	
+	}
+
 	public String getSeparator() {
 		return separator;
 	}
@@ -239,14 +225,6 @@ public class ImportExcel extends AbstractEntry{
 
 	public void setJob_id(String job_id) {
 		this.job_id = job_id;
-	}
-
-	public String getTemplate_code() {
-		return template_code;
-	}
-
-	public void setTemplate_code(String template_code) {
-		this.template_code = template_code;
 	}
 
 	public String getAttribute1() {
@@ -287,28 +265,5 @@ public class ImportExcel extends AbstractEntry{
 
 	public void setAttribute5(String attribute5) {
 		this.attribute5 = attribute5;
-	}
-
-	public String getStatus_field() {
-		return status_field;
-	}
-	public void setStatus_field(String status_field) {
-		if(status_field==null)
-			status_field=DEFAULT_SUCCESS_FLAG;
-		this.status_field = status_field;
-	}
-	
-	public static void main(String[] args){
-		String pathname="/Users/zoulei/Desktop/11.xls";
-		File file=new File(pathname);		
-		InputStream is=null;
-		try {
-			is = new FileInputStream(file);
-			CompositeMap data=ExcelParse.parseFile(is, ".xls");			
-			System.out.print(data.toXML());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
 	}
 }
