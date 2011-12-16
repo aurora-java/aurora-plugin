@@ -32,8 +32,10 @@ public class NtlmConfig {
 	public DomainInstance getDefaultDomainInstance(){
 		Set keySet=domainInstances.keySet();
 		Iterator iterator =keySet.iterator();
-		while(iterator.hasNext()){
-			return (DomainInstance) domainInstances.get(iterator.next());
+		if(keySet.size()==1){
+			while(iterator.hasNext()){
+				return (DomainInstance) domainInstances.get(iterator.next());
+			}
 		}
 		return null;
 	}
