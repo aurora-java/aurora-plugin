@@ -92,6 +92,7 @@ public class NtlmLogin extends AbstractEntry {
 			mLogger.log(Level.SEVERE,"NTLM authenticate fail",e);
 			return null;
 		}
+		mLogger.log(Level.INFO, "NTLM authenticate domain:"+ntlm.getDomain()+";Username:"+ntlm.getUsername()+";name:"+ntlm.getName());
 		return ntlm;
 	}
 }
