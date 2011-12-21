@@ -46,8 +46,8 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 
 	private static String TRUNCATE_WARNING = "DATA TRUNCATED";
 	
-	Map<String, CompositeMap> columnMap=new TreeMap<String, CompositeMap>();
-	Map <String,Map<String,String>> headMap=new TreeMap<String,Map<String,String>>();
+	Map<Integer, CompositeMap> columnMap=new TreeMap<Integer, CompositeMap>();
+	Map <Integer,Map<Integer,String>> headMap=new TreeMap<Integer,Map<Integer,String>>();
 	Map<String ,Object> rowMap;
 	
 	int headLevel;
@@ -146,13 +146,13 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 				col++;			
 				record = (CompositeMap) iterator.next();
 				title=getPrompt(record.getString("prompt"));
-				Map<String, String> map=headMap.get(Integer.toString(rownum));
+				Map<Integer, String> map=headMap.get(Integer.valueOf(rownum));
 				if(map!=null)					
-					map.put(Integer.toString(col), title);
+					map.put(Integer.valueOf(col), title);
 				else {
-					map =new TreeMap<String, String>();
-					map.put(Integer.toString(col), title);
-					headMap.put(Integer.toString(rownum), map);
+					map =new TreeMap<Integer, String>();
+					map.put(Integer.valueOf(col), title);
+					headMap.put(Integer.valueOf(rownum), map);
 				}
 
 				level=record.getInt("_level",0);
@@ -172,7 +172,7 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 						col=generatExcelHead(object,sheet,nextRow,col-1);
 					}					
 				}else{					
-					columnMap.put(Integer.toString(col), record);
+					columnMap.put(col, record);
 					int width=record.getInt("width", 100);
 					sw.setCellWidth(col+1, (short)(width/6));
 					if(level!=0){
@@ -189,18 +189,18 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 		int headerStyleIndex = styles.getHeaderStyle().getIndex();
 		try {			
 		    sw.beginSheet();		
-		    Set<String> keySet=headMap.keySet();
-		    Iterator<String> iterator=keySet.iterator();
-		    Map<String, String> map;
+		    Set<Integer> keySet=headMap.keySet();
+		    Iterator<Integer> iterator=keySet.iterator();
+		    Map<Integer, String> map;
 		    while(iterator.hasNext()){
-		    	String row=(String)iterator.next();
-		    	sw.insertRow(Integer.valueOf(row));
+		    	Integer row=(Integer)iterator.next();
+		    	sw.insertRow(row);
 		    	map=headMap.get(row);
-		    	Set<String> colSet=map.keySet();
-		    	Iterator<String> it=colSet.iterator();
+		    	Set<Integer> colSet=map.keySet();
+		    	Iterator<Integer> it=colSet.iterator();
 		    	while(it.hasNext()){
-		    		String col=(String)it.next();		    		
-		    		sw.createCell(Integer.valueOf(col), map.get(col),headerStyleIndex);
+		    		Integer col=(Integer)it.next();		    		
+		    		sw.createCell(col, map.get(col),headerStyleIndex);
 		    	}
 		    	sw.endRow();
 		    }
@@ -237,11 +237,11 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 		rowMap.put(name, value);
 	}
 	public void endRow() {	
-		Set<String> keySet=columnMap.keySet();
-		Iterator<String> iterator =keySet.iterator();
+		Set<Integer> keySet=columnMap.keySet();
+		Iterator<Integer> iterator =keySet.iterator();
 		try {
 			while(iterator.hasNext()){
-				String key=(String)iterator.next();						
+				Integer key=(Integer)iterator.next();						
 				Object att=rowMap.get(columnMap.get(key).getString("name"));
 				int col=Integer.valueOf(key);
 				if(col>excel2007.getColLimit())break;	
