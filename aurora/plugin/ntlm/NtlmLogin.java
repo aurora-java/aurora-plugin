@@ -64,8 +64,7 @@ public class NtlmLogin extends AbstractEntry {
 			context.putObject("/spnego/@user_name", username,true);
 			context.putObject("/spnego/@status_code", "Y",true);			
 			
-			runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));
-			mLogger.info("doLogin context:"	+ context.toXML());
+			runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));			
 		} else {			
 			if ("POST".equals(httpRequest.getMethod().toUpperCase())) {
 				if(msg!=null&&msg.startsWith("NTLM"))
