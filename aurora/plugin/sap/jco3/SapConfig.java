@@ -10,6 +10,10 @@ import uncertain.core.IGlobalInstance;
 
 public class SapConfig implements IGlobalInstance{	
 	String defaultSid;
+	public SapConfig(){
+		System.out.println("java.library.path:"+System.getProperty("java.library.path"));			
+	}
+	
 	public void addInstances(InstanceConfig[] instances) {	
 		JCo3Provider myProvider=new JCo3Provider();
 		InstanceConfig instance;
