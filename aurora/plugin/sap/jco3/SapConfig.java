@@ -11,7 +11,10 @@ import uncertain.core.IGlobalInstance;
 public class SapConfig implements IGlobalInstance{	
 	String defaultSid;
 	public SapConfig(){
-		System.out.println("java.library.path:"+System.getProperty("java.library.path"));			
+		String jarPath=JCoDestinationManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		jarPath=jarPath.substring(0, jarPath.lastIndexOf("/"));
+		System.setProperty("java.library.path", System.getProperty("java.library.path")+":"+jarPath);		
+		System.out.println(System.getProperty("java.library.path"));		
 	}
 	
 	public void addInstances(InstanceConfig[] instances) {	
