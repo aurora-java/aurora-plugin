@@ -58,12 +58,12 @@ public class NtlmLogin extends AbstractEntry {
 			if(ntlm==null){
 				return;
 			}
-			
+			String locale=httpRequest.getLocale().toString();
 			String username = ntlm.getUsername().toUpperCase();
 			mLogger.info("username:" + username);
 			context.putObject("/spnego/@user_name", username,true);
 			context.putObject("/spnego/@status_code", "Y",true);			
-			
+			context.putObject("/spnego/@locale", locale,true);
 			runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));			
 		} else {			
 			if ("POST".equals(httpRequest.getMethod().toUpperCase())) {
