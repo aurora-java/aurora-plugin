@@ -7,9 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import jcifs.smb.NtlmPasswordAuthentication;
 
-import aurora.service.ServiceContext;
 import aurora.service.ServiceInstance;
-import aurora.service.http.HttpServiceContext;
 import aurora.service.http.HttpServiceInstance;
 import uncertain.composite.CompositeMap;
 import uncertain.logging.ILogger;
@@ -42,9 +40,8 @@ public class NtlmLogin extends AbstractEntry {
 		
 		if (httpRequest.getSession().getAttribute("user_id") == null) {
 			mLogger.info("httpRequest Authorization:{"+msg+"}");
-			if(msg==null||!msg.startsWith("NTLM")){					
-				mLogger.info("excute procedure " + ntlmConfig.getProcedure());
-				context.putObject("/spnego/@service_name", svc.getName(),true);
+			if(msg==null||!msg.startsWith("NTLM")){				
+				context.putObject("/request/@service_name", svc.getName(),true);
 				runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));
 				Object result = context.getObject(ntlmConfig.getReturnPath());
 				if (result == null) {
@@ -54,7 +51,7 @@ public class NtlmLogin extends AbstractEntry {
 				}
 				
 				if (((CompositeMap) result).getChilds() != null) {
-					mLogger.info(context.getString("service_name") + " is not login required");					
+					mLogger.info(svc.getName() + " is not login required");					
 					return;
 				}
 			}
@@ -68,7 +65,8 @@ public class NtlmLogin extends AbstractEntry {
 			context.putObject("/spnego/@user_name", username,true);
 			context.putObject("/spnego/@status_code", "Y",true);			
 			context.putObject("/spnego/@locale", locale,true);
-			runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));			
+			runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));		
+			mLogger.info("excute procedure " + ntlmConfig.getProcedure());
 		} else {			
 			if ("POST".equals(httpRequest.getMethod().toUpperCase())) {
 				if(msg!=null&&msg.startsWith("NTLM"))
