@@ -7,7 +7,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import jcifs.smb.NtlmPasswordAuthentication;
 
+import aurora.service.ServiceContext;
 import aurora.service.ServiceInstance;
+import aurora.service.http.HttpServiceContext;
 import aurora.service.http.HttpServiceInstance;
 import uncertain.composite.CompositeMap;
 import uncertain.logging.ILogger;
@@ -39,8 +41,10 @@ public class NtlmLogin extends AbstractEntry {
 		String msg=httpRequest.getHeader("Authorization");
 		
 		if (httpRequest.getSession().getAttribute("user_id") == null) {
+			mLogger.info("httpRequest Authorization:{"+msg+"}");
 			if(msg==null||!msg.startsWith("NTLM")){					
 				mLogger.info("excute procedure " + ntlmConfig.getProcedure());
+				context.putObject("/spnego/@service_name", svc.getName(),true);
 				runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));
 				Object result = context.getObject(ntlmConfig.getReturnPath());
 				if (result == null) {
