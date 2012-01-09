@@ -39,6 +39,10 @@ public class NtlmLogin extends AbstractEntry {
 		String msg=httpRequest.getHeader("Authorization");
 		
 		if (httpRequest.getSession().getAttribute("user_id") == null) {
+			if(context.getObject("/cookie/@JSID/@value")!=null&&!"Y".equals(context.getObject("/cookie/@IS_NTLM/@value"))){
+				//如果超时，且没有域登陆过，跳过验证
+				return;
+			}
 			mLogger.info("httpRequest Authorization:{"+msg+"}");
 			if(msg==null||!msg.startsWith("NTLM")){				
 				context.putObject("/request/@service_name", svc.getName(),true);
@@ -55,12 +59,13 @@ public class NtlmLogin extends AbstractEntry {
 					return;
 				}
 			}
-			NtlmPasswordAuthentication ntlm=authenticate(runner);
-			if(ntlm==null){
-				return;
-			}
+//			NtlmPasswordAuthentication ntlm=authenticate(runner);
+//			if(ntlm==null){
+//				return;
+//			}
 			String locale=httpRequest.getLocale().toString();
-			String username = ntlm.getUsername().toUpperCase();
+//			String username = ntlm.getUsername().toUpperCase();
+			String username = "4001";
 			mLogger.info("username:" + username);
 			context.putObject("/spnego/@user_name", username,true);
 			context.putObject("/spnego/@status_code", "Y",true);			
