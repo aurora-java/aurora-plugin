@@ -64,7 +64,7 @@ public class NtlmLogin extends AbstractEntry {
 				return;
 			}
 			String locale=httpRequest.getLocale().toString();
-			String username = ntlm.getUsername().toUpperCase();
+			String username = ntlm.getUsername().toUpperCase();			
 			mLogger.info("username:" + username);
 			context.putObject("/spnego/@user_name", username,true);
 			context.putObject("/spnego/@status_code", "Y",true);			
@@ -89,15 +89,16 @@ public class NtlmLogin extends AbstractEntry {
 		try {
 			if ((ntlm = new NtlmAuthenticator(ntlmConfig).authenticate(
 					httpRequest, httpResponse)) == null) {
+				mLogger.log(Level.INFO,"runner is stop;ServiceName:"+svc.getName());
 				runner.stop();
 				return null;
 			}
 		} catch (Exception e) {
 			// 域验证不通过，跳入普通处理方式
-			mLogger.log(Level.SEVERE,"NTLM authenticate fail",e);
+			mLogger.log(Level.SEVERE,"NTLM authenticate fail;ServiceName:"+svc.getName(),e);
 			return null;
 		}
-		mLogger.log(Level.INFO, "NTLM authenticate domain:"+ntlm.getDomain()+";Username:"+ntlm.getUsername()+";name:"+ntlm.getName());
+		mLogger.log(Level.INFO, "NTLM authenticate domain:"+ntlm.getDomain()+";Username:"+ntlm.getUsername()+";name:"+ntlm.getName()+";IP:"+httpRequest.getRemoteHost()+"ServiceName:"+svc.getName());
 		return ntlm;
 	}
 }
