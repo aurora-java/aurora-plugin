@@ -26,46 +26,46 @@ public class SendMail {
 
 	public void check() {
 		if (smtpServer == null || "".equals(smtpServer)) {
-			throw new SendMailException("ÊÕ¼şÈËµØÖ·²»ÄÜÎª¿Õ");
+			throw new SendMailException("æ”¶ä»¶äººåœ°å€ä¸èƒ½ä¸ºç©º");
 		} else if (tfrom == null || "".equals(tfrom)) {
-			throw new SendMailException("·¢¼şÈË²»ÄÜÎª¿Õ²»ÄÜÎª¿Õ");
+			throw new SendMailException("å‘ä»¶äººä¸èƒ½ä¸ºç©ºä¸èƒ½ä¸ºç©º");
 		} else if (password == null || "".equals(password)) {
-			throw new SendMailException("·şÎñÆ÷ÃÜÂë²»ÄÜÎª¿Õ");
+			throw new SendMailException("æœåŠ¡å™¨å¯†ç ä¸èƒ½ä¸ºç©º");
 		} else if (tcontent == null || "".equals(tcontent)) {
-			throw new SendMailException("ÓÊ¼şÄÚÈİ²»ÄÜÎª¿Õ");
+			throw new SendMailException("é‚®ä»¶å†…å®¹ä¸èƒ½ä¸ºç©º");
 		} else if (tto == null || "".equals(tto)) {
-			throw new SendMailException("ÊÕ¼şÈËµØÖ·²»ÄÜÎª¿Õ");
+			throw new SendMailException("æ”¶ä»¶äººåœ°å€ä¸èƒ½ä¸ºç©º");
 		}
 	}
 
 	public void sendMail() throws Exception {
-		// JavaMailĞèÒªPropertiesÀ´´´½¨Ò»¸ösession¶ÔÏó¡£Ëü½«Ñ°ÕÒ×Ö·û´®"mail.smtp.host"£¬ÊôĞÔÖµ¾ÍÊÇ·¢ËÍÓÊ¼şµÄÖ÷»ú.
-		// Properties¶ÔÏó»ñÈ¡ÖîÈçÓÊ¼ş·şÎñÆ÷¡¢ÓÃ»§Ãû¡¢ÃÜÂëµÈĞÅÏ¢£¬ÒÔ¼°ÆäËû¿ÉÔÚÕû¸öÓ¦ÓÃ³ÌĞòÖĞ ¹²ÏíµÄĞÅÏ¢¡£
+		// JavaMailéœ€è¦Propertiesæ¥åˆ›å»ºä¸€ä¸ªsessionå¯¹è±¡ã€‚å®ƒå°†å¯»æ‰¾å­—ç¬¦ä¸²"mail.smtp.host"ï¼Œå±æ€§å€¼å°±æ˜¯å‘é€é‚®ä»¶çš„ä¸»æœº.
+		// Propertieså¯¹è±¡è·å–è¯¸å¦‚é‚®ä»¶æœåŠ¡å™¨ã€ç”¨æˆ·åã€å¯†ç ç­‰ä¿¡æ¯ï¼Œä»¥åŠå…¶ä»–å¯åœ¨æ•´ä¸ªåº”ç”¨ç¨‹åºä¸­ å…±äº«çš„ä¿¡æ¯ã€‚
 
 		Properties props = new Properties();
-		props.put("mail.smtp.host", smtpServer);// ´æ´¢·¢ËÍÓÊ¼ş·şÎñÆ÷µÄĞÅÏ¢
-		props.put("mail.smtp.auth", "true");// Í¬Ê±Í¨¹ıÑéÖ¤
+		props.put("mail.smtp.host", smtpServer);// å­˜å‚¨å‘é€é‚®ä»¶æœåŠ¡å™¨çš„ä¿¡æ¯
+		props.put("mail.smtp.auth", "true");// åŒæ—¶é€šè¿‡éªŒè¯
 		props.put("mail.smtp.port", port);
 
-		Session s = Session.getInstance(props, null);// ¸ù¾İÊôĞÔĞÂ½¨Ò»¸öÓÊ¼ş»á»°£¬null²ÎÊıÊÇÒ»ÖÖAuthenticator(ÑéÖ¤³ÌĞò)
-		// s.setDebug(true);// ÉèÖÃµ÷ÊÔ±êÖ¾,Òª²é¿´¾­¹ıÓÊ¼ş·şÎñÆ÷ÓÊ¼şÃüÁî£¬¿ÉÒÔÓÃ¸Ã·½·¨
-		// MessageÀà±íÊ¾µ¥¸öÓÊ¼şÏûÏ¢£¬ËüµÄÊôĞÔ°üÀ¨ÀàĞÍ£¬µØÖ·ĞÅÏ¢ºÍËù¶¨ÒåµÄÄ¿Â¼½á¹¹¡£
+		Session s = Session.getInstance(props, null);// æ ¹æ®å±æ€§æ–°å»ºä¸€ä¸ªé‚®ä»¶ä¼šè¯ï¼Œnullå‚æ•°æ˜¯ä¸€ç§Authenticator(éªŒè¯ç¨‹åº)
+		// s.setDebug(true);// è®¾ç½®è°ƒè¯•æ ‡å¿—,è¦æŸ¥çœ‹ç»è¿‡é‚®ä»¶æœåŠ¡å™¨é‚®ä»¶å‘½ä»¤ï¼Œå¯ä»¥ç”¨è¯¥æ–¹æ³•
+		// Messageç±»è¡¨ç¤ºå•ä¸ªé‚®ä»¶æ¶ˆæ¯ï¼Œå®ƒçš„å±æ€§åŒ…æ‹¬ç±»å‹ï¼Œåœ°å€ä¿¡æ¯å’Œæ‰€å®šä¹‰çš„ç›®å½•ç»“æ„ã€‚
 
-		Message message = new MimeMessage(s);// ÓÉÓÊ¼ş»á»°ĞÂ½¨Ò»¸öÏûÏ¢¶ÔÏó
-		Address from = new InternetAddress(tfrom);// ·¢¼şÈËµÄÓÊ¼şµØÖ·
-		message.setFrom(from);// ÉèÖÃ·¢¼şÈË
+		Message message = new MimeMessage(s);// ç”±é‚®ä»¶ä¼šè¯æ–°å»ºä¸€ä¸ªæ¶ˆæ¯å¯¹è±¡
+		Address from = new InternetAddress(tfrom);// å‘ä»¶äººçš„é‚®ä»¶åœ°å€
+		message.setFrom(from);// è®¾ç½®å‘ä»¶äºº
 
-		// Address to = new InternetAddress(tto);// ÊÕ¼şÈËµÄÓÊ¼şµØÖ·
+		// Address to = new InternetAddress(tto);// æ”¶ä»¶äººçš„é‚®ä»¶åœ°å€
 		message.addRecipients(Message.RecipientType.TO, InternetAddress
-				.parse(tto));// ÉèÖÃÊÕ¼şÈË,²¢ÉèÖÃÆä½ÓÊÕÀàĞÍÎªTO,»¹ÓĞ3ÖÖÔ¤¶¨ÒåÀàĞÍÈçÏÂ£º
+				.parse(tto));// è®¾ç½®æ”¶ä»¶äºº,å¹¶è®¾ç½®å…¶æ¥æ”¶ç±»å‹ä¸ºTO,è¿˜æœ‰3ç§é¢„å®šä¹‰ç±»å‹å¦‚ä¸‹ï¼š
 
 		if (cto != null && !"".equals(cto)) {
 			message.setRecipients(Message.RecipientType.CC, InternetAddress
-					.parse(cto));// ÉèÖÃ³­ËÍ
+					.parse(cto));// è®¾ç½®æŠ„é€
 		}
 
-		message.setSubject(ttitle);// ÉèÖÃÖ÷Ìâ
-		message.setSentDate(new Date());// ÉèÖÃ·¢ĞÅÊ±¼ä
+		message.setSubject(ttitle);// è®¾ç½®ä¸»é¢˜
+		message.setSentDate(new Date());// è®¾ç½®å‘ä¿¡æ—¶é—´
 		/*
 		 * try { message.setDataHandler(new DataHandler(new String(message
 		 * .getBytes("utf-8"), "utf-8"), "text/html;charset=utf-8")); } catch
@@ -78,15 +78,15 @@ public class SendMail {
 		mbp.setContent(tcontent, "text/html;charset=utf-8");
 		mp.addBodyPart(mbp);
 		message.setContent(mp);
-		message.saveChanges();// ´æ´¢ÓÊ¼şĞÅÏ¢
+		message.saveChanges();// å­˜å‚¨é‚®ä»¶ä¿¡æ¯
 		
-		// Transport ÊÇÓÃÀ´·¢ËÍĞÅÏ¢µÄ£¬
-		// ÓÃÓÚÓÊ¼şµÄÊÕ·¢´ò²Ù×÷¡£
+		// Transport æ˜¯ç”¨æ¥å‘é€ä¿¡æ¯çš„ï¼Œ
+		// ç”¨äºé‚®ä»¶çš„æ”¶å‘æ‰“æ“ä½œã€‚
 		Transport transport = null;
 		try {
 			transport = s.getTransport("smtp");
-			transport.connect(smtpServer, userName, password);// ÒÔsmtp·½Ê½µÇÂ¼ÓÊÏä
-			transport.sendMessage(message, message.getAllRecipients());// ·¢ËÍÓÊ¼ş,ÆäÖĞµÚ¶ş¸ö²ÎÊıÊÇËùÓĞÒÑÉèºÃµÄÊÕ¼şÈËµØÖ·
+			transport.connect(smtpServer, userName, password);// ä»¥smtpæ–¹å¼ç™»å½•é‚®ç®±
+			transport.sendMessage(message, message.getAllRecipients());// å‘é€é‚®ä»¶,å…¶ä¸­ç¬¬äºŒä¸ªå‚æ•°æ˜¯æ‰€æœ‰å·²è®¾å¥½çš„æ”¶ä»¶äººåœ°å€
 		} finally {
 			if (transport != null && transport.isConnected()) {
 				transport.close();
