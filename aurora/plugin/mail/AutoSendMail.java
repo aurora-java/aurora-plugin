@@ -33,7 +33,7 @@ public class AutoSendMail extends AbstractEntry implements IConfigurable {
 	public void run(ProcedureRunner runner) throws Exception {
 
 		ILogger logger = LoggingContext.getLogger("aurora.plugin.mail", registry);
-		logger.log(Level.INFO, "Accept to E-mail message, began sendind mail operation£¡");
+		logger.log(Level.INFO, "Accept to E-mail message, began sendind mail operation");
 		
 		CompositeMap map = runner.getContext();
 		SqlServiceContext svcContext = SqlServiceContext
