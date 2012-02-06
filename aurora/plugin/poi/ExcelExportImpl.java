@@ -115,13 +115,20 @@ public class ExcelExportImpl {
 			while (it.hasNext()) {
 				cell=row.createCell(col);
 				CompositeMap record = (CompositeMap) it.next();				
-				text=object.getString(record.getString("name"));					
+				Object value=object.get(record.getString("name"));					
 				columnstyle=(HSSFCellStyle) wb.createCellStyle();
 				columnstyle.setAlignment(getExcelAlign(record.getString("align")));
 				cell.setCellType(Cell.CELL_TYPE_STRING);
 				cell.setCellStyle(columnstyle);
-				if(text!=null)
-					cell.setCellValue(new HSSFRichTextString(text));					
+				if(value!=null){
+					if(value instanceof String){
+						cell.setCellValue(new HSSFRichTextString(value.toString()));
+					}
+					if(value instanceof java.lang.Long||value instanceof java.lang.Double||value instanceof java.math.BigDecimal){
+						cell.setCellValue(Double.parseDouble(value.toString()));
+					}
+				}
+										
 				if(!is_setwidth){
 					int width=record.getInt("width", 100);
 					sheet.setColumnWidth(col, (short)(width*35.7));
