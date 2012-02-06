@@ -124,7 +124,7 @@ public class ExcelExportImpl {
 					if(value instanceof String){
 						cell.setCellValue(new HSSFRichTextString(value.toString()));
 					}
-					if(value instanceof java.lang.Long||value instanceof java.lang.Double||value instanceof java.math.BigDecimal){
+					if(value instanceof java.lang.Number){
 						cell.setCellValue(Double.parseDouble(value.toString()));
 					}
 				}
