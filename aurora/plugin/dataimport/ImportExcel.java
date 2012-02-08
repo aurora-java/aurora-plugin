@@ -36,6 +36,7 @@ public class ImportExcel extends AbstractEntry {
 	public String separator = ",";
 	public String header_id;
 	public String user_id = "${/session/@user_id}";
+	public String template_code;
 	public String job_id;
 	public String attribute1;
 	public String attribute2;
@@ -48,7 +49,18 @@ public class ImportExcel extends AbstractEntry {
 	
 	public ImportExcel(UncertainEngine uncertainEngine){
 		mUncertainEngine=uncertainEngine;
+	}	
+	
+	public String getTemplate_code() {
+		return template_code;
 	}
+
+
+	public void setTemplate_code(String template_code) {
+		this.template_code = template_code;
+	}
+
+
 	public String getDataSourceName() {
 		return dataSourceName;
 	}
@@ -101,7 +113,10 @@ public class ImportExcel extends AbstractEntry {
 			cstm.setString(3, "NEW");
 			cstm.setString(4, user_id);
 			cstm.setString(5, fileName);
-			cstm.setNull(6, java.sql.Types.VARCHAR);
+			if(template_code == null)
+				cstm.setNull(6, java.sql.Types.VARCHAR);
+			else
+				cstm.setString(6, template_code);
 			if (attribute1 == null)
 				cstm.setNull(7, java.sql.Types.VARCHAR);
 			else
@@ -153,6 +168,7 @@ public class ImportExcel extends AbstractEntry {
 		user_id = TextParser.parse(user_id, context);
 		if (user_id == null && "".equals(user_id))
 			throw new IllegalArgumentException("user_id is undefined");
+		template_code= TextParser.parse(template_code, context);
 		job_id = TextParser.parse(job_id, context);
 		attribute1 = TextParser.parse(attribute1, context);
 		attribute2 = TextParser.parse(attribute2, context);
