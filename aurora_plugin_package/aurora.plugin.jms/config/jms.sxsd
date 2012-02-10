@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: linjinxiao  
+    $Date: 2012-2-10 下午3:41:12  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<sxsd:schema xmlns:p="uncertain.proc" xmlns:sxsd="http://www.uncertain-framework.org/schema/simple-schema" xmlns:jms="aurora.plugin.jms">
+    <sxsd:attributes/>
+    <sxsd:elements>
+        <sxsd:element name="jms:jms-message-dispatch" document="发送jms消息">
+            <sxsd:attributes>
+                <sxsd:attribute name="message" document="jms消息的内容"/>
+                <sxsd:attribute name="topic" document="消息主题"/>
+            </sxsd:attributes>
+            <sxsd:extensions>
+                <sxsd:extension base="p:AbstractAction"/>
+            </sxsd:extensions>
+        </sxsd:element>
+    </sxsd:elements>
+    <sxsd:categories/>
+    <sxsd:types/>
+    <sxsd:editors/>
+    <sxsd:wizards/>
+</sxsd:schema>

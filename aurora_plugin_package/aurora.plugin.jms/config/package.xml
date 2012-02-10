@@ -1,2 +1,5 @@
 <package name="aurora.plugin.jms">
+	<schema-files>
+		<schema-file path="jms.sxsd"/>
+	</schema-files>
 </package>
