@@ -199,13 +199,15 @@ public class XLSXParse {
                     case FORMULA:
                         // A formula could result in a string value,
                         // so always add double-quote characters.
-                        thisStr = '"' + value.toString() + '"';
+//                        thisStr = '"' + value.toString() + '"';
+                    	thisStr =value.toString();
                         break;
 
                     case INLINESTR:
                         // TODO: have seen an example of this, so it's untested.
                         XSSFRichTextString rtsi = new XSSFRichTextString(value.toString());
-                        thisStr = '"' + rtsi.toString() + '"';
+//                        thisStr = '"' + rtsi.toString() + '"';
+                        thisStr =rtsi.toString();
                         break;
 
                     case SSTINDEX:
@@ -213,7 +215,8 @@ public class XLSXParse {
                         try {
                             int idx = Integer.parseInt(sstIndex);
                             XSSFRichTextString rtss = new XSSFRichTextString(sharedStringsTable.getEntryAt(idx));
-                            thisStr = '"' + rtss.toString() + '"';
+//                            thisStr = '"' + rtss.toString() + '"';
+                            thisStr =rtss.toString();
                         }
                         catch (NumberFormatException ex) {
                             output.println("Failed to parse SST index '" + sstIndex + "': " + ex.toString());

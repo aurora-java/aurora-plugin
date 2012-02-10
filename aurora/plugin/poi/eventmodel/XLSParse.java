@@ -157,8 +157,9 @@ public class XLSParse implements HSSFListener {
 					thisStr = formatListener.formatNumberDateCell(frec);
 				}
 			} else {
-				thisStr = '"' +
-					HSSFFormulaParser.toFormulaString(stubWorkbook, frec.getParsedExpression()) + '"';
+//				thisStr = '"' +
+//					HSSFFormulaParser.toFormulaString(stubWorkbook, frec.getParsedExpression()) + '"';
+				thisStr=HSSFFormulaParser.toFormulaString(stubWorkbook, frec.getParsedExpression());
 			}
 			break;
 		case StringRecord.sid:
@@ -177,7 +178,8 @@ public class XLSParse implements HSSFListener {
 
 			thisRow = lrec.getRow();
 			thisColumn = lrec.getColumn();
-			thisStr = '"' + lrec.getValue() + '"';
+//			thisStr = '"' + lrec.getValue() + '"';
+			thisStr = lrec.getValue();
 			break;
 		case LabelSSTRecord.sid:
 			LabelSSTRecord lsrec = (LabelSSTRecord) record;
@@ -185,9 +187,11 @@ public class XLSParse implements HSSFListener {
 			thisRow = lsrec.getRow();
 			thisColumn = lsrec.getColumn();
 			if(sstRecord == null) {
-				thisStr = '"' + "(No SST Record, can't identify string)" + '"';
+//				thisStr = '"' + "(No SST Record, can't identify string)" + '"';
+				thisStr ="(No SST Record, can't identify string)";
 			} else {
-				thisStr = '"' + sstRecord.getString(lsrec.getSSTIndex()).toString() + '"';
+//				thisStr = '"' + sstRecord.getString(lsrec.getSSTIndex()).toString() + '"';
+				thisStr = sstRecord.getString(lsrec.getSSTIndex()).toString();
 			}
 			break;
 		case NoteRecord.sid:
@@ -196,7 +200,8 @@ public class XLSParse implements HSSFListener {
 			thisRow = nrec.getRow();
 			thisColumn = nrec.getColumn();
 			// TODO: Find object to match nrec.getShapeId()
-			thisStr = '"' + "(TODO)" + '"';
+//			thisStr = '"' + "(TODO)" + '"';
+			thisStr ="(TODO)";
 			break;
 		case NumberRecord.sid:
 			NumberRecord numrec = (NumberRecord) record;
@@ -212,7 +217,8 @@ public class XLSParse implements HSSFListener {
 
 			thisRow = rkrec.getRow();
 			thisColumn = rkrec.getColumn();
-			thisStr = '"' + "(TODO)" + '"';
+//			thisStr = '"' + "(TODO)" + '"';
+			thisStr = "(TODO)";
 			break;
 		default:
 			break;
