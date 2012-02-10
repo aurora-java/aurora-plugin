@@ -41,14 +41,16 @@ public class IDocServer {
 	private DataSource dataSource;
 	private int server_id = -1;
 	private boolean isDeleteFileImmediately;
+	private boolean isEnableInterfaceHistory;
 	private ServerConnection reConnect;
 	private boolean shutdownByCommand = false;
-	public IDocServer(String idocDir, DataSource ds, String serverName, boolean isDeleteFileImmediately,
+	public IDocServer(String idocDir, DataSource ds, String serverName, boolean isDeleteFileImmediately,boolean isEnableInterfaceHistory,
 			int reconnectTime, int maxReconnectTime) {
 		this.idocDir = idocDir;
 		this.dataSource = ds;
 		this.serverName = serverName;
 		this.isDeleteFileImmediately = isDeleteFileImmediately;
+		this.isEnableInterfaceHistory = isEnableInterfaceHistory;
 		reConnect = new ServerConnection(this,reconnectTime, maxReconnectTime);
 	}
 	public void start(){
@@ -224,7 +226,8 @@ public class IDocServer {
 	}
 
 	public synchronized void addBackupFile(IDocFile file) {
-		backupFils.addLast(file);
+		if(isEnableInterfaceHistory)
+			backupFils.addLast(file);
 	}
 
 	public synchronized IDocFile getBckupFile() {

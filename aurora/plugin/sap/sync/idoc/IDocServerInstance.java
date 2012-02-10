@@ -17,6 +17,7 @@ public class IDocServerInstance implements IGlobalInstance {
 	public static final String PLUGIN = "aurora.plugin.sap.sync.idoc";
 	public static final String SEPARATOR = ",";
 	public String DeleteImmediately = "Y";
+	public String INTERFACE_HISTORY_FLAG = "Y";
 	public String SERVER_NAME_LIST;
 	public String IDOC_DIR;
 	public String RECONNECT_TIME = "60000";// 1 minute
@@ -34,16 +35,16 @@ public class IDocServerInstance implements IGlobalInstance {
 	public void onInitialize() throws Exception {
 		initLoggerUtil();
 		run();
-		Runnable shutdownHook = new Runnable() {  
-	        public void run() {  
-	        	try {
+		Runnable shutdownHook = new Runnable() {
+			public void run() {
+				try {
 					onShutdown();
 					System.out.println("shutdown idoc finished!");
 				} catch (Exception e) {
 					e.printStackTrace();
-				} 
-	        }  
-	    }; 
+				}
+			}
+		};
 		Runtime.getRuntime().addShutdownHook(new Thread(shutdownHook));
 	}
 
@@ -90,8 +91,8 @@ public class IDocServerInstance implements IGlobalInstance {
 		for (int i = 0; i < servers.length; i++) {
 			String serverName = servers[i];
 			try {
-				IDocServer server = new IDocServer(IDOC_DIR, ds, serverName, isDeleteFileImmediately(), reconnectTime,
-						maxReconnectTime);
+				IDocServer server = new IDocServer(IDOC_DIR, ds, serverName, isDeleteFileImmediately(),
+						isEnableInterfaceHistory(), reconnectTime, maxReconnectTime);
 				server.start();
 				serverList.add(server);
 			} catch (Throwable e) {
@@ -102,5 +103,9 @@ public class IDocServerInstance implements IGlobalInstance {
 
 	public boolean isDeleteFileImmediately() {
 		return "Y".equals(DeleteImmediately);
+	}
+
+	public boolean isEnableInterfaceHistory() {
+		return "Y".equals(INTERFACE_HISTORY_FLAG);
 	}
 }

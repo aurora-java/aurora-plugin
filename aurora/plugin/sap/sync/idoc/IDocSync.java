@@ -59,7 +59,7 @@ public class IDocSync extends Thread {
 				CompositeMap iDocData = loader.loadByFile(file.getPath());
 				if (iDocData.getChilds() == null)
 					return header_id;
-				iDocServer.getDbUtil().setConnectionAutoCommit(false);
+				//iDocServer.getDbUtil().setConnectionAutoCommit(false);
 				for (Iterator it = iDocData.getChildIterator(); it.hasNext();) {
 					CompositeMap idoc_node = (CompositeMap) it.next();
 					if (idoc_node == null || idoc_node.getChildIterator() == null || idoc_node.getChilds().size() < 2) {
