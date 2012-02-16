@@ -1,4 +1,4 @@
-﻿package aurora.plugin.bill99;
+package aurora.plugin.bill99;
 
 /**
  * <p>Title: </p>
