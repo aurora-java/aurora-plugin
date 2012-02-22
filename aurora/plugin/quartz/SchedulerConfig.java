@@ -19,7 +19,7 @@ public class SchedulerConfig implements IGlobalInstance {
 	public static final String KEY_UE = "IObjectRegistry";
 	public static final String LOGGING_TOPIC = "aurora.plugin.quartz";
 
-	private IObjectRegistry registry;
+	private static IObjectRegistry registry;
 	SchedulerFactory schedulerFactory;
 	Scheduler scheduler;
 
@@ -40,6 +40,10 @@ public class SchedulerConfig implements IGlobalInstance {
 		return (IObjectRegistry) m.get(KEY_UE);
 	}
 
+	public static IObjectRegistry getObjectRegistry() {
+		return registry;
+	}
+	
 	public JobDetail[] getJobs() {
 		return jobs;
 	}
