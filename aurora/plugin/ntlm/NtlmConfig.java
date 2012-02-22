@@ -12,6 +12,7 @@ public class NtlmConfig {
 	public String returnPath;
 	CompositeMap domainInstances;
 	IObjectRegistry mObjectRegistry;
+	boolean enableBasic=false;
 
 	public NtlmConfig(IObjectRegistry registry) {
 		mObjectRegistry = registry;
@@ -24,7 +25,11 @@ public class NtlmConfig {
 	public void onInitialize() {
 		mObjectRegistry.registerInstance(NtlmConfig.class, this);
 	}
-
+	
+	public CompositeMap getDomainInstances(){
+		return domainInstances;
+	}
+	
 	public DomainInstance getDomainInstance(String domain) {
 		return (DomainInstance) domainInstances.get(domain);
 	}
@@ -68,5 +73,14 @@ public class NtlmConfig {
 
 	public void setReturnPath(String returnPath) {
 		this.returnPath = returnPath;
+	}
+
+	public boolean getEnableBasic() {
+		return enableBasic;
+	}
+
+	public void setEnableBasic(boolean enableBasic) {
+		this.enableBasic = enableBasic;
 	}	
+	
 }

@@ -1,5 +1,6 @@
 package aurora.plugin.ntlm;
 
+import java.io.IOException;
 import java.util.logging.Level;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,9 +43,10 @@ public class NtlmLogin extends AbstractEntry {
 			if(context.getObject("/cookie/@JSID/@value")!=null&&!"Y".equals(context.getObject("/cookie/@IS_NTLM/@value"))){
 				//如果超时，且没有域登陆过，跳过验证
 				return;
-			}
+			}			
+			//如果不需要验证登录，则跳过验证
 			mLogger.info("httpRequest Authorization:{"+msg+"}");
-			if(msg==null||!msg.startsWith("NTLM")){				
+			if(msg==null||!msg.startsWith("NTLM")){
 				context.putObject("/request/@service_name", svc.getName(),true);
 				runner.call(procedureManager.loadProcedure(ntlmConfig.getProcedure()));
 				Object result = context.getObject(ntlmConfig.getReturnPath());
@@ -52,13 +54,14 @@ public class NtlmLogin extends AbstractEntry {
 					mLogger.log(Level.SEVERE, ntlmConfig.getReturnPath()
 							+ " is null");
 					return;
-				}
+				}				
 				
 				if (((CompositeMap) result).getChilds() != null) {
 					mLogger.info(svc.getName() + " is not login required");					
 					return;
 				}
-			}
+			}			
+			
 			NtlmPasswordAuthentication ntlm=authenticate(runner);
 			if(ntlm==null){
 				return;
@@ -79,13 +82,14 @@ public class NtlmLogin extends AbstractEntry {
 		}
 	}
 
-	NtlmPasswordAuthentication authenticate(ProcedureRunner runner) {
+	NtlmPasswordAuthentication authenticate(ProcedureRunner runner) throws IOException {
 		ILogger mLogger = LoggingContext.getLogger("aurora.plugin.ntlm",mObjectRegistry);	
 		NtlmPasswordAuthentication ntlm;
 		HttpServiceInstance svc = (HttpServiceInstance) ServiceInstance
 				.getInstance(runner.getContext());
 		HttpServletRequest httpRequest = svc.getRequest();
 		HttpServletResponse httpResponse = svc.getResponse();
+		String realm;
 		try {
 			if ((ntlm = new NtlmAuthenticator(ntlmConfig).authenticate(
 					httpRequest, httpResponse)) == null) {
@@ -93,10 +97,31 @@ public class NtlmLogin extends AbstractEntry {
 				runner.stop();
 				return null;
 			}
-		} catch (Exception e) {
-			// 域验证不通过，跳入普通处理方式
-			mLogger.log(Level.SEVERE,"NTLM authenticate fail;ServiceName:"+svc.getName(),e);
+		}catch(NtlmException ntlmException){
+			mLogger.log(Level.WARNING,"NTLM authenticate fail;ServiceName:"+svc.getName(),ntlmException);			
+			if(ntlmConfig.getEnableBasic()){
+				realm="Ntlm Auth failure,Please use the basic authentication";
+				httpResponse.addHeader( "WWW-Authenticate", "Basic realm=\"" +
+	                    realm + "\"");
+				httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				httpResponse.setContentLength(0);
+				httpResponse.flushBuffer();
+				runner.stop();
+			}			
 			return null;
+		}catch (Exception e) {
+			// 域验证不通过，跳入普通处理方式
+			mLogger.log(Level.WARNING,"NTLM authenticate fail;ServiceName:"+svc.getName(),e);
+			if(ntlmConfig.getEnableBasic()){
+				realm=e.getMessage();
+				httpResponse.addHeader( "WWW-Authenticate", "Basic realm=\"" +
+	                    realm + "\"");
+				httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				httpResponse.setContentLength(0);
+				httpResponse.flushBuffer();
+				runner.stop();
+			}			
+		    return null;
 		}
 		mLogger.log(Level.INFO, "NTLM authenticate domain:"+ntlm.getDomain()+";Username:"+ntlm.getUsername()+";name:"+ntlm.getName()+";IP:"+httpRequest.getRemoteHost()+"ServiceName:"+svc.getName());
 		return ntlm;

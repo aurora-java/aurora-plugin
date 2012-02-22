@@ -1,10 +1,14 @@
 package aurora.plugin.ntlm;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import uncertain.composite.CompositeMap;
 
 import jcifs.Config;
 import jcifs.UniAddress;
@@ -12,17 +16,20 @@ import jcifs.http.NtlmSsp;
 import jcifs.ntlmssp.Type1Message;
 import jcifs.ntlmssp.Type3Message;
 import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbAuthException;
 import jcifs.smb.SmbSession;
 import jcifs.util.Base64;
 
 public class NtlmAuthenticator {
 	private String defaultDomain;
 	private String domainController;
-
+	private String realm;
+	private boolean offerBasic;
 	NtlmConfig ntlmConfig;
 
 	public NtlmAuthenticator(NtlmConfig ntlmConfig) {
 		this.ntlmConfig = ntlmConfig;
+		offerBasic=ntlmConfig.getEnableBasic();
 	}
 
 	public NtlmPasswordAuthentication authenticate(HttpServletRequest req,
@@ -48,8 +55,9 @@ public class NtlmAuthenticator {
 			}else	{
 				domainInstance = (DomainInstance) this.ntlmConfig.getDomainInstance(defaultDomain.toUpperCase());
 			}			
-			if (domainInstance == null)
-				throw new RuntimeException("DomainInstance is null;defaultDomain:"+defaultDomain+";type1:"+type1 +";type3:"+type3);
+			if (domainInstance == null){							
+				throw new NtlmException("DomainInstance is null;defaultDomain:"+defaultDomain+";type1:"+type1 +";type3:"+type3);
+			}
 			domainController=domainInstance.getDomainController();
 			
 			Config.setProperty("jcifs.smb.client.domain", domainInstance.getDomain());
@@ -67,12 +75,48 @@ public class NtlmAuthenticator {
 
 			SmbSession.logon(dc, ntlm);
 			return ntlm;
-		} else {
-			resp.setHeader("WWW-Authenticate", "NTLM");
-			resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			resp.setContentLength(0);
-			resp.flushBuffer();
-			return null;
+		}else if(msg != null && msg.startsWith("Basic ") && offerBasic){
+			String auth = new String(Base64.decode(msg.substring(6)),
+            "US-ASCII");
+		    int index = auth.indexOf(':');
+		    String user = (index != -1) ? auth.substring(0, index) : auth;
+		    String password = (index != -1) ? auth.substring(index + 1) :
+		            "";
+		    index = user.indexOf('\\');
+		    if (index == -1) index = user.indexOf('/');		   
+		    user = (index != -1) ? user.substring(index + 1) : user;
+		    CompositeMap domianMap=this.ntlmConfig.getDomainInstances();
+		    Set keySet=domianMap.keySet();
+		    Iterator iterator =keySet.iterator();
+		    while(iterator.hasNext()){
+		    	DomainInstance instance=(DomainInstance) domianMap.get(iterator.next());
+		    	Config.setProperty("jcifs.smb.client.domain", instance.getDomain());
+				Config.setProperty("jcifs.smb.client.username", instance.getUserName());
+				Config.setProperty("jcifs.smb.client.password", instance.getPassword());
+		    	defaultDomain=instance.getDomain();
+		    	domainController=instance.getDomainController();
+		    	String domain = (index != -1) ? user.substring(0, index) :
+			            defaultDomain;
+				ntlm = new NtlmPasswordAuthentication(domain, user, password);
+				dc = UniAddress.getByName( domainController, true);
+				try{
+					SmbSession.logon(dc, ntlm);
+					return ntlm;
+				}catch(SmbAuthException e){	
+					e.printStackTrace();
+					continue;
+				}				
+		    }				
+		} 
+		resp.setHeader("WWW-Authenticate", "NTLM");
+		if(offerBasic){
+			realm="Basic Authenticate Logon failure: unknown user name or bad password";
+			resp.addHeader( "WWW-Authenticate", "Basic realm=\"" +
+                    realm + "\"");
 		}
+		resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		resp.setContentLength(0);
+		resp.flushBuffer();
+		return null;		
 	}	
 }
