@@ -177,11 +177,23 @@ public class ImportExcel extends AbstractEntry {
 		attribute5 = TextParser.parse(attribute5, context);
 	}
 
-	public void saveLine(CompositeMap data, int rownum) throws SQLException {
-		StringBuffer lineSql = new StringBuffer("fnd_interface_load_pkg.ins_fnd_interface_lines(?,?,?,?,?,?,?");
+	public void saveLine(CompositeMap data, int rownum) throws SQLException {		
 		if (data.getLong("maxCell") == null)
-			return;
+			return;		
 		int maxcell = data.getInt("maxCell");
+		boolean is_null=true;
+		
+		for (int i = 0; i < maxcell; i++) {
+			String valueString = data.getString("C" + i);
+			if(valueString!=null||!"".equals(valueString)){
+				is_null=false;
+				break;
+			}				
+		}
+		//过滤空行
+		if(is_null)
+			return;		
+		StringBuffer lineSql = new StringBuffer("fnd_interface_load_pkg.ins_fnd_interface_lines(?,?,?,?,?,?,?");
 		for (int i = 0; i < maxcell; i++) {
 			lineSql.append(",?");
 		}
