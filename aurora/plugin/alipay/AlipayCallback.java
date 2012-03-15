@@ -24,7 +24,6 @@ public class AlipayCallback extends AbstractEntry{
 		request.setCharacterEncoding("UTF-8");
 		ServiceContext service = ServiceContext.createServiceContext(context);
 		CompositeMap model = service.getModel();
-		System.out.println("--------------返回界面----------");
 		//获取支付宝GET过来反馈信息
 		Map<String,String> params = new HashMap<String,String>();
 		Map requestParams = request.getParameterMap();
@@ -38,7 +37,6 @@ public class AlipayCallback extends AbstractEntry{
 			}
 			//乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
 			//valueStr = new String(valueStr.getBytes("ISO-8859-1"), "UTF-8");
-			System.out.println("name="+name+", valueStr="+valueStr);
 			params.put(name, valueStr);
 		}
 		//对支付宝反馈回来的信息进行校验
@@ -66,9 +64,6 @@ public class AlipayCallback extends AbstractEntry{
             out.close();
 		}
 
-		System.out.println("--------------返回结果----------");
-		System.out.println(result);
-		System.out.println("--------------返回结果----------");
 		model.put("result", result);
 	}
 
