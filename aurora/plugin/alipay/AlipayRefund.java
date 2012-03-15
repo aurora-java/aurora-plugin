@@ -30,7 +30,6 @@ public class AlipayRefund extends AbstractEntry {
 		CompositeMap model = service.getModel();
 		
 		String batch_no=getValue(context,getBatch_no());
-		System.out.println("batch_no"+batch_no);
 		//batch_no的格式为：退款日期（8位）+流水号（3～24位）。
 		String date_batch_no=AlipayUtil.getBatchNO(batch_no);
 		//把请求参数打包成数组
