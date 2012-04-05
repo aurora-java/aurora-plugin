@@ -96,4 +96,8 @@ public class MemcachedClientFactory implements INamedCacheFactory, IConfigureLis
         mDefaultWrapper = null;
     }
 
+	public void setNamedCache(String name, ICache cache) {
+		// not support this action
+	}
+
 }
