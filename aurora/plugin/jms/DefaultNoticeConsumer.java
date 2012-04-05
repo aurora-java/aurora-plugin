@@ -2,6 +2,8 @@ package aurora.plugin.jms;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -15,43 +17,38 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
+import aurora.application.features.msg.IMessage;
+import aurora.application.features.msg.IMessageListener;
+import aurora.application.features.msg.IMessageStub;
+import aurora.application.features.msg.INoticerConsumer;
+
 import uncertain.exception.BuiltinExceptionFactory;
-import uncertain.exception.ConfigurationFileException;
 import uncertain.exception.GeneralException;
 import uncertain.logging.ILogger;
 import uncertain.logging.LoggingContext;
 import uncertain.ocm.AbstractLocatableObject;
 import uncertain.ocm.IObjectRegistry;
-import aurora.application.features.msg.Event;
-import aurora.application.features.msg.IConsumer;
-import aurora.application.features.msg.IMessage;
-import aurora.application.features.msg.IMessageHandler;
-import aurora.application.features.msg.IMessageStub;
+import uncertain.util.resource.ILocatable;
 
-public class Consumer extends AbstractLocatableObject implements MessageListener,ExceptionListener,IConsumer {
-	
-	private IObjectRegistry registry;
-	
+public class DefaultNoticeConsumer extends AbstractLocatableObject implements INoticerConsumer,MessageListener,ExceptionListener {
 	private String topic;
 	private String client;
-	private Event[] events;
-	
-	private Map<String,String> eventMap = new HashMap<String,String>(); 
-	private ILogger logger;
 	private Session session;
 	private Connection connection;
-	private MessageConsumer messageConsumer;	
-	private JMSStub jmsStub;
-	
-    public Consumer(IObjectRegistry registry) {
+	private MessageConsumer messageConsumer;
+	private Map<String,List<IMessageListener>> messageListeners = new HashMap<String,List<IMessageListener>>(); 
+	private ILogger logger;
+	private IObjectRegistry registry;
+    public DefaultNoticeConsumer(IObjectRegistry registry) {
         this.registry = registry;
     }
+
+	
 	public void init(IMessageStub stub) throws Exception {
 		if(!(stub instanceof JMSStub)){
 			throw new IllegalArgumentException("The IMessageStub is not IJMSMessageStub!");
 		}
-		jmsStub =(JMSStub)stub;
-		
+		JMSStub jmsStub =(JMSStub)stub;
 		if(topic ==null){
 			throw BuiltinExceptionFactory.createAttributeMissing(this, "topic");
 		}
@@ -78,25 +75,25 @@ public class Consumer extends AbstractLocatableObject implements MessageListener
 	}
 	public void onMessage(Message message) {
 		if(!(message instanceof TextMessage)){
-			throw new GeneralException(MessageCodes.MESSAGE_TYPE_ERROR, new Object[]{TextMessage.class.getName(),message.getClass().getCanonicalName()}, this);
+			ILocatable locatable = null;
+			throw new GeneralException(MessageCodes.MESSAGE_TYPE_ERROR, new Object[]{TextMessage.class.getName(),message.getClass().getCanonicalName()}, locatable);
 		}
-		TextMessage textMessage = (TextMessage)message;
 		String messageText = null;
 		try {
-			messageText = (textMessage).getText();
+			messageText = ((TextMessage)message).getText();
 		} catch (JMSException e) {
 			throw new GeneralException(MessageCodes.JMSEXCEPTION_ERROR, new Object[]{e.getMessage()}, e);
 		}
-		String handlerName = (String)eventMap.get(messageText);
-		if(handlerName != null){
-			IMessageHandler handler = (IMessageHandler)jmsStub.getMessageHandler(handlerName);
-			if(handler == null){
-				ConfigurationFileException ex = new ConfigurationFileException(MessageCodes.HANDLER_NOT_FOUND_ERROR, new Object[]{handlerName}, this);
-				logger.log(Level.SEVERE,"Error when handle jsm message", ex);
-				throw ex;
-				
+		List<IMessageListener> listeners = messageListeners.get(messageText);
+		if(listeners != null){
+			for(IMessageListener l:listeners){
+				try {
+					l.notice(new JMSMessage((TextMessage)message));
+				} catch (Exception e) {
+					logger.log(Level.SEVERE, "Listener:"+l.toString()+" occur exception.", e);
+					throw new RuntimeException("Listener:"+l.toString()+" occur exception.",e);
+				}
 			}
-			handler.onMessage(new JMSMessage(textMessage));
 		}
 		
 	}
@@ -115,19 +112,7 @@ public class Consumer extends AbstractLocatableObject implements MessageListener
 	public Session getSession() {
 		return this.session;
 	}
-	public void setEvents(Event[] events) {
-		this.events = events;
-		if(events != null){
-			for (int i = 0; i < events.length; i++) {
-				Event event = events[i];
-				if(event.getHandler() != null)
-					eventMap.put(event.getMessage(), event.getHandler());
-			}
-		}
-	}
-	public Event[] getEvents() {
-		return events;
-	}
+
 	public String getClient() {
 		return client;
 	}
@@ -141,5 +126,26 @@ public class Consumer extends AbstractLocatableObject implements MessageListener
 	public void onException(JMSException paramJMSException) {
 		paramJMSException.printStackTrace();
 		logger.log(Level.SEVERE,"JMSException:",paramJMSException);
+	}
+
+
+	public void addListener(String message, IMessageListener listener) {
+		List<IMessageListener> listeners = messageListeners.get(message);
+		if(listeners == null){
+			listeners = new LinkedList<IMessageListener>();
+			messageListeners.put(message, listeners);
+		}
+		if(!listeners.contains(listener))
+			listeners.add(listener);
+	}
+
+
+	public void removeListener(String message, IMessageListener listener) {
+		List<IMessageListener> listeners = messageListeners.get(message);
+		if(listeners == null){
+			return;
+		}
+		listeners.remove(listener);
+		
 	}
 }
