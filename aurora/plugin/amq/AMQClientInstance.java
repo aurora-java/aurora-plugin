@@ -4,22 +4,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Message;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-import aurora.plugin.jms.Consumer;
-import aurora.plugin.jms.IMessageHandler;
-
 import uncertain.composite.CompositeMap;
+import uncertain.core.ILifeCycle;
 import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.exception.MessageFactory;
 import uncertain.logging.ILogger;
 import uncertain.logging.LoggingContext;
-import uncertain.ocm.IConfigurable;
+import uncertain.ocm.AbstractLocatableObject;
 import uncertain.ocm.IObjectRegistry;
+import aurora.application.features.msg.IConsumer;
+import aurora.application.features.msg.IMessage;
+import aurora.application.features.msg.IMessageDispatcher;
+import aurora.application.features.msg.IMessageHandler;
+import aurora.application.features.msg.IMessageStub;
+import aurora.plugin.jms.JMSStub;
 
-public class AMQClientInstance implements IConfigurable{
+public class AMQClientInstance extends AbstractLocatableObject implements ILifeCycle,JMSStub {
 	/**
 	 * 配置样本
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -38,34 +45,47 @@ public class AMQClientInstance implements IConfigurable{
 	 * 
 	 */
 	public static final String PLUGIN = "aurora.plugin.amq";
+	private IMessageDispatcher[] mMessageDispatchers;
 	private IMessageHandler[] mMessageHandlers;
-	private Consumer[] consumers;
-	private CompositeMap config;
+	private IConsumer[] consumers;
 	private String url;
+	
 	private IObjectRegistry registry;
 	public ILogger logger;
-	private Map handlersMap = new HashMap();
+	private Map<String,IMessageHandler> handlersMap = new HashMap<String,IMessageHandler>();
+	private Map<String,IMessageDispatcher> dispatchersMap = new HashMap<String,IMessageDispatcher>();
 	private ActiveMQConnectionFactory factory;
+	private Map<String,IConsumer> consumerMap;
+	private boolean inited = false;
+	
 	public AMQClientInstance(IObjectRegistry registry) {
 		this.registry = registry;
 	}
 	
-	// Framework function
-	public void onInitialize() throws Exception {
+	public boolean startup() {
+		if(inited)
+			return true;
 		logger = LoggingContext.getLogger(PLUGIN, registry);
 		MessageFactory.loadResource("resources.aurora_plugin_amq");
 		if(url == null){
-			BuiltinExceptionFactory.createOneAttributeMissing(config.asLocatable(), "url");
+			BuiltinExceptionFactory.createOneAttributeMissing(this, "url");
 		}
 		factory = new ActiveMQConnectionFactory(url);
-		registry.registerInstance(ConnectionFactory.class, factory);
 		// javax.jms.QueueConnectionFactory, javax.jms.TopicConnectionFactory
+		registry.registerInstance(ConnectionFactory.class, factory);
+		consumerMap = new HashMap();
+		//init consumer config
+		if(consumers != null){
+			for(int i= 0;i<consumers.length;i++){
+				consumerMap.put(consumers[i].getTopic(), consumers[i]);
+			}
+		}
 		(new Thread(){
 			public void run(){
 				if(consumers != null){
 					for(int i= 0;i<consumers.length;i++){
 						try {
-							consumers[i].init(factory,handlersMap);
+							consumers[i].init(AMQClientInstance.this);
 						} catch (Exception e) {
 							logger.log(Level.SEVERE,"init jms consumers failed!",e);
 						}
@@ -82,7 +102,9 @@ public class AMQClientInstance implements IConfigurable{
 				}
 			}
 		});
-		
+		registry.registerInstance(IMessageStub.class, this);
+		inited = true;
+		return true;
 	}
 	public void onShutdown() throws Exception{
 		if(consumers != null){
@@ -94,11 +116,7 @@ public class AMQClientInstance implements IConfigurable{
 	public IMessageHandler getMessageHandler(String name){
 		return (IMessageHandler)handlersMap.get(name);
 	}
-	public void beginConfigure(CompositeMap config) {
-		this.config = config;
-	}
-	public void endConfigure() {
-	}
+
 	public String getUrl() {
 		return url;
 	}
@@ -115,10 +133,19 @@ public class AMQClientInstance implements IConfigurable{
 			handlersMap.put(messageHandlers[i].getName(), messageHandlers[i]);
 		}
 	}
-	public Consumer[] getConsumers() {
+	public IMessageDispatcher[] getMessageDispatchers() {
+		return mMessageDispatchers;
+	}
+	public void setMessageDispatchers(IMessageDispatcher[] messageDispatchers) {
+		this.mMessageDispatchers = messageDispatchers;
+		for(int i= 0;i<messageDispatchers.length;i++){
+			dispatchersMap.put(messageDispatchers[i].getTopic(), messageDispatchers[i]);
+		}
+	}
+	public IConsumer[] getConsumers() {
 		return consumers;
 	}
-	public void setConsumers(Consumer[] consumers) {
+	public void setConsumers(IConsumer[] consumers) {
 		this.consumers = consumers;
 	}
 	public ILogger getLogger() {
@@ -132,5 +159,34 @@ public class AMQClientInstance implements IConfigurable{
 	}
 	public void setFactory(ActiveMQConnectionFactory factory) {
 		this.factory = factory;
+	}
+
+	public IConsumer getConsumer(String topic) {
+		return consumerMap.get(topic);
+	}
+	
+	public void shutdown() {
+		try {
+			onShutdown();
+		} catch (Exception e) {
+			logger.log(Level.SEVERE,"shutdown jms instance failed!",e);
+		}
+	}
+
+	public IMessageDispatcher getDispatcher(String topic) {
+		return dispatchersMap.get(topic);
+	}
+
+	public void send(String topic,IMessage message, CompositeMap context) throws Exception {
+		IMessageDispatcher sender = getDispatcher(topic);
+		if(sender == null)
+			throw new IllegalArgumentException("Don't not define the MessageDispatcher for topic:"+topic);
+		sender.send(message, context);
+	}
+
+	public Connection createConnection() throws JMSException {
+		if(factory == null)
+			throw new IllegalStateException("ConnectionFactory is not initialiaze!");
+		return factory.createConnection();
 	}
 }
