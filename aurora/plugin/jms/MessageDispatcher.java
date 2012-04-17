@@ -25,18 +25,10 @@ public class MessageDispatcher extends AbstractLocatableObject implements IMessa
 
 	private IObjectRegistry mRegistry;
 	
-	private String topic;
 	public MessageDispatcher(IObjectRegistry registry) {
 		this.mRegistry = registry;
 	}
-	public String getTopic() {
-		return topic;
-	}
-	public void setTopic(String topic) {
-		this.topic = topic;
-		
-	}
-	public void send(IMessage message, CompositeMap context) throws Exception {
+	public void send(String topic,IMessage message, CompositeMap context) throws Exception {
 		if (topic == null)
 			BuiltinExceptionFactory.createAttributeMissing(this, "topic");
 		ILogger logger = LoggingContext.getLogger(context,
