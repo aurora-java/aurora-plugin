@@ -7,11 +7,9 @@ import java.util.logging.Level;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
-import javax.jms.Message;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-import uncertain.composite.CompositeMap;
 import uncertain.core.ILifeCycle;
 import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.exception.MessageFactory;
@@ -20,11 +18,11 @@ import uncertain.logging.LoggingContext;
 import uncertain.ocm.AbstractLocatableObject;
 import uncertain.ocm.IObjectRegistry;
 import aurora.application.features.msg.IConsumer;
-import aurora.application.features.msg.IMessage;
 import aurora.application.features.msg.IMessageDispatcher;
 import aurora.application.features.msg.IMessageHandler;
 import aurora.application.features.msg.IMessageStub;
 import aurora.plugin.jms.JMSStub;
+import aurora.plugin.jms.MessageDispatcher;
 
 public class AMQClientInstance extends AbstractLocatableObject implements ILifeCycle,JMSStub {
 	/**
@@ -53,13 +51,14 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	private IObjectRegistry registry;
 	public ILogger logger;
 	private Map<String,IMessageHandler> handlersMap = new HashMap<String,IMessageHandler>();
-	private Map<String,IMessageDispatcher> dispatchersMap = new HashMap<String,IMessageDispatcher>();
+	private IMessageDispatcher messageDispatcher;
 	private ActiveMQConnectionFactory factory;
 	private Map<String,IConsumer> consumerMap;
 	private boolean inited = false;
 	
 	public AMQClientInstance(IObjectRegistry registry) {
 		this.registry = registry;
+		messageDispatcher = new MessageDispatcher(registry);
 	}
 	
 	public boolean startup() {
@@ -136,12 +135,6 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	public IMessageDispatcher[] getMessageDispatchers() {
 		return mMessageDispatchers;
 	}
-	public void setMessageDispatchers(IMessageDispatcher[] messageDispatchers) {
-		this.mMessageDispatchers = messageDispatchers;
-		for(int i= 0;i<messageDispatchers.length;i++){
-			dispatchersMap.put(messageDispatchers[i].getTopic(), messageDispatchers[i]);
-		}
-	}
 	public IConsumer[] getConsumers() {
 		return consumers;
 	}
@@ -173,15 +166,9 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 		}
 	}
 
-	public IMessageDispatcher getDispatcher(String topic) {
-		return dispatchersMap.get(topic);
-	}
-
-	public void send(String topic,IMessage message, CompositeMap context) throws Exception {
-		IMessageDispatcher sender = getDispatcher(topic);
-		if(sender == null)
-			throw new IllegalArgumentException("Don't not define the MessageDispatcher for topic:"+topic);
-		sender.send(message, context);
+	
+	public IMessageDispatcher getDispatcher() {
+		return messageDispatcher;
 	}
 
 	public Connection createConnection() throws JMSException {
