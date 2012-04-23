@@ -169,11 +169,10 @@ public class CVSLogSync extends CVSAdapter {
 	void dataConvert(String line) {
 		if (line.startsWith("RCS file")) {
 			String[] array = line.split(":");
-			String fileName = array[1];
-			dataMap.put(
-					"fileName",
-					fileName.substring(this.repositoryPath.length() + 2).split(
-							",")[0].trim());
+			String fileName = array[1];		
+			fileName=fileName.substring(this.repositoryPath.length() + 2);	
+			fileName=fileName.substring(0, fileName.lastIndexOf(","));
+			dataMap.put("fileName",fileName.trim());
 			return;
 		}
 		if (line.startsWith("head")) {

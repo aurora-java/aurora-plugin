@@ -108,13 +108,15 @@ public class CVSHistorySync extends CVSAdapter {
 					conn.rollback();
 			} catch (SQLException sqlException) {
 			}
+			mLogger.log(Level.SEVERE, jobName+":Exception",e);
 			throw e;
 		} catch (Exception e) {
 			try {
 				if (conn != null)
 					conn.rollback();
 			} catch (SQLException sqlException) {
-			}
+			}			
+			mLogger.log(Level.SEVERE, jobName+":Exception",e);
 			throw e;
 		} finally {
 			SyncUtil.unlockSync(conn, jobName);
@@ -196,8 +198,10 @@ public class CVSHistorySync extends CVSAdapter {
 		CallableStatement cstm = null;
 		try {
 			Iterator it = dataMap.getChildIterator();
+			if(it==null)
+				System.out.println(dataMap.toXML());
 			cstm = conn.prepareCall("{call " + saveSql + "}");
-			while (it.hasNext()) {
+			while (it!=null&&it.hasNext()) {
 				CompositeMap row = (CompositeMap) it.next();
 				String head = row.getString("revision");
 				String tag = null;
