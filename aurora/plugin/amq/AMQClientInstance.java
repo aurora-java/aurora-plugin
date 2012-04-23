@@ -43,7 +43,6 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	 * 
 	 */
 	public static final String PLUGIN = "aurora.plugin.amq";
-	private IMessageDispatcher[] mMessageDispatchers;
 	private IMessageHandler[] mMessageHandlers;
 	private IConsumer[] consumers;
 	private String url;
@@ -131,9 +130,6 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 		for(int i= 0;i<messageHandlers.length;i++){
 			handlersMap.put(messageHandlers[i].getName(), messageHandlers[i]);
 		}
-	}
-	public IMessageDispatcher[] getMessageDispatchers() {
-		return mMessageDispatchers;
 	}
 	public IConsumer[] getConsumers() {
 		return consumers;
