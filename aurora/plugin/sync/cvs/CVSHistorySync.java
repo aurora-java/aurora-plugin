@@ -91,8 +91,10 @@ public class CVSHistorySync extends CVSAdapter {
 				throw new RuntimeException();
 			}
 			try {
-				if (conn != null)
+				if (conn != null){
+					SyncUtil.syncSuccess(conn, jobName);
 					conn.commit();
+				}
 			} catch (SQLException e) {
 			}
 		} catch (SQLException e) {
