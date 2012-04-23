@@ -31,7 +31,7 @@ public class ProcedureInvoke {
 				.getInstanceOfType(IServiceFactory.class);		
 		Procedure proc = procedureManager.loadProcedure(serviceName);
 		CompositeMap auroraContext = new CompositeMap();
-		auroraContext.createChild("parameter").put("name", jobName);
+		auroraContext.createChild("parameter").put("job_name", jobName);
 		ServiceInvoker.invokeProcedureWithTransaction(serviceName, proc,
 				serviceFactory, auroraContext);
 	}
