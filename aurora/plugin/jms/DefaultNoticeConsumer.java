@@ -88,7 +88,7 @@ public class DefaultNoticeConsumer extends AbstractLocatableObject implements IN
 		if(listeners != null){
 			for(IMessageListener l:listeners){
 				try {
-					l.notice(new JMSMessage((TextMessage)message));
+					l.onMessage(new JMSMessage((TextMessage)message));
 				} catch (Exception e) {
 					logger.log(Level.SEVERE, "Listener:"+l.toString()+" occur exception.", e);
 					throw new RuntimeException("Listener:"+l.toString()+" occur exception.",e);
