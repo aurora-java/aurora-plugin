@@ -280,6 +280,11 @@ public class CVSHistorySync extends CVSAdapter {
 			String value=line.substring(0,index).trim();
 			if (!tagMap.containsKey(key))
 				tagMap.put(key, value);
+			else{
+				String tag=tagMap.get(key);
+				tag+=","+value;
+				tagMap.put(key, tag);
+			}				
 			return;
 		}		
 	}	
