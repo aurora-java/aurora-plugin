@@ -21,6 +21,7 @@ import aurora.application.features.msg.IMessage;
 import aurora.application.features.msg.IMessageListener;
 import aurora.application.features.msg.IMessageStub;
 import aurora.application.features.msg.INoticerConsumer;
+import aurora.application.features.msg.MessageCodes;
 
 import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.exception.GeneralException;

@@ -27,6 +27,7 @@ import aurora.application.features.msg.IConsumer;
 import aurora.application.features.msg.IMessage;
 import aurora.application.features.msg.IMessageHandler;
 import aurora.application.features.msg.IMessageStub;
+import aurora.application.features.msg.MessageCodes;
 
 public class Consumer extends AbstractLocatableObject implements MessageListener,ExceptionListener,IConsumer {
 	
