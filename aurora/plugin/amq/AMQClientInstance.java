@@ -3,6 +3,7 @@ package aurora.plugin.amq;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -12,9 +13,6 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 import uncertain.core.ILifeCycle;
 import uncertain.exception.BuiltinExceptionFactory;
-import uncertain.exception.MessageFactory;
-import uncertain.logging.ILogger;
-import uncertain.logging.LoggingContext;
 import uncertain.ocm.AbstractLocatableObject;
 import uncertain.ocm.IObjectRegistry;
 import aurora.application.features.msg.IConsumer;
@@ -27,19 +25,23 @@ import aurora.plugin.jms.MessageDispatcher;
 public class AMQClientInstance extends AbstractLocatableObject implements ILifeCycle,JMSStub {
 	/**
 	 * 配置样本
-	<?xml version="1.0" encoding="UTF-8"?>
-	<amq:AMQ-client-instance xmlns:amq="aurora.plugin.amq" xmlns:jms="aurora.plugin.jms" url="failover:tcp://localhost:61616">
-	    <jms:messageHandlers>
-	        <jms:defaultMessageHandler name="handler1" procedure="init.load_priviledge_check_data"/>
-	    </jms:messageHandlers>
-	    <jms:consumers >
-	        <amq:consumer topic="test1">
-	            <amq:events>
-	                <amq:event handler="handler1" message="resource_update"/>
-	            </amq:events>
-	        </amq:consumer>
-	    </amq:consumers>
-	</amq:AMQ-client-instance>
+	<amq:AMQ-client-instance xmlns:msg="aurora.application.features.msg" xmlns:jms="aurora.plugin.jms" xmlns:amq="aurora.plugin.amq" url="failover:(tcp://127.0.0.1:61616)">
+	    <messageHandlers>
+	        <msg:DefaultMessageHandler name="refreshPriviledge" procedure="init.load_priviledge_check_data"/>
+	        <msg:DefaultMessageHandler name="refreshService" procedure="init.load_system_service"/>
+	    </messageHandlers>
+		
+	    <consumers>
+	        <jms:consumer topic="application_foundation">
+	            <events>
+	                <msg:event handler="refreshPriviledge" message="priviledge_setting_change"/>
+	                <msg:event handler="refreshService" message="service_config_change"/>
+	            </events>
+	        </jms:consumer>
+			<jms:DefaultNoticeConsumer topic="dml_event"/>
+	    </consumers>
+		
+</amq:AMQ-client-instance>
 	 * 
 	 */
 	public static final String PLUGIN = "aurora.plugin.amq";
@@ -48,7 +50,7 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	private String url;
 	
 	private IObjectRegistry registry;
-	public ILogger logger;
+	private Logger logger;
 	private Map<String,IMessageHandler> handlersMap = new HashMap<String,IMessageHandler>();
 	private IMessageDispatcher messageDispatcher;
 	private ActiveMQConnectionFactory factory;
@@ -63,15 +65,14 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	public boolean startup() {
 		if(inited)
 			return true;
-		logger = LoggingContext.getLogger(PLUGIN, registry);
-		MessageFactory.loadResource("resources.aurora_plugin_amq");
+		logger = Logger.getLogger(PLUGIN);
 		if(url == null){
 			BuiltinExceptionFactory.createOneAttributeMissing(this, "url");
 		}
 		factory = new ActiveMQConnectionFactory(url);
 		// javax.jms.QueueConnectionFactory, javax.jms.TopicConnectionFactory
 		registry.registerInstance(ConnectionFactory.class, factory);
-		consumerMap = new HashMap();
+		consumerMap = new HashMap<String,IConsumer>();
 		//init consumer config
 		if(consumers != null){
 			for(int i= 0;i<consumers.length;i++){
@@ -136,12 +137,6 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	}
 	public void setConsumers(IConsumer[] consumers) {
 		this.consumers = consumers;
-	}
-	public ILogger getLogger() {
-		return logger;
-	}
-	public void setLogger(ILogger logger) {
-		this.logger = logger;
 	}
 	public ActiveMQConnectionFactory getFactory() {
 		return factory;
