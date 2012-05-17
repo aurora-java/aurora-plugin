@@ -55,7 +55,7 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	private IMessageDispatcher messageDispatcher;
 	private ActiveMQConnectionFactory factory;
 	private Map<String,IConsumer> consumerMap;
-	private boolean inited = false;
+	private boolean started = false;
 	
 	public AMQClientInstance(IObjectRegistry registry) {
 		this.registry = registry;
@@ -63,7 +63,7 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	}
 	
 	public boolean startup() {
-		if(inited)
+		if(started)
 			return true;
 		logger = Logger.getLogger(PLUGIN);
 		if(url == null){
@@ -102,7 +102,7 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 			}
 		});
 		registry.registerInstance(IMessageStub.class, this);
-		inited = true;
+		started = true;
 		return true;
 	}
 	public void onShutdown() throws Exception{
@@ -166,5 +166,9 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 		if(factory == null)
 			throw new IllegalStateException("ConnectionFactory is not initialiaze!");
 		return factory.createConnection();
+	}
+
+	public boolean isStarted() {
+		return started;
 	}
 }
