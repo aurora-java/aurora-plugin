@@ -87,9 +87,11 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 							consumers[i].init(AMQClientInstance.this);
 						} catch (Exception e) {
 							logger.log(Level.SEVERE,"init jms consumers failed!",e);
+							throw new RuntimeException(e);
 						}
 					}
 				}
+				started = true;
 			}
 		}).start();
 		Runtime.getRuntime().addShutdownHook(new Thread(){
@@ -102,7 +104,6 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 			}
 		});
 		registry.registerInstance(IMessageStub.class, this);
-		started = true;
 		return true;
 	}
 	public void onShutdown() throws Exception{
