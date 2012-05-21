@@ -13,6 +13,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 import uncertain.core.ILifeCycle;
 import uncertain.exception.BuiltinExceptionFactory;
+import uncertain.logging.LoggingContext;
 import uncertain.ocm.AbstractLocatableObject;
 import uncertain.ocm.IObjectRegistry;
 import aurora.application.features.msg.IConsumer;
@@ -93,7 +94,7 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 					}
 				}
 				status = STARTED_STATUS;
-				logger.log(Level.INFO,"start jms client successful!");
+				LoggingContext.getLogger(PLUGIN, registry).log(Level.INFO,"start jms client successful!");
 			}
 		}).start();
 		Runtime.getRuntime().addShutdownHook(new Thread(){
