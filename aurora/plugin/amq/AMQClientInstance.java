@@ -41,7 +41,7 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 			<jms:DefaultNoticeConsumer topic="dml_event"/>
 	    </consumers>
 		
-</amq:AMQ-client-instance>
+	</amq:AMQ-client-instance>
 	 * 
 	 */
 	public static final String PLUGIN = "aurora.plugin.amq";
@@ -55,7 +55,7 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	private IMessageDispatcher messageDispatcher;
 	private ActiveMQConnectionFactory factory;
 	private Map<String,IConsumer> consumerMap;
-	private boolean started = false;
+	private int status = STOP_STATUS;
 	
 	public AMQClientInstance(IObjectRegistry registry) {
 		this.registry = registry;
@@ -63,8 +63,9 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	}
 	
 	public boolean startup() {
-		if(started)
+		if(status == STARTING_STATUS || status == STARTED_STATUS)
 			return true;
+		status = STARTING_STATUS;
 		logger = Logger.getLogger(PLUGIN);
 		if(url == null){
 			BuiltinExceptionFactory.createOneAttributeMissing(this, "url");
@@ -91,7 +92,7 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 						}
 					}
 				}
-				started = true;
+				status = STARTED_STATUS;
 			}
 		}).start();
 		Runtime.getRuntime().addShutdownHook(new Thread(){
@@ -170,6 +171,6 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	}
 
 	public boolean isStarted() {
-		return started;
+		return status == STARTED_STATUS;
 	}
 }
