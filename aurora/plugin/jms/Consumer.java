@@ -101,7 +101,7 @@ public class Consumer extends AbstractLocatableObject implements MessageListener
 		}
 		
 	}
-	public void onMessage(IMessage msg) throws Exception {
+	public void onMessage(IMessage msg){
 		throw new IllegalArgumentException("This method will never be called is this class!");
 	}
 	public String getTopic() {
