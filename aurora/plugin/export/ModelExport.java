@@ -96,10 +96,10 @@ public class ModelExport {
 				ServiceOutputConfig.KEY_SERVICE_OUTPUT + "/@"
 						+ ServiceOutputConfig.KEY_OUTPUT);		
 		if (return_path == null) {
-			mLogger.log(Level.SEVERE, "_column_config_ must be defined");
-			throw new ServletException("_column_config_ must be defined");
+			mLogger.log(Level.SEVERE, "service-output must be defined");
+			throw new ServletException("service-output must be defined");
 		}
-		CompositeMap exportData = (CompositeMap) context.getModel().getObject(return_path);
+		CompositeMap exportData = (CompositeMap) context.getObjectContext().getObject(return_path);
 		return exportData;
 	}
 	
@@ -109,9 +109,9 @@ public class ModelExport {
 		.getObject(KEY_COLUMN_CONFIG + "/" + KEY_COLUMN);
 		if (column_config == null) {
 			mLogger.log(Level.SEVERE,
-					"service-output tag and output attibute must be defined");
+					"_column_config_ tag and output attibute must be defined");
 			throw new ServletException(
-					"service-output tag and output attibute must be defined");
+					"_column_config_ tag and output attibute must be defined");
 		}
 		return column_config;
 	}	
