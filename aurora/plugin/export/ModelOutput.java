@@ -55,9 +55,14 @@ public class ModelOutput {
 		if (iterator != null) {
 			while (iterator.hasNext()) {
 				modelQueryMap = (CompositeMap) iterator.next();
-				rootpath=modelQueryMap.getString("rootpath");
+				rootpath=modelQueryMap.getString("rootpath");				
 				if(rootpath!=null){
-					if ("model-query".equals(modelQueryMap.getName())&&return_path.indexOf(rootpath)!=-1){
+					if(!rootpath.startsWith("/"))
+						rootpath="/model/"+rootpath;
+					if(!return_path.startsWith("/"))
+						return_path="/"+return_path;
+					
+					if ("model-query".equals(modelQueryMap.getName())&&return_path.equalsIgnoreCase(rootpath)){
 						modelQueryMap.putBoolean(DataSetConfig.PROPERTITY_FETCHALL,true);
 						if(KEY_EXCEL.equals(parameters.getString(KEY_FORMAT)))
 							modelQueryMap.createChildByTag("consumer").createChildByTag("output-excel").setNameSpaceURI("http://www.aurora-framework.org/application");
