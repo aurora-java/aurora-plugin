@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<u:instance-config xmlns:u="uncertain.pkg">
+	<u:instances>
+		<u:configurable-instance configFile="ldap.config" >
+			<u:description>基于ldap身份认证</u:description>				
+			<!-- 必须注册自己或者接口，才会被放入全局实例 -->
+			<u:implement-types>
+				<u:type typeName="aurora.plugin.ldap.LdapConfig" />
+			</u:implement-types>
+		</u:configurable-instance>
+	</u:instances>
+</u:instance-config>
