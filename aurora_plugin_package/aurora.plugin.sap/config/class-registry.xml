@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <class-registry>
   <package-mapping packageName="aurora.plugin.sap" />
+  <package-mapping packageName="aurora.plugin.sap.jco3" />
+  <feature-attach elementName="jco-invoke" featureClass="aurora.plugin.sap.jco3.JcoInvoke" nameSpace="aurora.plugin.sap.jco3"/>
   <feature-attach elementName="jco-invoke" featureClass="aurora.plugin.sap.JcoInvoke" nameSpace="aurora.plugin.sap"/>
 </class-registry>

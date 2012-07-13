@@ -2,13 +2,15 @@ package aurora.plugin.sap.jco3;
 
 import java.util.Properties;
 
+import uncertain.core.IGlobalInstance;
+
+import aurora.plugin.sap.ISapConfig;
+
 import com.sap.conn.jco.JCoDestination;
 import com.sap.conn.jco.JCoDestinationManager;
 import com.sap.conn.jco.ext.DestinationDataProvider;
 
-import uncertain.core.IGlobalInstance;
-
-public class SapConfig implements IGlobalInstance{	
+public class SapConfig implements ISapConfig,IGlobalInstance{	
 	String defaultSid;
 	public SapConfig(){
 		String jarPath=JCoDestinationManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();

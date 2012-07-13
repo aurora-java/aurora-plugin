@@ -32,8 +32,11 @@ public class JcoInvoke extends AbstractEntry {
 	public String function;
 	public String return_target;
 
-	public JcoInvoke(SapConfig config) {
-		sapConfig = config;
+	public JcoInvoke(ISapConfig config) {
+		if(config instanceof SapConfig)
+			sapConfig = (SapConfig)config;
+		else
+			throw new IllegalStateException("aurora.plugin.sap.SapConfig is undefined");
 	}
 
 	public JcoInvoke(SapInstance si) {

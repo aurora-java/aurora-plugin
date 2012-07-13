@@ -17,6 +17,7 @@ import uncertain.logging.LoggingContext;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 
+import aurora.plugin.sap.ISapConfig;
 import aurora.service.http.HttpServiceInstance;
 
 public class JcoInvoke extends AbstractEntry {
@@ -32,8 +33,11 @@ public class JcoInvoke extends AbstractEntry {
 	SapConfig sapConfig;
 	ILogger logger;
 	
-	public JcoInvoke(SapConfig config) {
-		sapConfig = config;
+	public JcoInvoke(ISapConfig config) {
+		if(config instanceof SapConfig)
+			sapConfig = (SapConfig)config;
+		else
+			throw new IllegalStateException("aurora.plugin.sap.jco3.SapConfig is undefined");
 	}
 	
 	public void run(ProcedureRunner runner) throws Exception {
