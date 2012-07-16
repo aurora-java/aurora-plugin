@@ -13,6 +13,7 @@ public class AuroraJobDetail extends JobDetail implements IConfigurable {
     Class           targetJobClass;
     String          method;
     CompositeMap    config;
+    boolean isStateful = false;
     
     public AuroraJobDetail(){
         super();
@@ -45,8 +46,12 @@ public class AuroraJobDetail extends JobDetail implements IConfigurable {
     /* (non-Javadoc)
      * @see org.quartz.JobDetail#setJobClass(java.lang.Class)
      */
-    public void setJobClass(Class jobClass) {        
-        super.setJobClass(AuroraJobRunner.class);
+    public void setJobClass(Class jobClass) {
+    	if(isStateful){
+    		super.setJobClass(AuroraStatefulJobRunner.class);
+    	}else{
+    		super.setJobClass(AuroraJobRunner.class);
+    	}
         targetJobClass = jobClass;
     }
     
@@ -57,9 +62,17 @@ public class AuroraJobDetail extends JobDetail implements IConfigurable {
 
     public void beginConfigure(CompositeMap config) {
         this.config = config;
+        isStateful = config.getBoolean("stateful", false);
     }
 
     public void endConfigure() {
     }
 
+	public boolean getStateful() {
+		return isStateful;
+	}
+
+	public void setStateful(boolean isStateful) {
+		this.isStateful = isStateful;
+	}
 }
