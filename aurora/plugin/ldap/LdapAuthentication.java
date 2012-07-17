@@ -2,7 +2,6 @@ package aurora.plugin.ldap;
 
 import java.util.Hashtable;
 
-import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.ldap.InitialLdapContext;
@@ -55,6 +54,7 @@ public class LdapAuthentication extends AbstractEntry{
 			if(ldapServer.getKeystore()==null)
 				throw new IllegalStateException("javax.net.ssl.trustStore is null"); 
 			System.setProperty("javax.net.ssl.trustStore", ldapServer.getKeystore());
+			env.put("java.naming.ldap.factory.socket","aurora.plugin.ldap.SSLSocketFactoryWrap");
 		}
 		LdapContext ctx = null;
 		try {
