@@ -23,7 +23,6 @@ public class LdapAuthentication extends AbstractEntry{
 	String username;
 	String password;
 	String errorMessage;
-	boolean is_ssl=false;
 	IObjectRegistry mObjectRegistry;
 
 	public LdapAuthentication(LdapConfig ldapMap,IObjectRegistry reg) {
@@ -34,28 +33,23 @@ public class LdapAuthentication extends AbstractEntry{
 	public void run(ProcedureRunner runner) throws Exception{
 		CompositeMap context=runner.getContext();
 		validateParameter(context);
-		LdapServerInstance ldapServer=this.ldapMap.getSapInstance(this.serverName);
-		if("ssl".equalsIgnoreCase(ldapServer.getSecurityProtocol()))
-			is_ssl=true;
+		LdapServerInstance ldapServer=this.ldapMap.getSapInstance(this.serverName);		
 		String user = this.getUsername().indexOf(ldapServer.getDomain()) > 0 ? this.getUsername() : this.getUsername()
-				+ ldapServer.getDomain();
-		String url="ldap://" + ldapServer.getHost() + ":" + ldapServer.getPort();
-		if(is_ssl)
-			url="ldaps://" + ldapServer.getHost() + ":" + ldapServer.getPort();			
-		
+				+ ldapServer.getDomain();		
+		String url="ldap://" + ldapServer.getHost() + ":" + ldapServer.getPort();			
 		Hashtable<String,String> env = new Hashtable<String,String>();
-		env.put(Context.INITIAL_CONTEXT_FACTORY,ldapServer.getInitialContextFactory());
-		env.put(Context.PROVIDER_URL, url);
+		env.put(Context.INITIAL_CONTEXT_FACTORY,ldapServer.getInitialContextFactory());		
 		env.put(Context.SECURITY_AUTHENTICATION, ldapServer.getSecurityAuthentication());
 		env.put(Context.SECURITY_PRINCIPAL, user);
 		env.put(Context.SECURITY_CREDENTIALS, this.getPassword());
-		if(is_ssl){
-			env.put(Context.SECURITY_PROTOCOL, ldapServer.getSecurityProtocol());
-			if(ldapServer.getKeystore()==null)
-				throw new IllegalStateException("javax.net.ssl.trustStore is null"); 
-//			System.setProperty("javax.net.ssl.trustStore", ldapServer.getKeystore());
+		if(ldapServer.getSSLEnabled()){		
+			url="ldaps://" + ldapServer.getHost() + ":" + ldapServer.getPort();	
+			env.remove(Context.SECURITY_AUTHENTICATION);			
+			env.put(Context.SECURITY_PROTOCOL, "ssl");
 			env.put("java.naming.ldap.factory.socket","aurora.plugin.ldap.SSLSocketFactoryWrap");
 		}
+		env.put(Context.PROVIDER_URL, url);
+		
 		LdapContext ctx = null;
 		try {
 			ctx = new InitialLdapContext(env, null);	

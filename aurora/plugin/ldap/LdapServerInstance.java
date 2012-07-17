@@ -4,11 +4,18 @@ public class LdapServerInstance {
 	String name;
 	String host;
 	String port;
-	String keystore;
-	String securityProtocol;
 	String domain;
 	String securityAuthentication = "simple";
 	String initialContextFactory = "com.sun.jndi.ldap.LdapCtxFactory";
+	boolean isSSLEnabled=false;	
+	
+	public Boolean getSSLEnabled() {
+		return isSSLEnabled;
+	}
+
+	public void setSSLEnabled(Boolean SSLEnabled) {
+		this.isSSLEnabled = SSLEnabled;
+	}
 
 	public String getName() {
 		return name;
@@ -32,23 +39,7 @@ public class LdapServerInstance {
 
 	public void setPort(String port) {
 		this.port = port;
-	}
-
-	public String getKeystore() {
-		return keystore;
-	}
-
-	public void setKeystore(String keystore) {
-		this.keystore = keystore;
-	}
-
-	public String getSecurityProtocol() {
-		return securityProtocol;
-	}
-
-	public void setSecurityProtocol(String securityProtocol) {
-		this.securityProtocol = securityProtocol;
-	}
+	}	
 
 	public String getSecurityAuthentication() {
 		return securityAuthentication;
