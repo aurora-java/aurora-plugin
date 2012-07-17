@@ -120,8 +120,10 @@ public class CVSLogSync extends CVSAdapter {
 	}
 
 	public void messageSent(MessageEvent event) {
-		this.is_success = !event.isError();
 		String line = event.getMessage().trim();
+		if(event.isError()&&!line.startsWith("cvs rlog: Logging")){
+			this.is_success = !event.isError();
+		}		
 		PrintStream stream = event.isError() ? System.err : System.out;
 		StringBuffer taggedLine = new StringBuffer();
 		if (event.isTagged()) {
