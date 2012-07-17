@@ -53,7 +53,7 @@ public class LdapAuthentication extends AbstractEntry{
 			env.put(Context.SECURITY_PROTOCOL, ldapServer.getSecurityProtocol());
 			if(ldapServer.getKeystore()==null)
 				throw new IllegalStateException("javax.net.ssl.trustStore is null"); 
-			System.setProperty("javax.net.ssl.trustStore", ldapServer.getKeystore());
+//			System.setProperty("javax.net.ssl.trustStore", ldapServer.getKeystore());
 			env.put("java.naming.ldap.factory.socket","aurora.plugin.ldap.SSLSocketFactoryWrap");
 		}
 		LdapContext ctx = null;
