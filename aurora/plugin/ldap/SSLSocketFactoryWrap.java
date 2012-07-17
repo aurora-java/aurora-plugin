@@ -9,7 +9,6 @@ import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 
 public class SSLSocketFactoryWrap extends SocketFactory {
-	int socketTimeout =60000;
 	private static SSLSocketFactoryWrap defFactory;
 	private SocketFactory factory;
 
@@ -26,7 +25,6 @@ public class SSLSocketFactoryWrap extends SocketFactory {
 	public Socket createSocket(String host, int port) throws IOException,
 			UnknownHostException {		
 		Socket socket = this.factory.createSocket(host, port);
-		socket.setSoTimeout(socketTimeout);
 		return socket;
 	}
 
@@ -34,13 +32,11 @@ public class SSLSocketFactoryWrap extends SocketFactory {
 			int localPort) throws IOException, UnknownHostException {		
 		Socket socket = this.factory.createSocket(host, port, localHost,
 				localPort);
-		socket.setSoTimeout(socketTimeout);
 		return socket;
 	}
 
 	public Socket createSocket(InetAddress host, int port) throws IOException {		
 		Socket socket = this.factory.createSocket(host, port);
-		socket.setSoTimeout(socketTimeout);
 		return socket;
 	}
 
@@ -48,7 +44,6 @@ public class SSLSocketFactoryWrap extends SocketFactory {
 			InetAddress localAddress, int localPort) throws IOException {		
 		Socket socket = this.factory.createSocket(address, port, localAddress,
 				localPort);
-		socket.setSoTimeout(socketTimeout);
 		return socket;
 	}
 
