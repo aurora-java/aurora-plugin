@@ -38,7 +38,7 @@ public class MessageDispatcher extends AbstractLocatableObject implements IMessa
 		if (messageStub == null)
 			throw BuiltinExceptionFactory.createInstanceNotFoundException(null, IMessageStub.class, this.getClass().getCanonicalName());
 		if (!messageStub.isStarted()) {
-			throw new IllegalStateException("MessageStub is not started, please check the configuration.");
+			throw new IllegalStateException("Message Provider is not started, please check the configuration.");
 		}
 		ConnectionFactory connectionFactory = (ConnectionFactory) mRegistry.getInstanceOfType(ConnectionFactory.class);
 		if (connectionFactory == null) {
