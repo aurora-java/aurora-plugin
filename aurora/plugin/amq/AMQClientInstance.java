@@ -13,6 +13,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 import uncertain.core.ILifeCycle;
 import uncertain.exception.BuiltinExceptionFactory;
+import uncertain.logging.ILogger;
 import uncertain.logging.LoggingContext;
 import uncertain.ocm.AbstractLocatableObject;
 import uncertain.ocm.IObjectRegistry;
@@ -57,7 +58,9 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 	private ActiveMQConnectionFactory factory;
 	private Map<String,IConsumer> consumerMap;
 	private int status = STOP_STATUS;
-	
+	private boolean shutdown = false;
+	private Thread moniteStartThread;
+	private Thread initConsumersThread;
 	public AMQClientInstance(IObjectRegistry registry) {
 		this.registry = registry;
 		messageDispatcher = new MessageDispatcher(registry);
@@ -81,7 +84,7 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 				consumerMap.put(consumers[i].getTopic(), consumers[i]);
 			}
 		}
-		(new Thread(){
+		initConsumersThread = new Thread(){
 			public void run(){
 				if(consumers != null){
 					for(int i= 0;i<consumers.length;i++){
@@ -89,14 +92,16 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 							consumers[i].init(AMQClientInstance.this);
 						} catch (Exception e) {
 							logger.log(Level.SEVERE,"init jms consumers failed!",e);
-							throw new RuntimeException(e);
+//							throw new RuntimeException(e);
 						}
 					}
 				}
 				status = STARTED_STATUS;
 				LoggingContext.getLogger(PLUGIN, registry).log(Level.INFO,"start jms client successful!");
 			}
-		}).start();
+		};
+		initConsumersThread.start();
+		moniteStart();
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 			public void run(){
 				try {
@@ -110,11 +115,33 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 		return true;
 	}
 	public void onShutdown() throws Exception{
+		shutdown = true;
+		if(moniteStartThread != null)
+			moniteStartThread.interrupt();
+		if(initConsumersThread != null)
+			initConsumersThread.interrupt();
 		if(consumers != null){
 			for(int i= 0;i<consumers.length;i++){
 				consumers[i].onShutdown();
 			}
 		}
+		
+	}
+	private void moniteStart(){
+		final ILogger logger = LoggingContext.getLogger(PLUGIN, registry);
+		moniteStartThread = new Thread(){
+			public void run(){
+				while(!shutdown&&status!=STARTED_STATUS){
+					try {
+						Thread.sleep(600000);
+					} catch (InterruptedException e) {
+						logger.log(Level.SEVERE,"",e);
+					}
+					logger.log(Level.INFO,"Trying to Connect to "+url);
+				}
+			}
+		};
+		moniteStartThread.start();
 	}
 	public IMessageHandler getMessageHandler(String name){
 		return (IMessageHandler)handlersMap.get(name);
