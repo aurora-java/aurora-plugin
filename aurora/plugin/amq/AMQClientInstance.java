@@ -135,7 +135,7 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 					try {
 						Thread.sleep(600000);
 					} catch (InterruptedException e) {
-						logger.log(Level.SEVERE,"",e);
+//						logger.log(Level.SEVERE,"",e);
 					}
 					logger.log(Level.INFO,"Trying to Connect to "+url);
 				}
