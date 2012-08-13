@@ -23,6 +23,7 @@ import uncertain.ocm.IObjectRegistry;
 public class ModelExport {
 	public final String KEY_COLUMN_CONFIG = "_column_config_";
 	public final String KEY_FILE_NAME = "_file_name_";
+	public final String KEY_MERGE_COLUMN="_merge_column_";
 	public final String KEY_CHARSET = "GBK";
 	public final String KEY_PROMPT = "prompt";
 	public final String KEY_DATA_INDEX = "name";
@@ -81,10 +82,10 @@ public class ModelExport {
 		String fileName = parameter.getString(KEY_FILE_NAME, "excel");
 		response.setContentType("application/vnd.ms-excel");
 		response.setCharacterEncoding(KEY_CHARSET);
-		response.setHeader("Content-Disposition", "attachment; filename=\""+ fileName + ".xls\"");
+		response.setHeader("Content-Disposition", "attachment; filename=\""+ new String(fileName.getBytes(),"ISO-8859-1") + ".xls\"");
 		ExcelExportImpl excelFactory = new ExcelExportImpl(localMsgProvider);
 		excelFactory.createExcel(getExportData(context), getColumnConfig(context),
-				response.getOutputStream());
+				response.getOutputStream(),(CompositeMap)context.getParameter().getObject(this.KEY_MERGE_COLUMN));
 
 		return EventModel.HANDLE_STOP;
 	}
@@ -109,9 +110,9 @@ public class ModelExport {
 		.getObject(KEY_COLUMN_CONFIG + "/" + KEY_COLUMN);
 		if (column_config == null) {
 			mLogger.log(Level.SEVERE,
-					"_column_config_ tag and output attibute must be defined");
+					"_column_config_ tag and column attibute must be defined");
 			throw new ServletException(
-					"_column_config_ tag and output attibute must be defined");
+					"_column_config_ tag and column attibute must be defined");
 		}
 		return column_config;
 	}	

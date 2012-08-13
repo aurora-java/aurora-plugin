@@ -14,22 +14,45 @@ import org.apache.poi.ss.usermodel.*;
 import aurora.i18n.ILocalizedMessageProvider;
 import aurora.plugin.export.MergedHeader;
 import uncertain.composite.CompositeMap;
+import uncertain.composite.transform.GroupConfig;
+import uncertain.composite.transform.GroupTransformer;
 
 public class ExcelExportImpl {	
 	ILocalizedMessageProvider localMsgProvider;	
 	Workbook wb;
 	
 	CompositeMap dataModel;
+	CompositeMap mergeColumn;
 	CompositeMap headerConfig;
 	List<CompositeMap> headerList;
 	final int numberLimit=65535;
 	int headLevel;
 	HSSFCellStyle headstyle;	
+	HSSFCellStyle bodystyle;
 	public ExcelExportImpl(ILocalizedMessageProvider localMsgProvider){		
 		this.localMsgProvider = localMsgProvider;
 	}
-	public void createExcel(CompositeMap dataModel,CompositeMap column_config,OutputStream os) throws Exception {
-		this.dataModel = dataModel;
+	public void createExcel(CompositeMap dataModel,CompositeMap column_config,OutputStream os,CompositeMap merge_column) throws Exception {			
+		if(merge_column!=null){				
+			CompositeMap groupConfig=null;
+			CompositeMap record;
+			Iterator it=merge_column.getChildIterator();
+			if(it!=null){
+				groupConfig = new CompositeMap();	
+				while(it.hasNext()){
+					record=(CompositeMap)it.next();
+					CompositeMap configRecord = new CompositeMap();
+					configRecord.put(GroupConfig.KEY_GROUP_KEY_FIELDS, record.getString("name"));
+					configRecord.put(GroupConfig.KEY_RECORD_NAME, record.getString("name"));
+					groupConfig.addChild(configRecord);
+				}		
+			}
+			this.mergeColumn=groupConfig;
+			this.dataModel=GroupTransformer.transformByConfig(dataModel, this.mergeColumn);				
+		}else{
+			this.dataModel = dataModel;
+		}
+	
 		headerConfig=(new MergedHeader(column_config)).conifg;		
 		wb = new HSSFWorkbook();
 		setCellStyle(wb);//设置列style
@@ -47,10 +70,7 @@ public class ExcelExportImpl {
 			}	
 		}
 	}
-	void setCellStyle(Workbook wb){
-		headstyle=(HSSFCellStyle) wb.createCellStyle(); 
-		headstyle.getFont(wb).setFontName("宋体");
-		headstyle.getFont(wb).setFontHeightInPoints((short)12);
+	void setCellStyle(Workbook wb){		
 		headstyle=(HSSFCellStyle) wb.createCellStyle(); 
 		HSSFFont headfont = (HSSFFont) wb.createFont(); 		
 		headfont.setFontName("宋体");
@@ -59,6 +79,13 @@ public class ExcelExportImpl {
 		headstyle.setFont(headfont);  
 	    headstyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 左右居中  
 	    headstyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 上下居中	
+	    bodystyle=(HSSFCellStyle) wb.createCellStyle();
+	    bodystyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 上下居中	
+	    HSSFFont bodyfont= (HSSFFont) wb.createFont(); 	
+	    bodyfont.setFontName("宋体");
+	    bodyfont.setBoldweight(HSSFFont.BOLDWEIGHT_NORMAL);//加粗
+	    bodyfont.setFontHeightInPoints((short) 12);// 字体大小
+	    bodystyle.setFont(bodyfont);  
 	}
 	short getExcelAlign(String align){
 		short excelAlign=0;		
@@ -73,16 +100,15 @@ public class ExcelExportImpl {
 	void createExcel(){
 		Sheet sheet = null;
 		Iterator iterator=this.dataModel.getChildIterator();
-		if(iterator!=null){		
-			while(iterator.hasNext()){
-				this.headLevel=0;		
-				sheet = wb.createSheet();
-				createExcelHeader(sheet);
+		this.headLevel=0;		
+		sheet = wb.createSheet();
+		createExcelHeader(sheet);				
+		sheet.createFreezePane(0,++this.headLevel);// 冻结	
+		if(iterator!=null){							
+			if(this.mergeColumn!=null)					
+				createExcelTableMerge(sheet,this.dataModel);
+			else
 				createExcelTable(sheet,iterator);				
-			}
-		}else{
-			sheet = wb.createSheet();
-			createExcelHeader(sheet);
 		}
 	}
 	
@@ -92,14 +118,44 @@ public class ExcelExportImpl {
 		generatExcelHead(headerConfig,sheet,header,-1);
 	}
 	
-	void createExcelTable(Sheet sheet,Iterator iterator) {
-		HSSFCellStyle columnstyle;
-		boolean is_setwidth=false;
-		this.headLevel++;
-		sheet.createFreezePane(0,this.headLevel);// 冻结		
+	void createExcelTableMerge(Sheet sheet,CompositeMap record){		
+		int mergeCount=0;
+		String colName;
 		int col=0;
-		String text;
-		Cell cell;	
+		CompositeMap head;
+		Iterator it;
+		Iterator iterator=record.getChildIterator();		
+		while(iterator.hasNext()){
+			CompositeMap childRecord = (CompositeMap)iterator.next();
+			it=childRecord.getChildIterator();
+			if(it!=null){
+				createExcelTableMerge(sheet,childRecord);	
+				mergeCount=childRecord.getInt("_count");
+				colName= childRecord.getName();
+				for(int i=0,l=this.headerList.size();i<l;i++){
+					head=this.headerList.get(i);
+					if(colName.equals(head.get("name"))){
+						col=i;
+						break;
+					}				
+				}				
+				CellRangeAddress range = new CellRangeAddress(this.headLevel-mergeCount,this.headLevel-1,col,col);				
+				sheet.addMergedRegion(range);	
+				int count=record.getInt("_count",0);
+				record.put("_count", count+mergeCount);				
+			}else{				
+				createExcelTable(sheet,record.getChildIterator());
+				record.put("_count",record.getChilds().size());
+				break;
+			}
+		}			
+	}
+	
+	void createExcelTable(Sheet sheet,Iterator iterator) {		
+		boolean is_setwidth=false;		
+		int col=0;
+		Cell cell;
+		String columnName;		
 		
 		while (iterator.hasNext()) {
 			if(this.headLevel==numberLimit){
@@ -114,13 +170,13 @@ public class ExcelExportImpl {
 			Iterator it=this.headerList.iterator();
 			while (it.hasNext()) {
 				cell=row.createCell(col);
-				CompositeMap record = (CompositeMap) it.next();				
-				Object value=object.get(record.getString("name"));					
-				columnstyle=(HSSFCellStyle) wb.createCellStyle();
-				columnstyle.setAlignment(getExcelAlign(record.getString("align")));
+				CompositeMap record = (CompositeMap) it.next();		
+				columnName=record.getString("name");
+				Object value=object.get(columnName);				
+				bodystyle.setAlignment(getExcelAlign(record.getString("align")));
 				cell.setCellType(Cell.CELL_TYPE_STRING);
-				cell.setCellStyle(columnstyle);
-				if(value!=null){
+				cell.setCellStyle(bodystyle);
+				if(value!=null){					
 					if(value instanceof String){
 						cell.setCellValue(new HSSFRichTextString(value.toString()));
 					}
