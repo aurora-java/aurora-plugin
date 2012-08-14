@@ -4,6 +4,7 @@ import org.quartz.JobExecutionContext;
 
 import aurora.service.IServiceFactory;
 import aurora.service.ServiceInvoker;
+import aurora.service.ServiceThreadLocal;
 
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.IObjectRegistry;
@@ -32,6 +33,7 @@ public class ProcedureInvoke {
 		Procedure proc = procedureManager.loadProcedure(serviceName);
 		CompositeMap auroraContext = new CompositeMap();
 		auroraContext.createChild("parameter").put("job_name", jobName);
+		ServiceThreadLocal.setCurrentThreadContext(auroraContext);
 		ServiceInvoker.invokeProcedureWithTransaction(serviceName, proc,
 				serviceFactory, auroraContext);
 	}
