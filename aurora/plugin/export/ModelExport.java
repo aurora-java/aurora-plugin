@@ -85,7 +85,7 @@ public class ModelExport {
 		response.setHeader("Content-Disposition", "attachment; filename=\""+ new String(fileName.getBytes(),"ISO-8859-1") + ".xls\"");
 		ExcelExportImpl excelFactory = new ExcelExportImpl(localMsgProvider);
 		excelFactory.createExcel(getExportData(context), getColumnConfig(context),
-				response.getOutputStream(),(CompositeMap)context.getParameter().getObject(this.KEY_MERGE_COLUMN));
+				response.getOutputStream(),(CompositeMap)context.getParameter().getChild(this.KEY_MERGE_COLUMN));
 
 		return EventModel.HANDLE_STOP;
 	}
