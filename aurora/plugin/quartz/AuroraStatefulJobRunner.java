@@ -1,6 +1,7 @@
 package aurora.plugin.quartz;
 
 import java.lang.reflect.Method;
+import java.util.logging.Level;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -8,6 +9,7 @@ import org.quartz.JobExecutionException;
 import org.quartz.StatefulJob;
 
 import uncertain.core.UncertainEngine;
+import uncertain.logging.LoggingContext;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.ocm.OCManager;
 
@@ -48,6 +50,7 @@ public class AuroraStatefulJobRunner implements StatefulJob {
             om.populateObject(detail.getConfig(), instance);
             job_method.invoke(instance, args);
         }catch(Exception ex){
+        	LoggingContext.getLogger(this.getClass().getCanonicalName(), os).log(Level.SEVERE, "", ex);
             throw new JobExecutionException(ex);
         }
     }
