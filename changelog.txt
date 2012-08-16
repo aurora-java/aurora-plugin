@@ -1,4 +1,25 @@
 1.1.6
+===============
+2012-8-16 邹磊
+针对aurora1.3.1,升级quartz实现
+WEB-INF目录下新建aurora.plugin.quartz文件夹,将job.config文件放到该目录下
+WEB-INF目录下的config文件不再支持解析
+
+===============
+2012-8-16 邹磊
+针对aurora1.3.1版本升级sap实现,aurora1.2版本还是原来的方式
+
+在WEB-INF/目录下新建aurora.plugin.sap目录，将sap.config文件放到这个目录下
+还是根据命名空间aurora.plugin.sap.jco3或aurora.plugin.sap区分使用的jco版本
+WEB-INF目录下的config文件不再支持解析
+
+在uncertain.xml中添加
+<package-mapping packageName="aurora.plugin.sap"/>
+删掉，并不再支持
+<package-mapping packageName="aurora.plugin.sap.jco3"/>
+
+
+
 
 =====
 2011-8-30
