@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-registry>
+	<class-mapping className="aurora.plugin.touch.DeviceTypeInit" elementName="device-type-init" nameSpace="http://www.aurora-framework.org/application"/>
+</class-registry>
