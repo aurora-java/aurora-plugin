@@ -61,7 +61,6 @@ public class ServerScript extends AbstractEntry {
 
 	@Override
 	public void run(ProcedureRunner runner) throws Exception {
-		long ts = System.nanoTime();
 		CompositeMap context = runner.getContext();
 		if (exp == null)
 			exp = cdata;
@@ -88,12 +87,7 @@ public class ServerScript extends AbstractEntry {
 			sb.append("message : " + re.getMessage() + "\n");
 			// re.printStackTrace();
 			throw new ScriptException(sb.toString());
-		} finally {
-			long te = System.nanoTime();
-			System.out
-					.println("server-script:" + (te - ts) / 1000000.0 + " ms");
 		}
-
 	}
 
 	@Override
