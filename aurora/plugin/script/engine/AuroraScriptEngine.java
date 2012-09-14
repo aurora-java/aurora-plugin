@@ -31,7 +31,7 @@ import aurora.plugin.script.scriptobject.ScriptUtil;
 import aurora.plugin.script.scriptobject.SessionObject;
 import aurora.service.ServiceInstance;
 
-public class AuroraScriptEngine /* extends RhinoScriptEngine */{
+public class AuroraScriptEngine {
 	public static final String aurora_core_js = "aurora-core.js";
 	public static final String KEY_SERVICE_CONTEXT = "service_context";
 	public static final String KEY_SSO = "sso";
