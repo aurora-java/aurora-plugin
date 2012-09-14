@@ -1,0 +1,5 @@
+<package name="aurora.plugin.script">
+    <schema-files>
+        <schema-file path="script.sxsd"/>
+    </schema-files>
+</package>

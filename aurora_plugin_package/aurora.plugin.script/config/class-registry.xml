@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-registry>
+  <package-mapping packageName="aurora.plugin.script" />
+  <package-mapping packageName="aurora.plugin.script.engine"/>
+  <package-mapping packageName="aurora.plugin.script.scriptobject"/>
+</class-registry>
