@@ -1,6 +1,8 @@
 package aurora.plugin.ldap;
 
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -19,6 +21,7 @@ import uncertain.proc.ProcedureRunner;
 
 public class LdapAuthentication extends AbstractEntry{
 	LdapConfig ldapMap;
+	List<LdapServerInstance> ldapServerList=null;
 	String serverName;
 	String username;
 	String password;
@@ -28,34 +31,50 @@ public class LdapAuthentication extends AbstractEntry{
 	public LdapAuthentication(LdapConfig ldapMap,IObjectRegistry reg) {
 		this.ldapMap = ldapMap;
 		this.mObjectRegistry = reg;
+		ldapServerList=this.ldapMap.getInstanceList();		
 	}
 
 	public void run(ProcedureRunner runner) throws Exception{
 		CompositeMap context=runner.getContext();
-		validateParameter(context);
-		LdapServerInstance ldapServer=this.ldapMap.getSapInstance(this.serverName);		
-		String user = this.getUsername().indexOf(ldapServer.getDomain()) > 0 ? this.getUsername() : this.getUsername()
-				+ ldapServer.getDomain();		
-		String url="ldap://" + ldapServer.getHost() + ":" + ldapServer.getPort();			
-		Hashtable<String,String> env = new Hashtable<String,String>();
-		env.put(Context.INITIAL_CONTEXT_FACTORY,ldapServer.getInitialContextFactory());		
-		env.put(Context.SECURITY_AUTHENTICATION, ldapServer.getSecurityAuthentication());
-		env.put(Context.SECURITY_PRINCIPAL, user);
-		env.put(Context.SECURITY_CREDENTIALS, this.getPassword());
-		if(ldapServer.getSSLEnabled()){		
-			url="ldaps://" + ldapServer.getHost() + ":" + ldapServer.getPort();	
-			env.remove(Context.SECURITY_AUTHENTICATION);			
-			env.put(Context.SECURITY_PROTOCOL, "ssl");
-			env.put("java.naming.ldap.factory.socket","aurora.plugin.ldap.SSLSocketFactoryWrap");
+		validateParameter(context);		
+		Iterator<LdapServerInstance> iterator=ldapServerList.iterator();
+		Exception exception=null;
+		while(iterator.hasNext()){			
+			LdapServerInstance ldapServer=iterator.next();			
+			if(!this.serverName.equals(ldapServer.getName()))
+				continue;
+			exception=null;
+			String user = this.getUsername().indexOf(ldapServer.getDomain()) > 0 ? this.getUsername() : this.getUsername()
+					+ ldapServer.getDomain();		
+			String url="ldap://" + ldapServer.getHost() + ":" + ldapServer.getPort();			
+			Hashtable<String,String> env = new Hashtable<String,String>();
+			env.put(Context.INITIAL_CONTEXT_FACTORY,ldapServer.getInitialContextFactory());		
+			env.put(Context.SECURITY_AUTHENTICATION, ldapServer.getSecurityAuthentication());
+			env.put(Context.SECURITY_PRINCIPAL, user);
+			env.put(Context.SECURITY_CREDENTIALS, this.getPassword());
+			if(ldapServer.getSSLEnabled()){		
+				url="ldaps://" + ldapServer.getHost() + ":" + ldapServer.getPort();	
+				env.remove(Context.SECURITY_AUTHENTICATION);			
+				env.put(Context.SECURITY_PROTOCOL, "ssl");
+				env.put("java.naming.ldap.factory.socket","aurora.plugin.ldap.SSLSocketFactoryWrap");
+			}
+			env.put(Context.PROVIDER_URL, url);			
+			LdapContext ctx = null;
+			try {
+				ctx = new InitialLdapContext(env, null);					
+				return;
+			} catch (NamingException e) {
+				exception=e;	
+			}finally{
+				try {
+					if(ctx!=null)
+						ctx.close();
+				} catch (NamingException e) {					
+				}
+			}		
 		}
-		env.put(Context.PROVIDER_URL, url);
-		
-		LdapContext ctx = null;
-		try {
-			ctx = new InitialLdapContext(env, null);	
-			ctx.close();
-		} catch (NamingException e) {
-			 if(e.getMessage().startsWith("[LDAP: error code 49")){
+		if(exception!=null){
+			if(exception.getMessage().startsWith("[LDAP: error code 49")){
 				 String error_message=this.getErrorMessage();			 
 				 error_message = LanguageUtil.getTranslatedMessage(mObjectRegistry, error_message, context);
 				 ErrorMessage msg = new ErrorMessage(null,error_message, null);			
@@ -64,8 +83,9 @@ public class LdapAuthentication extends AbstractEntry{
 				 sc.put("success", false);
 		         runner.getCaller().locateTo("CreateResponse");
 		         runner.stop();
-			 }else
-				 throw e;
+			 }
+			 else
+				 throw exception;
 		}
 	}
 	

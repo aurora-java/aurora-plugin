@@ -1,21 +1,24 @@
 package aurora.plugin.ldap;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 
-public class LdapConfig{
-	
-	Map<String,LdapServerInstance> ldapInstanceMap=new HashMap<String,LdapServerInstance>();
-	public LdapServerInstance getSapInstance(String name){
-		return ldapInstanceMap.get(name);
+public class LdapConfig {
+
+	List<LdapServerInstance> ldapInstanceList=null;
+	public LdapConfig(){
+		ldapInstanceList = new LinkedList<LdapServerInstance>();
 	}
-	
-	public void addInstances(LdapServerInstance[] instances) {		
+	public List<LdapServerInstance> getInstanceList() {
+		return ldapInstanceList;
+	}
+
+	public void addInstances(LdapServerInstance[] instances) {
 		LdapServerInstance instance;
-		int l=instances.length;
-		for(int i=0;i<l;i++){
-			instance=instances[i];		
-			ldapInstanceMap.put(instance.getName(), instance);
-		}		
+		int l = instances.length;
+		for (int i = 0; i < l; i++) {
+			instance = instances[i];
+			ldapInstanceList.add(instance);
+		}
 	}
 }
