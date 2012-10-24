@@ -1,9 +1,13 @@
 package aurora.plugin.script.engine;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
@@ -53,6 +57,8 @@ public class AuroraScriptEngine {
 			}
 		});
 	}
+
+	private static Set<String> executedInTopLevel = new HashSet<String>();
 
 	private CompositeMap service_context;
 	private int optimizeLevel = -1;
@@ -109,7 +115,7 @@ public class AuroraScriptEngine {
 			ScriptableObject.defineClass(topLevel, ActionEntryObject.class);
 			topLevel.defineFunctionProperties(new String[] { "print",
 					"println", "raise_app_error", "$instance", "$cache",
-					"$config", "$bm" }, AuroraScriptEngine.class,
+					"$config", "$bm", "$define" }, AuroraScriptEngine.class,
 					ScriptableObject.DONTENUM);
 			cx.evaluateString(topLevel, js, aurora_core_js, 1, null);
 			// --define useful method
@@ -221,6 +227,32 @@ public class AuroraScriptEngine {
 		if (args.length > 1)
 			bm.jsSet_option(args[1]);
 		return bm;
+	}
+
+	public static void $define(Context cx, Scriptable thisObj, Object[] args,
+			Function funObj) throws IOException {
+		if (args.length == 0 || !(args[0] instanceof String))
+			return;
+		String jspath = (String) args[0];
+		String jspath_low = jspath.toLowerCase();
+		CompositeMap context = (CompositeMap) cx
+				.getThreadLocal(KEY_SERVICE_CONTEXT);
+		if (!executedInTopLevel.contains(jspath_low)) {
+			ScriptImportor.defineExternScript(cx, topLevel, context, jspath);
+			executedInTopLevel.add(jspath_low);
+			return;
+		}
+		ScriptShareObject sso = (ScriptShareObject) context
+				.get(AuroraScriptEngine.KEY_SSO);
+		if (sso == null)
+			return;
+		File jsFile = ScriptImportor.getJsFile(sso, jspath);
+		if (CompiledScriptCache.getInstance().isChanged(jsFile, cx)) {
+			Script script = CompiledScriptCache.getInstance().getScript(jsFile,
+					cx);
+			if (script != null)
+				script.exec(cx, topLevel);
+		}
 	}
 
 	public void setOptimizeLevel(int level) {

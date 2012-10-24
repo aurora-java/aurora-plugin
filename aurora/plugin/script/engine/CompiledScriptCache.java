@@ -109,6 +109,12 @@ public class CompiledScriptCache implements CompiledScriptCacheMBean {
 		return getScript(source, cx, "<Unknown source>");
 	}
 
+	public boolean isChanged(File file, Context cx) {
+		Key k = new Key(file, cx.getOptimizationLevel());
+		Value v = scriptCache.get(k);
+		return (v == null || k.lastModif != v.lastModif);
+	}
+
 	/**
 	 * 
 	 * @param file
