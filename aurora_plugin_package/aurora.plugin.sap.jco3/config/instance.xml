@@ -3,6 +3,9 @@
 	<u:instances>
 		<u:configurable-instance configFile="sap.config">
 			<u:description>实现SAP JCO接口</u:description>
+			<u:implement-types>
+				<u:type typeName="aurora.plugin.sap.ISapConfig" />
+			</u:implement-types>	
 		</u:configurable-instance>				
 	</u:instances>
 </u:instance-config>
