@@ -378,7 +378,7 @@ public class CertificateCoderUtil {
 		// 使用这些类库是有风险的。
 		// http://java.sun.com/products/jdk/faq/faq-sun-packages.html
 		// 使用非eclipse环境自带的jdk可以解决编译错误。
-		 return Base64.encodeBase64String(key);
-//		return (new sun.misc.BASE64Encoder()).encodeBuffer(key);
+		// return Base64.encodeBase64String(key);
+		return (new sun.misc.BASE64Encoder()).encodeBuffer(key);
 	}
 }

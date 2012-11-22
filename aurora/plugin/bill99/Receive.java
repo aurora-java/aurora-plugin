@@ -11,7 +11,6 @@ import aurora.service.ServiceContext;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 
-
 public class Receive extends AbstractEntry {
 	// 获取人民币网关账户号
 	private String merchantAcctId;
@@ -194,18 +193,26 @@ public class Receive extends AbstractEntry {
 
 		// 获取加密签名串
 		signMsg = (String) request.getParameter("signMsg").trim();
-
-		String merchantSignMsg = createSignMSG();
-
-		boolean isSignFail = !signMsg.toUpperCase().equals(
-				merchantSignMsg.toUpperCase());
+		String merchantSignMsg = "";
+		boolean isSignFail = true;
+		if ("1".equals(signType)) {
+			merchantSignMsg = createSignMSG();
+			isSignFail = !signMsg.toUpperCase().equals(
+					merchantSignMsg.toUpperCase());
+		} else if ("4".equals(signType)) {
+			String createReceiveMsg = createPKiReceiveMsg();
+			SendReceivePKipair pki = new SendReceivePKipair();
+			isSignFail = pki.enCodeByCer(createReceiveMsg, signMsg);
+		} else {
+			throw new RuntimeException("接收来自块钱的signType 配置错误，1：为MD5，4：为签名方式");
+		}
 
 		bill99.put(Bill99.orderAmount, orderAmount);
 		bill99.put(Bill99.orderTime, orderTime);
 		bill99.put(Bill99.payType, payType);
 		bill99.put(Bill99.bankId, bankId);
 		bill99.put(Bill99.orderId, orderId);
-		bill99.put(Bill99.key, key);
+		// bill99.put(Bill99.key, key);
 		bill99.put(Bill99.merchantAcctId, merchantAcctId);
 		bill99.put(Bill99.version, version);
 		bill99.put(Bill99.language, language);
@@ -223,7 +230,55 @@ public class Receive extends AbstractEntry {
 		bill99.put(Bill99.isSignFail, isSignFail);
 	}
 
+	private String createPKiReceiveMsg() {
+		String merchantSignMsgVal = "";
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal,
+				"merchantAcctId", merchantAcctId);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "version",
+				version);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "language",
+				language);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "signType",
+				signType);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "payType",
+				payType);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "bankId",
+				bankId);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "orderId",
+				orderId);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal,
+				"orderTime", orderTime);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal,
+				"orderAmount", orderAmount);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "dealId",
+				dealId);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal,
+				"bankDealId", bankDealId);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "dealTime",
+				dealTime);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal,
+				"payAmount", payAmount);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "fee", fee);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "ext1",
+				ext1);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "ext2",
+				ext2);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal,
+				"payResult", payResult);
+		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, "errCode",
+				errCode);
+		return merchantSignMsgVal;
+	}
+
 	private String createSignMSG() throws UnsupportedEncodingException {
+		String merchantSignMsgVal = createMD5ReceiveMsg();
+
+		String merchantSignMsg = MD5Util.md5Hex(
+				merchantSignMsgVal.getBytes("gb2312")).toUpperCase();
+		return merchantSignMsg;
+	}
+
+	private String createMD5ReceiveMsg() {
 		// 生成加密串。必须保持如下顺序。
 		String merchantSignMsgVal = "";
 		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal,
@@ -262,12 +317,11 @@ public class Receive extends AbstractEntry {
 				Bill99.payResult, payResult);
 		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal,
 				Bill99.errCode, errCode);
-		merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal, Bill99.key,
-				key);
-
-		String merchantSignMsg = MD5Util.md5Hex(
-				merchantSignMsgVal.getBytes("gb2312")).toUpperCase();
-		return merchantSignMsg;
+		if ("1".equals(signType)) {
+			merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal,
+					Bill99.key, key);
+		}
+		return merchantSignMsgVal;
 	}
 
 	private String getVaule(String key) {

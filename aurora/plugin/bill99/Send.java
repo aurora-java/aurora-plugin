@@ -174,11 +174,20 @@ public class Send extends AbstractEntry {
 		bill99.put(Bill99.bankId, bankId);
 		bill99.put(Bill99.redoFlag, redoFlag);
 		bill99.put(Bill99.pid, pid);
-		bill99.put(Bill99.key, key);
+		if ("1".equals(signType)) {
+			bill99.put(Bill99.key, key);
+		}
 		bill99.put(Bill99.payUrl, payUrl);
-
-		String signMsg = createSignMSG();
-		bill99.put(Bill99.signMsg, signMsg);
+		if ("1".equals(signType)) {
+			String signMsg = createSignMD5MSG();
+			bill99.put(Bill99.signMsg, signMsg);
+		} else if ("4".equals(signType)) {
+			SendReceivePKipair pki = new SendReceivePKipair();
+			String signMsg = pki.signMsg(createPKIMessage());
+			bill99.put(Bill99.signMsg, signMsg);
+		} else {
+			throw new RuntimeException("signType 配置错误，1：为MD5，4：为签名方式");
+		}
 
 	}
 
@@ -191,8 +200,48 @@ public class Send extends AbstractEntry {
 
 	}
 
-	private String createSignMSG() throws UnsupportedEncodingException {
+	private String createSignMD5MSG() throws UnsupportedEncodingException {
 		// 生成加密签名串
+		String signMsgVal = createMD5SendMessage();
+		String signMsg = MD5Util.md5Hex(signMsgVal.getBytes("gb2312"))
+				.toUpperCase();
+		return signMsg;
+	}
+
+	private String createPKIMessage() {
+		// /请务必按照如下顺序和规则组成加密串！
+		String signMsgVal = "";
+		signMsgVal = Bill99.appendParam(signMsgVal, "inputCharset",
+				inputCharset);
+		signMsgVal = Bill99.appendParam(signMsgVal, "pageUrl", pageUrl);
+		signMsgVal = Bill99.appendParam(signMsgVal, "bgUrl", bgUrl);
+		signMsgVal = Bill99.appendParam(signMsgVal, "version", version);
+		signMsgVal = Bill99.appendParam(signMsgVal, "language", language);
+		signMsgVal = Bill99.appendParam(signMsgVal, "signType", signType);
+		signMsgVal = Bill99.appendParam(signMsgVal, "merchantAcctId",
+				merchantAcctId);
+		signMsgVal = Bill99.appendParam(signMsgVal, "payerName", payerName);
+		signMsgVal = Bill99.appendParam(signMsgVal, "payerContactType",
+				payerContactType);
+		signMsgVal = Bill99.appendParam(signMsgVal, "payerContact",
+				payerContact);
+		signMsgVal = Bill99.appendParam(signMsgVal, "orderId", orderId);
+		signMsgVal = Bill99.appendParam(signMsgVal, "orderAmount", orderAmount);
+		signMsgVal = Bill99.appendParam(signMsgVal, "orderTime", orderTime);
+		signMsgVal = Bill99.appendParam(signMsgVal, "productName", productName);
+		signMsgVal = Bill99.appendParam(signMsgVal, "productNum", productNum);
+		signMsgVal = Bill99.appendParam(signMsgVal, "productId", productId);
+		signMsgVal = Bill99.appendParam(signMsgVal, "productDesc", productDesc);
+		signMsgVal = Bill99.appendParam(signMsgVal, "ext1", ext1);
+		signMsgVal = Bill99.appendParam(signMsgVal, "ext2", ext2);
+		signMsgVal = Bill99.appendParam(signMsgVal, "payType", payType);
+		signMsgVal = Bill99.appendParam(signMsgVal, "bankId", bankId);
+		signMsgVal = Bill99.appendParam(signMsgVal, "redoFlag", redoFlag);
+		signMsgVal = Bill99.appendParam(signMsgVal, "pid", pid);
+		return signMsgVal;
+	}
+
+	private String createMD5SendMessage() {
 		// /请务必按照如下顺序和规则组成加密串！
 		String signMsgVal = "";
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.inputCharset,
@@ -230,11 +279,7 @@ public class Send extends AbstractEntry {
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.redoFlag, redoFlag);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.pid, pid);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.key, key);
-
-		String signMsg = MD5Util.md5Hex(signMsgVal.getBytes("gb2312"))
-				.toUpperCase();
-		return signMsg;
-
+		return signMsgVal;
 	}
 
 	public void initConfig() {
@@ -262,6 +307,7 @@ public class Send extends AbstractEntry {
 		// #签名类型.固定值
 		// #1代表MD5签名
 		// #当前版本固定为1
+		// 签名类型,该值为4，代表PKI加密方式,该参数必填。
 		this.signType = getVaule(Bill99.signType);
 		// #支付人联系方式类型.固定选择值
 		// #只能选择1

@@ -33,9 +33,9 @@ public class Pkipair {
 			Signature signature = Signature.getInstance("SHA1withRSA");
 			signature.initSign(priK);
 			signature.update(signMsg.getBytes("UTF-8"));
-			//避免其他人编译错误，打包时一定要修改
-//			sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
-//			base64 = encoder.encode(signature.sign());
+			
+			sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
+			base64 = encoder.encode(signature.sign());
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

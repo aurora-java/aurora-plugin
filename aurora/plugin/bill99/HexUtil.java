@@ -3,7 +3,6 @@ package aurora.plugin.bill99;
 
 /**
  * This class provides convenient functions to convert hex string to byte array and vice versa.
- * @author 99bill
  *
  */
 public class HexUtil {
@@ -45,6 +44,6 @@ public class HexUtil {
         return buf;
     }
 
-    private static final String HEX_CHARS = "0123456789abcdef";
+    private static final String HEX_CHARS = "0123456789ABCDEF";
 
 }

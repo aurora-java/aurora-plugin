@@ -26,10 +26,10 @@ public class CerEncode {
 			Signature signature = Signature.getInstance("SHA1withRSA");
 			signature.initVerify(pk);
 			signature.update(val.getBytes());
-			//避免其他人编译错误，打包时一定要修改
-//			sun.misc.BASE64Decoder decoder = new sun.misc.BASE64Decoder();
-//
-//			flag = signature.verify(decoder.decodeBuffer(msg));
+			
+			sun.misc.BASE64Decoder decoder = new sun.misc.BASE64Decoder();
+
+			flag = signature.verify(decoder.decodeBuffer(msg));
 
 		} catch (Exception e) {
 			e.printStackTrace();
