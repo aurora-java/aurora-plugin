@@ -151,6 +151,10 @@ public class Send extends AbstractEntry {
 		productId = getValue(context, this.getProductId());
 		orderTime = getValue(context, this.getOrderTime());
 
+		payType = getValue(context, this.getPayType());
+		if (payType == null || "".equals(payType))
+			this.setPayType(getVaule(Bill99.payType));
+
 		bill99.put(Bill99.inputCharset, inputCharset);
 		bill99.put(Bill99.pageUrl, pageUrl);
 		bill99.put(Bill99.bgUrl, bgUrl);
@@ -274,7 +278,8 @@ public class Send extends AbstractEntry {
 				productDesc);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.ext1, ext1);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.ext2, ext2);
-		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.payType, payType);
+		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.payType,
+				payType);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.bankId, bankId);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.redoFlag, redoFlag);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.pid, pid);
@@ -317,7 +322,7 @@ public class Send extends AbstractEntry {
 		// #只能选择00、10、11、12、13、14
 		// #00：组合支付（网关支付页面显示快钱支持的各种支付方式，推荐使用）10：银行卡支付（网关支付页面只显示银行卡支付）.11：电话银行支付（网关支付页面只显示电话支付）.12：快钱账户支付（网关支付页面只显示快钱账户支付）.13：线下支付（网关支付页面只显示线下支付方式）.14：B2B支付（网关支付页面只显示B2B支付，但需要向快钱申请开通才能使用）
 		//
-		this.payType = getVaule(Bill99.payType);
+		// this.setPayType(getVaule(Bill99.payType));
 		// #银行代码
 		// #实现直接跳转到银行页面去支付,只在payType=10时才需设置参数
 		// #具体代码参见 接口文档银行代码列表
@@ -485,6 +490,10 @@ public class Send extends AbstractEntry {
 
 	public String getPid() {
 		return pid;
+	}
+
+	public void setPayType(String payType) {
+		this.payType = payType;
 	}
 
 }
