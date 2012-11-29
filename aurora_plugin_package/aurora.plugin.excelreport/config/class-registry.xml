@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-registry>
+	<package-mapping packageName="aurora.plugin.excelreport" />
+	<class-mapping className="aurora.plugin.excelreport.SheetWrap"
+		elementName="sheet" nameSpace="aurora.plugin.excelreport" />
+	<class-mapping className="aurora.plugin.excelreport.CellStyleWrap"
+		elementName="cell-style" nameSpace="aurora.plugin.excelreport" />
+	<class-mapping className="aurora.plugin.excelreport.FontWrap"
+		elementName="font" nameSpace="aurora.plugin.excelreport" />
+
+</class-registry>
+
