@@ -202,7 +202,7 @@ public class Receive extends AbstractEntry {
 		} else if ("4".equals(signType)) {
 			String createReceiveMsg = createPKiReceiveMsg();
 			SendReceivePKipair pki = new SendReceivePKipair();
-			isSignFail = pki.enCodeByCer(createReceiveMsg, signMsg);
+			isSignFail = !pki.enCodeByCer(createReceiveMsg, signMsg);
 		} else {
 			throw new RuntimeException("接收来自块钱的signType 配置错误，1：为MD5，4：为签名方式");
 		}
