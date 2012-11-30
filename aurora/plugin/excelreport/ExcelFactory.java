@@ -14,27 +14,25 @@ public class ExcelFactory {
 
 	public void createExcel(CompositeMap context, ExcelReport excelReport)
 			throws Exception {
+		if(excelReport.getSheets()==null)return;	
 		Workbook wb = null;
-		if (".xlsx".equalsIgnoreCase(excelReport.getFormat()))
+		if (ExcelReport.KEY_EXCEL2007_SUFFIX.equalsIgnoreCase(excelReport.getFormat()))
 			wb = new XSSFWorkbook();
 		else
-			wb = new HSSFWorkbook();
-		styles = createStyles(wb, excelReport);
-		if(excelReport.getSheets()==null)return;
+			wb = new HSSFWorkbook();		
+		if(excelReport.getStyles()!=null)
+			styles = createStyles(wb, excelReport);
 		for (SheetWrap sheetObj : excelReport.getSheets()) {
 			sheetObj.createSheet(wb, context, this);
 		}
-
 		wb.write(excelReport.getOutputStream());		
-//		excelReport.getOutputStream().close();
-
+		excelReport.getOutputStream().close();
 	}
 
 	private Map<String, CellStyle> createStyles(Workbook wb,
-			ExcelReport excelReport) {
+			ExcelReport excelReport) {		
 		Map<String, CellStyle> styles = new HashMap<String, CellStyle>();
-		CellStyle style;
-		if(excelReport.getStyles()==null)return styles;
+		CellStyle style;		
 		for (CellStyleWrap cellStyleObj : excelReport.getStyles()) {
 			style = cellStyleObj.createStyle(wb);
 			styles.put(cellStyleObj.getName(), style);
@@ -48,5 +46,4 @@ public class ExcelFactory {
 			row = sheet.createRow(rownum - 1);
 		return row;
 	}
-
 }

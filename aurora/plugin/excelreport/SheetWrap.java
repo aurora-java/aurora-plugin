@@ -54,7 +54,7 @@ public class SheetWrap {
 
 	public void createSheet(Workbook wb, CompositeMap context,
 			ExcelFactory excelFactory) {
-		sheet = wb.createSheet(this.getName());
+		this.sheet = wb.createSheet(this.getName());
 		this.createHelper = wb.getCreationHelper();
 		this.excelFactory = excelFactory;
 		createDynamicContent(context);
@@ -166,7 +166,6 @@ public class SheetWrap {
 						}
 						colBuffer.append(")");
 						cell.setCellFormula(colBuffer.toString());
-						System.out.println(colBuffer);
 					} else if (column.getGroupDesc() != null
 							&& (dataModel.get(column.getField()) != null)) {
 						Cell cell = row.createCell(cellAddress);
@@ -237,10 +236,8 @@ public class SheetWrap {
 		GroupConfig[] groupConfig = createGroupConfig(data,
 				this.getDynamicContent());
 		if (groupConfig != null) {
-			System.out.println(data.toXML());
 			CompositeMap target = GroupTransformer.transform(data, groupConfig);
 			createTableGroup(target, this.getDynamicContent(), sheet);
-			System.out.println(target.toXML());
 		} else {
 			Iterator rowIt = data.getChildIterator();
 			if (rowIt == null)
@@ -283,8 +280,7 @@ public class SheetWrap {
 
 		}
 		if (groupConfig.getChildIterator() != null) {
-			GroupConfig[] configs = GroupConfig.createGroupConfigs(groupConfig);
-			System.out.println(groupConfig.toXML());
+			GroupConfig[] configs = GroupConfig.createGroupConfigs(groupConfig);		
 			for (GroupConfig config : configs) {
 				config.setExtendParentAttributes(false);
 			}

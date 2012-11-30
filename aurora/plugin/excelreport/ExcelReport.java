@@ -1,9 +1,21 @@
 package aurora.plugin.excelreport;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.WritableByteChannel;
 
 import javax.servlet.http.HttpServletResponse;
+
+import org.dom4j.IllegalAddException;
+import org.xml.sax.SAXException;
 
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
@@ -17,16 +29,152 @@ import uncertain.proc.ProcedureRunner;
 
 public class ExcelReport extends AbstractEntry {
 	String configPath;
-
+	String fileName;
 	String format;
 	UncertainEngine uncertainEngine;
 	public final static String KEY_EXCEL_REPORT = "excel-report";
+	public final static String KEY_EXCEL2003_SUFFIX = ".xls";
+	public final static String KEY_EXCEL2007_SUFFIX = ".xlsx";
+	public final static String KEY_EXCEL2003_MIME = "application/vnd.ms-excel";
+	public final static String KEY_EXCEL2007_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 	OutputStream os;
 	public CellStyleWrap[] styles;
 	public SheetWrap[] sheets;
+	CompositeMap configObj;
+
+	public void run(ProcedureRunner runner) throws Exception {
+		CompositeMap context = runner.getContext();
+		ExcelReport excelReport = createExcelReport(context);
+		if (excelReport == null)
+			return;
+		String filename = excelReport.getFileName();
+		if (filename != null) {
+			if (filename.endsWith(KEY_EXCEL2007_SUFFIX)) {
+				excelReport.setFormat(KEY_EXCEL2007_SUFFIX);
+			} else if (filename.endsWith(KEY_EXCEL2003_SUFFIX)) {
+				excelReport.setFormat(KEY_EXCEL2003_SUFFIX);
+			} else {
+				throw new IllegalAddException(filename + " illegal suffix");
+			}
+		}
+		boolean is_http = true;
+		File tempFile = null;
+		if (is_http) {
+			tempFile = File.createTempFile("excelreport",
+					excelReport.getFormat());
+			os = new FileOutputStream(tempFile);
+		} else {
+			os = new FileOutputStream(fileName);
+		}
+		excelReport.setOutputStream(os);
+		try {
+			new ExcelFactory().createExcel(context, excelReport);
+		} catch (Exception e) {
+			throw e;
+		}
+		if (is_http) {
+			ServiceInstance svc = ServiceInstance.getInstance(context);
+			HttpServletResponse response = ((HttpServiceInstance) svc)
+					.getResponse();
+			setResponseHeader(response, excelReport);
+			transferOutputStream(response.getOutputStream(),
+					new FileInputStream(tempFile));
+		}
+		stopRunner(runner);
+	}
+
+	ExcelReport createExcelReport(CompositeMap context) throws IOException,
+			SAXException {
+		ExcelReport excelReport = null;
+		if (this.getSheets() == null && this.getConfigPath() != null) {
+			CompositeMap config = (CompositeMap) context.getObject(this
+					.getConfigPath());
+			if (config != null) {
+				String configStr = XMLOutputter.defaultInstance().toXML(config,
+						false);
+				try {
+					setConfigObj(CompositeLoader.createInstanceForOCM()
+							.loadFromString(configStr, "UTF-8"));
+				} catch (IOException e) {
+					throw e;
+				} catch (SAXException e) {
+					throw e;
+				}
+			}
+			OCManager mOCManager = this.uncertainEngine.getOcManager();
+			excelReport = (ExcelReport) mOCManager.createObject(getConfigObj());
+		} else {
+			excelReport = this;
+		}
+		return excelReport;
+	}
+
+	void stopRunner(ProcedureRunner runner) {
+		runner.stop();
+		while (runner.getCaller() != null) {
+			runner.getCaller().stop();
+			runner = runner.getCaller();
+		}
+	}
+
+	void transferOutputStream(OutputStream os, InputStream is)
+			throws IOException {
+		ReadableByteChannel rbc = Channels.newChannel(is);
+		WritableByteChannel wbc = Channels.newChannel(os);
+		ByteBuffer buffer = ByteBuffer.allocate(1024);
+		try {
+			while (rbc.read(buffer) != -1) {
+				buffer.flip();
+				wbc.write(buffer);
+				buffer.compact();
+			}			
+		} catch (IOException e) {
+			throw e;
+		} finally {			
+			wbc.close();
+			rbc.close();
+			is.close();
+		}
+	}
+
+	void setResponseHeader(HttpServletResponse response, ExcelReport excelReport)
+			throws UnsupportedEncodingException {
+		if (KEY_EXCEL2007_SUFFIX.equals(format)) {
+			response.setContentType(KEY_EXCEL2007_MIME);
+		} else {
+			response.setContentType(KEY_EXCEL2003_MIME);
+		}
+		try {
+			response.setHeader("Content-Disposition", "attachment; filename=\""
+					+ new String(excelReport.getFileName().getBytes(),
+							"ISO-8859-1") + "\"");
+		} catch (UnsupportedEncodingException e) {
+			throw e;
+		}
+	}
+
+	public OutputStream getOutputStream() {
+		return os;
+	}
+
+	public String getFormat() {
+		return format;
+	}
+
+	public void setFormat(String format) {
+		this.format = format;
+	}
 
 	public String getConfigPath() {
 		return configPath;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 
 	public void setConfigPath(String configPath) {
@@ -52,73 +200,17 @@ public class ExcelReport extends AbstractEntry {
 	public void setSheets(SheetWrap[] sheets) {
 		this.sheets = sheets;
 	}
-	
+
 	public void setOutputStream(OutputStream os) {
 		this.os = os;
 	}
 
-	public void run(ProcedureRunner runner) throws Exception {
-		ExcelReport excelReport = null;
-		CompositeMap context = runner.getContext();
-		if (this.getSheets() == null && this.getConfigPath() != null) {
-			OCManager mOCManager = this.uncertainEngine.getOcManager();
-
-			CompositeMap config = (CompositeMap) context.getObject(this
-					.getConfigPath());
-			config.setNameSpace("dr", "aurora.plugin.excelreport");
-			String configStr = XMLOutputter.defaultInstance().toXML(config, false);
-			config = CompositeLoader.createInstanceForOCM().loadFromString(configStr,"UTF-8");
-			System.out.println(config.toXML());
-			excelReport = (ExcelReport) mOCManager.createObject(config);			
-		}
-
-		ServiceInstance svc = ServiceInstance.getInstance(context);
-		boolean is_http = true;
-		format = ".xlsx";
-		String fileName = "/Users/zoulai/work/logs/bank" + format;
-		excelReport.setFormat(format);
-		fileName="excelReport";
-		if (is_http) {
-			HttpServletResponse response = ((HttpServiceInstance) svc)
-					.getResponse();
-			if(".xlsx".equals(format)){
-				response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-			}else{
-				response.setContentType("application/vnd.ms-excel");
-			}
-			response.setCharacterEncoding("GBK");
-			response.setHeader("Content-Disposition", "attachment; filename=\""
-					+ new String(fileName.getBytes(), "ISO-8859-1") + format+"\"");
-			os = response.getOutputStream();			
-			excelReport.setOutputStream(os);
-		} else {
-			os = new FileOutputStream(fileName);
-			excelReport.setOutputStream(os);
-		}
-		ExcelFactory f = new ExcelFactory();
-		if (excelReport != null)
-			f.createExcel(context, excelReport);
-		else
-			f.createExcel(context, this);
-		if (is_http) {
-			runner.stop();
-			while (runner.getCaller() != null) {
-				runner.getCaller().stop();
-				runner = runner.getCaller();
-			}
-		}
+	public CompositeMap getConfigObj() {
+		return configObj;
 	}
 
-	public OutputStream getOutputStream() {
-		return os;
-	}
-
-	public String getFormat() {
-		return format;
-	}
-	
-	public void setFormat(String format){
-		this.format=format;
+	public void setConfigObj(CompositeMap configObj) {
+		this.configObj = configObj;
 	}
 
 }
