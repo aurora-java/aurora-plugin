@@ -2,8 +2,13 @@ package aurora.plugin.mail;
 
 import java.util.Date;
 import java.util.Properties;
+
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.mail.Address;
+import javax.mail.Authenticator;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -23,6 +28,8 @@ public class SendMail {
 	private String password;
 	private String userName;
 	private String port;
+	private Attachment[] attachments;
+	private boolean auth = false;
 
 	public void check() {
 		if (smtpServer == null || "".equals(smtpServer)) {
@@ -47,7 +54,16 @@ public class SendMail {
 		props.put("mail.smtp.auth", "true");// 同时通过验证
 		props.put("mail.smtp.port", port);
 
-		Session s = Session.getInstance(props, null);// 根据属性新建一个邮件会话，null参数是一种Authenticator(验证程序)
+		Session s = null;
+		if(auth){ //服务器需要身份认证   
+			props.put("mail.smtp.auth","true");
+			SmtpAuth smtpAuth=new SmtpAuth(userName,password);  
+            s=Session.getDefaultInstance(props, smtpAuth);    
+        }else{   
+            props.put("mail.smtp.auth","false");   
+            s=Session.getDefaultInstance(props, null);   
+        }   
+		
 		// s.setDebug(true);// 设置调试标志,要查看经过邮件服务器邮件命令，可以用该方法
 		// Message类表示单个邮件消息，它的属性包括类型，地址信息和所定义的目录结构。
 
@@ -77,22 +93,51 @@ public class SendMail {
 		MimeBodyPart mbp = new MimeBodyPart();
 		mbp.setContent(tcontent, "text/html;charset=utf-8");
 		mp.addBodyPart(mbp);
+		addAttachment(mp);
 		message.setContent(mp);
-		message.saveChanges();// 存储邮件信息
+		Transport.send(message, message.getAllRecipients());
 		
-		// Transport 是用来发送信息的，
-		// 用于邮件的收发打操作。
-		Transport transport = null;
-		try {
-			transport = s.getTransport("smtp");
-			transport.connect(smtpServer, userName, password);// 以smtp方式登录邮箱
-			transport.sendMessage(message, message.getAllRecipients());// 发送邮件,其中第二个参数是所有已设好的收件人地址
-		} finally {
-			if (transport != null && transport.isConnected()) {
-				transport.close();
-			}
-		}
+//		message.saveChanges();// 存储邮件信息
+//		
+//		// Transport 是用来发送信息的，
+//		// 用于邮件的收发打操作。
+//		Transport transport = null;
+//		try {
+//			transport = s.getTransport("smtp");
+//			transport.connect(smtpServer, userName, password);// 以smtp方式登录邮箱
+//			transport.sendMessage(message, message.getAllRecipients());// 发送邮件,其中第二个参数是所有已设好的收件人地址
+//		} finally {
+//			if (transport != null && transport.isConnected()) {
+//				transport.close();
+//			}
+//		}
 	}
+	class SmtpAuth extends Authenticator {    
+	    private String username,password;    
+	   
+	    public SmtpAuth(String username,String password){    
+	        this.username = username;     
+	        this.password = password;     
+	    }    
+	    protected javax.mail.PasswordAuthentication getPasswordAuthentication() {    
+	        return new javax.mail.PasswordAuthentication(username,password);    
+	    }    
+	} 
+    protected void addAttachment(Multipart mp) throws MessagingException{
+    	if(attachments != null){
+    		MimeBodyPart mbp;
+    		FileDataSource fds;
+    		String fileName;
+    		for(int i=0;i<attachments.length;i++){
+    			 mbp=new MimeBodyPart();  
+    			 fileName=attachments[i].getPath(); //选择出每一个附件名   
+    			 fds =new FileDataSource(fileName); //得到数据源   
+                 mbp.setDataHandler(new DataHandler(fds)); //得到附件本身并至入BodyPart   
+                 mbp.setFileName(attachments[i].getName());  //得到文件名同样至入BodyPart   
+                 mp.addBodyPart(mbp);   
+    		}
+        }    
+    }
 
 	public String getTtitle() {
 		return ttitle;
@@ -165,5 +210,15 @@ public class SendMail {
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
+	public void setAttachments(Attachment[] attaches) {
+		this.attachments = attaches;
+	}
+	public boolean isAuth() {
+		return auth;
+	}
 
+	public void setAuth(boolean auth) {
+		this.auth = auth;
+	}
+	
 }
