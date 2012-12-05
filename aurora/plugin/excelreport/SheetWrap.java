@@ -1,9 +1,13 @@
 package aurora.plugin.excelreport;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -12,6 +16,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+
 
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
@@ -26,8 +31,9 @@ public class SheetWrap {
 	private int currentRownum = 0;
 	private CreationHelper createHelper;
 	private Sheet sheet;
-	ExcelFactory excelFactory;
-
+	ExcelFactory excelFactory;	
+	Set<String> groupLevelSet=new HashSet<String>();
+	int totalCount=-1;
 	public DynamicContent getDynamicContent() {
 		return dynamicContent;
 	}
@@ -64,33 +70,33 @@ public class SheetWrap {
 	void createStaticContent(CompositeMap context) {
 		int rownum;
 		int colnum;
-		if(this.getStaticContent()==null)return;
-		for (CellData cellDataObj : this.getStaticContent()) {
-			colnum = CellReference.convertColStringToIndex(cellDataObj
-					.getCell());
-			if (cellDataObj.getOffset()) {
-				rownum = this.currentRownum + cellDataObj.getRow();
+		if (this.getStaticContent() == null)
+			return;
+		for (CellData cellConfig : this.getStaticContent()) {
+			colnum = CellReference.convertColStringToIndex(cellConfig.getCell());
+			if (cellConfig.getOffset()) {
+				rownum = this.currentRownum + cellConfig.getRow();
 			} else {
-				rownum = cellDataObj.getRow();
+				rownum = cellConfig.getRow();
 			}
 			Row row = ExcelFactory.createRow(sheet, rownum);
 			Cell cell = row.createCell(colnum);
-			if (cellDataObj.getStyleName() != null
-					&& !"".equals(cellDataObj.getStyleName()))
-				cell.setCellStyle(excelFactory.styles.get(cellDataObj
+			if (cellConfig.getStyleName() != null
+					&& !"".equals(cellConfig.getStyleName()))
+				cell.setCellStyle(excelFactory.styles.get(cellConfig
 						.getStyleName()));
-			if (cellDataObj.getRange() != null) {
-				sheet.addMergedRegion(CellRangeAddress.valueOf(cellDataObj
+			if (cellConfig.getRange() != null) {
+				sheet.addMergedRegion(CellRangeAddress.valueOf(cellConfig
 						.getRange()));
 			}
-			if (CellData.KEY_FORMULA.equals(cellDataObj.getType())) {
-				cell.setCellFormula(cellDataObj.getValue());
+			if (CellData.KEY_FORMULA.equals(cellConfig.getType())) {
+				cell.setCellFormula(cellConfig.getValue());
 			} else {
-				String value = cellDataObj.getValue();
+				String value = cellConfig.getValue();
 				value = TextParser.parse(value, context);
 				if (value == null || "".equals(value))
 					continue;
-				String dataType = cellDataObj.getDataType();
+				String dataType = cellConfig.getDataType();
 				if (CellData.KEY_DATA_TYPE_STRING.equals(dataType))
 					cell.setCellValue(createHelper.createRichTextString(value));
 				if (CellData.KEY_DATA_TYPE_NUMBER.equals(dataType))
@@ -122,13 +128,13 @@ public class SheetWrap {
 				cell.setCellStyle(excelFactory.styles.get(column
 						.getTitleStyle()));
 		}
+		this.sheet.createFreezePane(0, currentRownum);// 冻结		
 	}
-
-	List<Integer> createTableGroup(CompositeMap dataModel,
+	
+	List<CompositeMap> createTableGroup(CompositeMap dataModel,
 			DynamicContent dynamicContent, Sheet sheet) {
-		Iterator it = dataModel.getChildIterator();
-		TableColumn column;
-		List<Integer> rowList = new LinkedList<Integer>();
+		Iterator it = dataModel.getChildIterator();		
+		List<CompositeMap> rowList = new LinkedList<CompositeMap>();
 		if (it != null) {
 			while (it.hasNext()) {
 				CompositeMap childMap = (CompositeMap) it.next();
@@ -139,53 +145,119 @@ public class SheetWrap {
 					rowList.add(createRecord(childMap, dynamicContent, sheet));
 				}
 			}
-			if (rowList.size() != 0) {
-				List<TableColumn> list = dynamicContent.getTableColumnList();
-				Iterator<TableColumn> colIt = list.iterator();
-				int cellAddress = CellReference
-						.convertColStringToIndex(dynamicContent.getCell());
-				Row row = ExcelFactory.createRow(sheet, ++currentRownum);
-				while (colIt.hasNext()) {
-					column = colIt.next();
-					if (column.getGroupFormula() != null) {
-						Cell cell = row.createCell(cellAddress);
-						StringBuffer colBuffer = new StringBuffer();
-						colBuffer.append(column.getGroupFormula());
-						colBuffer.append("(");
-						Iterator iterator = rowList.iterator();
-						boolean is_first = true;
-						while (iterator.hasNext()) {
-							if (!is_first)
-								colBuffer.append(",");
-
-							colBuffer.append(CellReference
-									.convertNumToColString(cell
-											.getColumnIndex()));
-							colBuffer.append(iterator.next());
-							is_first = false;
-						}
-						colBuffer.append(")");
-						cell.setCellFormula(colBuffer.toString());
-					} else if (column.getGroupDesc() != null
-							&& (dataModel.get(column.getField()) != null)) {
-						Cell cell = row.createCell(cellAddress);
-						cell.setCellValue(createHelper
-								.createRichTextString(column.getGroupDesc()));
+			if (rowList.size() != 0) {				
+				Map<String, List<TableColumn>> groupMap=dynamicContent.getGroupMap();
+				List<TableColumn> list=groupMap.get(dataModel.getName());
+				if(list!=null){				
+					aaa(list,rowList,false);				
+				}				
+				if (!dataModel.getName().startsWith("level")) {		
+					CompositeMap m=null;
+					Iterator<String> iterator=new TreeSet<String>(groupMap.keySet()).iterator();
+					while(iterator.hasNext()){
+						String levelName=iterator.next();
+						List<TableColumn> list1=groupMap.get(levelName);
+						m=aaa(list1,rowList,true);						
 					}
-					cellAddress++;
-				}
-				if(!dataModel.getName().startsWith("level")){
-					Cell cell = row.createCell(CellReference.convertColStringToIndex(dynamicContent.getCell()));
-					cell.setCellValue(createHelper
-							.createRichTextString(dynamicContent.getGroupDesc()));
+					int firstRownum=m.getInt("first");
+					int endRownum=m.getInt("end");
+					this.sheet.groupRow(firstRownum-1, endRownum+totalCount);
+//					System.out.println("total this.sheet.groupRow("+(firstRownum-1)+","+(endRownum+totalCount)+")");
+						
 				}
 			}
 		}
 		return rowList;
 	}
-
-	int createRecord(CompositeMap record, DynamicContent dynamicContent,
+	
+	CompositeMap aaa(List<TableColumn> groupList,List<CompositeMap> rowList,boolean is_total){
+		Map<String, TableColumn> columnMap = dynamicContent
+				.getColumnsMap();		
+		Iterator<TableColumn> colIt = groupList.iterator();				
+		String curGroupFormula=null;
+		Row row =null;
+		TableColumn column;
+		int firstRownum=0;
+		int endRownum=0;
+		boolean is_flag=false;
+		boolean is_group=false;		
+		while (colIt.hasNext()) {
+			column = colIt.next();					
+			if(!column.getGroupFormula().equals(curGroupFormula)){
+				curGroupFormula=column.getGroupFormula();
+				row = ExcelFactory.createRow(sheet, ++currentRownum);			
+				is_flag=true;
+				is_group=true;	
+				if(is_total)
+					totalCount++;
+			}
+			if (column.getGroupFormula() != null) {										
+				Cell cell = row.createCell(column.getIndex());
+				StringBuffer colBuffer = new StringBuffer("SUBTOTAL(");
+				colBuffer.append(column.getGroupFormula());
+				colBuffer.append(",");
+				String ref1 = null;
+				String ref2 = null;
+				Iterator<CompositeMap> iterator = rowList.iterator();
+				String value=null;
+				boolean is_first = true;
+				while (iterator.hasNext()) {
+					CompositeMap map1=iterator.next();
+					value=((CompositeMap)map1.get("record")).getString(column.getGroupField());
+					if (is_first) {
+						firstRownum=map1.getInt("rownum");
+						ref1 = CellReference.convertNumToColString(cell
+								.getColumnIndex()) + firstRownum;
+						colBuffer.append(ref1);
+						colBuffer.append(":");
+						is_first = false;
+					} else {
+						endRownum=map1.getInt("rownum");
+						ref2 = CellReference.convertNumToColString(cell
+								.getColumnIndex()) + endRownum;
+					}
+				}
+				if (ref2 == null){
+					ref2 = ref1;
+					endRownum=firstRownum;
+				}
+				colBuffer.append(ref2);
+				colBuffer.append(")");
+//				System.out.println(colBuffer);
+				cell.setCellFormula(colBuffer.toString());
+				if(is_flag){
+					String field = column.getGroupField();
+					TableColumn groupColumn = columnMap.get(field);
+					Cell groupCell = row.createCell(groupColumn.getIndex());
+					if(is_total)
+						groupCell.setCellValue(value+" "+column.getTotalDesc());
+					else
+						groupCell.setCellValue(value+" "+column.getGroupDesc());
+					groupCell.setCellStyle(excelFactory.styles.get("group"));
+				}
+				
+			}	
+			if(is_group){
+				if(!is_total){
+					this.sheet.groupRow(firstRownum-1, (currentRownum-2));
+//					System.out.println("this.sheet.groupRow("+(firstRownum-1)+","+ (currentRownum-2)+")");
+				}		
+				is_group=false;
+			}			
+		}	
+		if(is_total){
+			CompositeMap map=new CompositeMap();
+			map.put("first", firstRownum);
+			map.put("end", endRownum);
+			return map;
+		}else{
+			return null;
+		}
+	}	
+	
+	CompositeMap createRecord(CompositeMap record, DynamicContent dynamicContent,
 			Sheet sheet) {
+		CompositeMap map=new CompositeMap();
 		List<TableColumn> list = dynamicContent.getTableColumnList();
 		TableColumn column;
 		Row row = ExcelFactory.createRow(sheet, ++currentRownum);
@@ -202,7 +274,9 @@ public class SheetWrap {
 				cell.setCellStyle(excelFactory.styles.get(column
 						.getCellStyleName()));
 		}
-		return currentRownum;
+		map.put("rownum", currentRownum);
+		map.put("record", record);
+		return map;
 	}
 
 	void setCellValue(Cell cell, Object value) {
@@ -226,7 +300,8 @@ public class SheetWrap {
 	}
 
 	void createDynamicContent(CompositeMap context) {
-		if(this.getDynamicContent()==null)return;
+		if (this.getDynamicContent() == null)
+			return;
 		createTableTitle(context, this.getDynamicContent(), sheet);
 		CompositeMap data = (CompositeMap) context.getObject(this
 				.getDynamicContent().getDataModel());
@@ -237,6 +312,7 @@ public class SheetWrap {
 				this.getDynamicContent());
 		if (groupConfig != null) {
 			CompositeMap target = GroupTransformer.transform(data, groupConfig);
+//			System.out.println(target.toXML());
 			createTableGroup(target, this.getDynamicContent(), sheet);
 		} else {
 			Iterator rowIt = data.getChildIterator();
@@ -251,15 +327,20 @@ public class SheetWrap {
 
 	GroupConfig[] createGroupConfig(CompositeMap dataModel,
 			DynamicContent dynamicContent) {
+		dynamicContent.createGroupMap();
 		CompositeMap groupConfig = new CompositeMap();
 		List<TableColumn> list = dynamicContent.getTableColumnList();
 		TableColumn column;
 		Iterator<TableColumn> it = list.iterator();
 		CompositeMap configRecord = null;
-		StringBuffer buffer = new StringBuffer();
+		StringBuffer buffer = new StringBuffer();		
 		int level = 0;
+		int index = CellReference.convertColStringToIndex(dynamicContent
+				.getCell());
 		while (it.hasNext()) {
 			column = it.next();
+			column.setIndex(index);
+			dynamicContent.putColumnsMap(column.getField(), column);			
 			if (level != column.getGroupLevel()) {
 				level = column.getGroupLevel();
 				if (buffer.length() != 0) {
@@ -270,17 +351,18 @@ public class SheetWrap {
 					groupConfig.addChild(configRecord);
 				}
 				buffer = new StringBuffer();
-				configRecord = new CompositeMap();
+				configRecord = new CompositeMap();			
 			}
 			if (level != 0) {
 				if (buffer.length() != 0)
 					buffer.append(",");
 				buffer.append(column.getField());
 			}
-
+			index++;
 		}
 		if (groupConfig.getChildIterator() != null) {
-			GroupConfig[] configs = GroupConfig.createGroupConfigs(groupConfig);		
+//			System.out.println(groupConfig.toXML());
+			GroupConfig[] configs = GroupConfig.createGroupConfigs(groupConfig);
 			for (GroupConfig config : configs) {
 				config.setExtendParentAttributes(false);
 			}

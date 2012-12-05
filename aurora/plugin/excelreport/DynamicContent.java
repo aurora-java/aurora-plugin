@@ -1,29 +1,56 @@
 package aurora.plugin.excelreport;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import uncertain.composite.CompositeMap;
 import uncertain.core.UncertainEngine;
 import uncertain.ocm.OCManager;
 
 public class DynamicContent {
-	String cell;
+	String cell="A";
 	String dataModel;
-	int row;
+	int row=1;
 	CompositeMap columns;
 	List<TableColumn> columnList;
 	OCManager mOCManager;
+	Map<String, TableColumn> columnsMap = new HashMap<String, TableColumn>();
+	Map<String, List<TableColumn>> groupMap = new HashMap<String, List<TableColumn>>();
 
-	String groupDesc;	
-
-	public String getGroupDesc() {
-		return groupDesc;
+	public Map<String, List<TableColumn>> getGroupMap() {
+		return groupMap;
 	}
 
-	public void setGroupDesc(String groupDesc) {
-		this.groupDesc = groupDesc;
+	public void createGroupMap() {
+		Iterator<TableColumn> iterator = columnList.iterator();
+		TableColumn column;
+		List<TableColumn> list = new LinkedList<TableColumn>();
+		int level = 0;
+		while (iterator.hasNext()) {
+			column = iterator.next();
+			if (level != column.getGroupLevel()) {
+				if (list.size() != 0) {
+					groupMap.put("level" + (level + 1), list);
+					list = new LinkedList<TableColumn>();
+				}
+				level = column.getGroupLevel();
+			}
+			if (column.getGroupFormula() != null)
+				list.add(column);
+		}
+		if (list.size() != 0)
+			groupMap.put("level" + (level + 1), list);
+	}
+
+	public Map<String, TableColumn> getColumnsMap() {
+		return columnsMap;
+	}
+
+	public void putColumnsMap(String name, TableColumn tableColumn) {
+		columnsMap.put(name, tableColumn);
 	}
 
 	public DynamicContent(UncertainEngine uncertainEngine) {

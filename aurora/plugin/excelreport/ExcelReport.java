@@ -17,12 +17,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.dom4j.IllegalAddException;
 import org.xml.sax.SAXException;
 
+import aurora.application.task.excel.IExcelTask;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.XMLOutputter;
 import uncertain.core.UncertainEngine;
+import uncertain.ocm.IObjectRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
@@ -41,12 +43,17 @@ public class ExcelReport extends AbstractEntry {
 	public CellStyleWrap[] styles;
 	public SheetWrap[] sheets;
 	CompositeMap configObj;
+	boolean enableTask = true;
+
+	public ExcelReport(UncertainEngine uncertainEngine) {
+		this.uncertainEngine = uncertainEngine;
+	}
 
 	public void run(ProcedureRunner runner) throws Exception {
 		CompositeMap context = runner.getContext();
 		ExcelReport excelReport = createExcelReport(context);
 		if (excelReport == null)
-			return;
+			return;		
 		String filename = excelReport.getFileName();
 		if (filename != null) {
 			if (filename.endsWith(KEY_EXCEL2007_SUFFIX)) {
@@ -57,14 +64,15 @@ public class ExcelReport extends AbstractEntry {
 				throw new IllegalAddException(filename + " illegal suffix");
 			}
 		}
-		boolean is_http = true;
 		File tempFile = null;
-		if (is_http) {
+		if (!enableTask) {
 			tempFile = File.createTempFile("excelreport",
 					excelReport.getFormat());
 			os = new FileOutputStream(tempFile);
 		} else {
-			os = new FileOutputStream(fileName);
+			IObjectRegistry or=this.uncertainEngine.getObjectRegistry();
+			IExcelTask task=(IExcelTask)or.getInstanceOfType(IExcelTask.class);			
+			os = new FileOutputStream(task.getDir()+"/"+excelReport.getFileName());
 		}
 		excelReport.setOutputStream(os);
 		try {
@@ -72,15 +80,15 @@ public class ExcelReport extends AbstractEntry {
 		} catch (Exception e) {
 			throw e;
 		}
-		if (is_http) {
+		if (!enableTask) {
 			ServiceInstance svc = ServiceInstance.getInstance(context);
 			HttpServletResponse response = ((HttpServiceInstance) svc)
 					.getResponse();
 			setResponseHeader(response, excelReport);
 			transferOutputStream(response.getOutputStream(),
 					new FileInputStream(tempFile));
+			stopRunner(runner);
 		}
-		stopRunner(runner);
 	}
 
 	ExcelReport createExcelReport(CompositeMap context) throws IOException,
@@ -127,10 +135,10 @@ public class ExcelReport extends AbstractEntry {
 				buffer.flip();
 				wbc.write(buffer);
 				buffer.compact();
-			}			
+			}
 		} catch (IOException e) {
 			throw e;
-		} finally {			
+		} finally {
 			wbc.close();
 			rbc.close();
 			is.close();
@@ -181,10 +189,6 @@ public class ExcelReport extends AbstractEntry {
 		this.configPath = configPath;
 	}
 
-	public ExcelReport(UncertainEngine uncertainEngine) {
-		this.uncertainEngine = uncertainEngine;
-	}
-
 	public CellStyleWrap[] getStyles() {
 		return styles;
 	}
@@ -213,4 +217,11 @@ public class ExcelReport extends AbstractEntry {
 		this.configObj = configObj;
 	}
 
+	public boolean getEnableTask() {
+		return enableTask;
+	}
+
+	public void setEnableTask(boolean enableTask) {
+		this.enableTask = enableTask;
+	}	
 }

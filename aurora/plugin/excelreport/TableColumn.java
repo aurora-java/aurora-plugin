@@ -14,7 +14,34 @@ public class TableColumn {
 	String order;
 	CompositeMap columns;
 	String groupFormula;
-	String groupDesc;	
+	String groupDesc;
+	String totalDesc;
+	String groupField;
+	int index;
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public String getGroupField() {
+		return groupField;
+	}
+
+	public void setGroupField(String groupField) {
+		this.groupField = groupField;
+	}
+
+	public String getTotalDesc() {
+		return totalDesc;
+	}
+
+	public void setTotalDesc(String totalDesc) {
+		this.totalDesc = totalDesc;
+	}
 
 	public String getGroupDesc() {
 		return groupDesc;
