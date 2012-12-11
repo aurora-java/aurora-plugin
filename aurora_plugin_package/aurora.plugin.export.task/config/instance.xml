@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<u:instance-config xmlns:u="uncertain.pkg">
+	<u:instances>
+		<u:configurable-instance configFile="excel-task.config">
+			<u:description>后台报表</u:description>
+			<u:implement-types>
+				<u:type typeName="aurora.plugin.export.task.IExcelTask" />
+			</u:implement-types>
+		</u:configurable-instance>
+	</u:instances>
+</u:instance-config>
