@@ -1,5 +1,10 @@
 package aurora.plugin.export;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.logging.Level;
 
@@ -9,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import aurora.application.config.BaseServiceConfig;
 import aurora.i18n.ILocalizedMessageProvider;
 import aurora.i18n.IMessageProvider;
+import aurora.plugin.export.task.IExcelTask;
 import aurora.plugin.poi.ExcelExportImpl;
 import aurora.presentation.component.std.config.DataSetConfig;
 import aurora.service.ServiceContext;
@@ -17,6 +23,7 @@ import aurora.service.ServiceOutputConfig;
 import aurora.service.http.HttpServiceInstance;
 import uncertain.composite.CompositeMap;
 import uncertain.event.EventModel;
+import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.logging.ILogger;
 import uncertain.logging.LoggingContext;
 import uncertain.ocm.IObjectRegistry;
@@ -33,6 +40,11 @@ public class ModelOutput {
 	public final static String KEY_GENERATE_STATE = "_generate_state";
 	public final static String KEY_FORMAT = "_format";
 	public final static String KEY_SEPARATOR = "separator";
+	
+	public final static String KEY_ENABLETASK = "enableTask";
+	
+	boolean enableTask = false;
+	private File excelDir;
 
 	IObjectRegistry mObjectRegistry;
 
@@ -76,6 +88,20 @@ public class ModelOutput {
 						+ "' can't find model-query tag");
 				throw new ServletException("The path '" + return_path
 						+ "' can't find model-query tag");
+			}
+		}
+		enableTask = parameters.getBoolean(KEY_ENABLETASK, false);
+		if (enableTask){
+			if (excelDir == null) {
+				IExcelTask excelTask = (IExcelTask) mObjectRegistry.getInstanceOfType(IExcelTask.class);
+				if (excelTask == null)
+					throw BuiltinExceptionFactory.createInstanceNotFoundException(null, IExcelTask.class, this.getClass().getCanonicalName());
+				File excelDirectory = new File(excelTask.getExcelDir());
+				if (!excelDirectory.exists())
+					throw new IllegalArgumentException("File " + excelTask.getExcelDir() + " is not exits!");
+				if (!excelDirectory.isDirectory())
+					throw new IllegalArgumentException("File " + excelTask.getExcelDir() + " is not directory!");
+				excelDir = excelDirectory;
 			}
 		}
 		return EventModel.HANDLE_NORMAL;
@@ -143,21 +169,35 @@ public class ModelOutput {
 
 		ServiceInstance svc = ServiceInstance.getInstance(context
 				.getObjectContext());
-		HttpServletResponse response = ((HttpServiceInstance) svc)
-				.getResponse();
-
-		String fileName = parameter.getString(KEY_FILE_NAME, "excel");
-		response.setContentType("application/vnd.ms-excel");
-		response.setCharacterEncoding(KEY_CHARSET);
-		response.setHeader("Content-Disposition", "attachment; filename=\""
-				+ new String(fileName.getBytes(), "ISO-8859-1") + ".xls\"");
 		ExcelExportImpl excelFactory = new ExcelExportImpl(localMsgProvider);
-		excelFactory.createExcel(
-				getExportData(context),
-				getColumnConfig(context),
-				response.getOutputStream(),
-				(CompositeMap) context.getParameter().getChild(
-						this.KEY_MERGE_COLUMN));
+		if (!enableTask) {
+			HttpServletResponse response = ((HttpServiceInstance) svc).getResponse();
+
+			String fileName = parameter.getString(KEY_FILE_NAME, "excel");
+			response.setContentType("application/vnd.ms-excel");
+			response.setCharacterEncoding(KEY_CHARSET);
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + new String(fileName.getBytes(), "ISO-8859-1") + ".xls\"");
+
+			excelFactory.createExcel(getExportData(context), getColumnConfig(context), response.getOutputStream(), (CompositeMap) context
+					.getParameter().getChild(this.KEY_MERGE_COLUMN));
+		} else {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+			String date = dateFormat.format(new Date());
+			String fileName = parameter.getString(KEY_FILE_NAME, "excel_") + date + "_" + System.currentTimeMillis() + ".xls";
+			File excel = new File(excelDir, fileName);
+			if (excel.createNewFile()) {
+				OutputStream os = new FileOutputStream(excel);
+				try {
+					excelFactory.createExcel(getExportData(context), getColumnConfig(context), os, null);
+				} finally {
+					if (os != null) {
+						os.flush();
+						os.close();
+					}
+				}
+			}
+			parameter.put("file_path", excel.getCanonicalPath());
+		}
 
 		return EventModel.HANDLE_STOP;
 	}
