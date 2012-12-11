@@ -2,34 +2,27 @@ package aurora.plugin.export.task;
 
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.IConfigurable;
-import aurora.application.task.excel.IExcelTask;
 
 
 public class ExcelTask implements IExcelTask,IConfigurable{
-	private String svc;
-	private String dir;
+	private String excelDir;
 	private CompositeMap accessPrivilegeConfig ;
-	//send email or just record on database.
-	private CompositeMap postProcessConfig ;
+	private CompositeMap excelTaskTemplate ;//send email or just record on database.
 	
-	public String getSvc() {
-		return svc;
+	public String getExcelDir() {
+		return excelDir;
 	}
 
-	public void setSvc(String svc) {
-		this.svc = svc;
+	public void setExcelDir(String dir) {
+		this.excelDir = dir;
 	}
 
-	public String getDir() {
-		return dir;
-	}
-
-	public void setDir(String dir) {
-		this.dir = dir;
-	}
-
-	public CompositeMap getProcedure() {
+	public CompositeMap getAccessChecker() {
 		return accessPrivilegeConfig;
+	}
+	
+	public CompositeMap getExcelTaskTemplate(){
+		return excelTaskTemplate;
 	}
 
 	public void endConfigure() {
@@ -38,9 +31,7 @@ public class ExcelTask implements IExcelTask,IConfigurable{
 
 	public void beginConfigure(CompositeMap config) {
 		 accessPrivilegeConfig = config.getChild("procedure");
-		 postProcessConfig = config.getChild("async-task");
+		 excelTaskTemplate = config.getChild("async-task");
 	}
-	public CompositeMap getPostProcessConfig(){
-		return postProcessConfig;
-	}
+
 }
