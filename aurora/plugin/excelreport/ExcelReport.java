@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.dom4j.IllegalAddException;
 import org.xml.sax.SAXException;
 
-import aurora.application.task.excel.IExcelTask;
+import aurora.plugin.export.task.IExcelTask;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 import uncertain.composite.CompositeLoader;
@@ -71,8 +71,10 @@ public class ExcelReport extends AbstractEntry {
 			os = new FileOutputStream(tempFile);
 		} else {
 			IObjectRegistry or=this.uncertainEngine.getObjectRegistry();
-			IExcelTask task=(IExcelTask)or.getInstanceOfType(IExcelTask.class);			
-			os = new FileOutputStream(task.getDir()+"/"+excelReport.getFileName());
+			IExcelTask excelTask=(IExcelTask)or.getInstanceOfType(IExcelTask.class);
+			String fileFullPath = excelTask.getExcelDir()+"/"+excelReport.getFileName();
+			os = new FileOutputStream(fileFullPath);
+			context.putObject("/parameter/@file_path", fileFullPath,true);
 		}
 		excelReport.setOutputStream(os);
 		try {
