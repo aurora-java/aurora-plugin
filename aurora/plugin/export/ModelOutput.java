@@ -42,8 +42,6 @@ public class ModelOutput {
 	public final static String KEY_SEPARATOR = "separator";
 	
 	public final static String KEY_ENABLETASK = "enableTask";
-	
-	boolean enableTask = false;
 	private File excelDir;
 
 	IObjectRegistry mObjectRegistry;
@@ -90,7 +88,7 @@ public class ModelOutput {
 						+ "' can't find model-query tag");
 			}
 		}
-		enableTask = parameters.getBoolean(KEY_ENABLETASK, false);
+		boolean enableTask = isEnableTask(parameters);
 		if (enableTask){
 			if (excelDir == null) {
 				IExcelTask excelTask = (IExcelTask) mObjectRegistry.getInstanceOfType(IExcelTask.class);
@@ -170,7 +168,7 @@ public class ModelOutput {
 		ServiceInstance svc = ServiceInstance.getInstance(context
 				.getObjectContext());
 		ExcelExportImpl excelFactory = new ExcelExportImpl(localMsgProvider);
-		if (!enableTask) {
+		if (!isEnableTask(parameter)) {
 			HttpServletResponse response = ((HttpServiceInstance) svc).getResponse();
 
 			String fileName = parameter.getString(KEY_FILE_NAME, "excel");
@@ -232,5 +230,11 @@ public class ModelOutput {
 					"_column_config_ tag and column attibute must be defined");
 		}
 		return column_config;
+	}
+	private boolean isEnableTask(CompositeMap parameter){
+		if(parameter == null)
+			return false;
+		boolean enableTask = parameter.getBoolean(KEY_ENABLETASK, false);
+		return enableTask;
 	}
 }

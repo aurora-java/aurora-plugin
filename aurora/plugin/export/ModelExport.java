@@ -40,8 +40,6 @@ public class ModelExport {
 	public final String KEY_FORMAT = "_format";
 
 	public final static String KEY_ENABLETASK = "enableTask";
-	
-	boolean enableTask = false;
 	private File excelDir;
 	
 	IObjectRegistry mObjectRegistry;
@@ -73,7 +71,7 @@ public class ModelExport {
 			}
 		}
 		CompositeMap parameters = context.getParameter();
-		enableTask = parameters.getBoolean(KEY_ENABLETASK, false);
+		boolean enableTask = isEnableTask(parameters);
 		if (enableTask){
 			if (excelDir == null) {
 				IExcelTask excelTask = (IExcelTask) mObjectRegistry.getInstanceOfType(IExcelTask.class);
@@ -104,7 +102,7 @@ public class ModelExport {
 
 		ServiceInstance svc = ServiceInstance.getInstance(context.getObjectContext());		
 		ExcelExportImpl excelFactory = new ExcelExportImpl(localMsgProvider);
-		if (!enableTask) {
+		if (!isEnableTask(parameter)) {
 			HttpServletResponse response = ((HttpServiceInstance) svc).getResponse();
 			String fileName = parameter.getString(KEY_FILE_NAME, "excel");
 			response.setContentType("application/vnd.ms-excel");
@@ -160,6 +158,12 @@ public class ModelExport {
 					"_column_config_ tag and column attibute must be defined");
 		}
 		return column_config;
-	}	
+	}
+	private boolean isEnableTask(CompositeMap parameter){
+		if(parameter == null)
+			return false;
+		boolean enableTask = parameter.getBoolean(KEY_ENABLETASK, false);
+		return enableTask;
+	}
 	
 }
