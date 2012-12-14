@@ -1,5 +1,6 @@
 package aurora.plugin.mail;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
 
@@ -16,6 +17,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
 
 public class SendMail {
 
@@ -123,7 +125,7 @@ public class SendMail {
 	        return new javax.mail.PasswordAuthentication(username,password);    
 	    }    
 	} 
-    protected void addAttachment(Multipart mp) throws MessagingException{
+    protected void addAttachment(Multipart mp) throws MessagingException, UnsupportedEncodingException{
     	if(attachments != null){
     		MimeBodyPart mbp;
     		FileDataSource fds;
@@ -133,7 +135,9 @@ public class SendMail {
     			 fileName=attachments[i].getPath(); //选择出每一个附件名   
     			 fds =new FileDataSource(fileName); //得到数据源   
                  mbp.setDataHandler(new DataHandler(fds)); //得到附件本身并至入BodyPart   
-                 mbp.setFileName(attachments[i].getName());  //得到文件名同样至入BodyPart   
+                 //MimeUtility.encodeText(filename)
+                 String encodeFileName = MimeUtility.encodeText(attachments[i].getName()) ;
+                 mbp.setFileName(encodeFileName); //得到文件名同样至入BodyPart  
                  mp.addBodyPart(mbp);   
     		}
         }    
