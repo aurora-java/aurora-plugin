@@ -7,56 +7,27 @@ public class TableColumn {
 	String field;
 	String type;
 	String titleStyle;
-	String titleStyleName;
 	String cellStyle;
-	String cellStyleName;
 	int groupLevel = 0;
 	String order;
 	CompositeMap columns;
-	String groupFormula;
-	String groupDesc;
-	String totalDesc;
-	String groupField;
+	SubtotalConfig[] groups;
 	int index;
-
+	
 	public int getIndex() {
 		return index;
 	}
 
 	public void setIndex(int index) {
 		this.index = index;
+	}	
+
+	public SubtotalConfig[] getGroups() {
+		return groups;
 	}
 
-	public String getGroupField() {
-		return groupField;
-	}
-
-	public void setGroupField(String groupField) {
-		this.groupField = groupField;
-	}
-
-	public String getTotalDesc() {
-		return totalDesc;
-	}
-
-	public void setTotalDesc(String totalDesc) {
-		this.totalDesc = totalDesc;
-	}
-
-	public String getGroupDesc() {
-		return groupDesc;
-	}
-
-	public void setGroupDesc(String groupDesc) {
-		this.groupDesc = groupDesc;
-	}
-
-	public String getGroupFormula() {
-		return groupFormula;
-	}
-
-	public void setGroupFormula(String groupFormula) {
-		this.groupFormula = groupFormula;
+	public void setGroups(SubtotalConfig[] groups) {
+		this.groups = groups;
 	}
 
 	public String getTitle() {
@@ -91,13 +62,7 @@ public class TableColumn {
 		this.titleStyle = titleStyle;
 	}
 
-	public String getTitleStyleName() {
-		return titleStyleName;
-	}
 
-	public void setTitleStyleName(String titleStyleName) {
-		this.titleStyleName = titleStyleName;
-	}
 
 	public String getCellStyle() {
 		return cellStyle;
@@ -107,13 +72,7 @@ public class TableColumn {
 		this.cellStyle = cellStyle;
 	}
 
-	public String getCellStyleName() {
-		return cellStyleName;
-	}
 
-	public void setCellStyleName(String cellStyleName) {
-		this.cellStyleName = cellStyleName;
-	}
 
 	public int getGroupLevel() {
 		return groupLevel;

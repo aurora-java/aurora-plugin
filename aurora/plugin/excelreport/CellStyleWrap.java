@@ -200,66 +200,66 @@ public class CellStyleWrap {
 	public CellStyle createStyle(Workbook wb) {
 		CellStyle style = wb.createCellStyle();
 		FontWrap fontObj = this.getFont();
-		if (isNotNull(fontObj)) {
+		if (ExcelFactory.isNotNull(fontObj)) {
 			Font font = fontObj.createFont(wb);
 			style.setFont(font);
 		}
-		if (isNotNull(this.getAlign())) {
+		if (ExcelFactory.isNotNull(this.getAlign())) {
 			style.setAlignment(IndexedCellStyle.valueOf(this.getAlign())
 					.getIndex());
 			if("ALIGN_LEFT".equals(this.getAlign())){
 				style.setIndention(this.getIndent());
 			}
 		}
-		if (isNotNull(this.getVertical())) {
+		if (ExcelFactory.isNotNull(this.getVertical())) {
 			style.setVerticalAlignment(IndexedCellStyle.valueOf(
 					this.getVertical()).getIndex());
 		}
-		if (isNotNull(this.getBorderLeft())) {
+		if (ExcelFactory.isNotNull(this.getBorderLeft())) {
 			style.setBorderLeft(IndexedCellStyle.valueOf(this.getBorderLeft())
 					.getIndex());
 		}
-		if (isNotNull(this.getBorderRight())) {
+		if (ExcelFactory.isNotNull(this.getBorderRight())) {
 			style.setBorderRight(IndexedCellStyle
 					.valueOf(this.getBorderRight()).getIndex());
 		}
-		if (isNotNull(this.getBorderBottom())) {
+		if (ExcelFactory.isNotNull(this.getBorderBottom())) {
 			style.setBorderBottom(IndexedCellStyle.valueOf(
 					this.getBorderBottom()).getIndex());
 		}
-		if (isNotNull(this.getBorderTop())) {
+		if (ExcelFactory.isNotNull(this.getBorderTop())) {
 			style.setBorderTop(IndexedCellStyle.valueOf(this.getBorderTop())
 					.getIndex());
 		}
-		if (isNotNull(this.getLeftBorderColor())) {
+		if (ExcelFactory.isNotNull(this.getLeftBorderColor())) {
 			style.setLeftBorderColor(IndexedColors.valueOf(
 					this.getLeftBorderColor()).getIndex());
 		}
-		if (isNotNull(this.getRightBorderColor())) {
+		if (ExcelFactory.isNotNull(this.getRightBorderColor())) {
 			style.setRightBorderColor(IndexedColors.valueOf(
 					this.getRightBorderColor()).getIndex());
 		}
-		if (isNotNull(this.getBottomBorderColor())) {
+		if (ExcelFactory.isNotNull(this.getBottomBorderColor())) {
 			style.setBottomBorderColor(IndexedColors.valueOf(
 					this.getBottomBorderColor()).getIndex());
 		}
-		if (isNotNull(this.getTopBorderColor())) {
+		if (ExcelFactory.isNotNull(this.getTopBorderColor())) {
 			style.setTopBorderColor(IndexedColors.valueOf(
 					this.getTopBorderColor()).getIndex());
 		}
-		if (isNotNull(this.getBackgroundColor())) {
+		if (ExcelFactory.isNotNull(this.getBackgroundColor())) {
 			style.setFillBackgroundColor(IndexedColors.valueOf(
 					this.getBackgroundColor()).getIndex());
 		}
-		if (isNotNull(this.getForegroundColor())) {
+		if (ExcelFactory.isNotNull(this.getForegroundColor())) {
 			style.setFillForegroundColor(IndexedColors.valueOf(
 					this.getForegroundColor()).getIndex());
 		}
-		if (isNotNull(this.getPattern())) {
+		if (ExcelFactory.isNotNull(this.getPattern())) {
 			style.setFillPattern(IndexedCellStyle.valueOf(this.getPattern())
 					.getIndex());
 		}
-		if (isNotNull(this.getDataFormat())) {
+		if (ExcelFactory.isNotNull(this.getDataFormat())) {
 			style.setDataFormat(wb.createDataFormat().getFormat(
 					this.getDataFormat()));
 		}
@@ -269,12 +269,4 @@ public class CellStyleWrap {
 		style.setRotation(this.getRotation());
 		return style;
 	}
-
-	boolean isNotNull(Object value) {
-		if (!"".equals(value) && value != null)
-			return true;
-		else
-			return false;
-	}
-
 }
