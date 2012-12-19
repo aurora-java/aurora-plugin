@@ -186,7 +186,8 @@ public class ModelOutput {
 			if (excel.createNewFile()) {
 				OutputStream os = new FileOutputStream(excel);
 				try {
-					excelFactory.createExcel(getExportData(context), getColumnConfig(context), os, null);
+					excelFactory.createExcel(getExportData(context), getColumnConfig(context), os, (CompositeMap) context
+							.getParameter().getChild(this.KEY_MERGE_COLUMN));
 				} finally {
 					if (os != null) {
 						os.flush();
