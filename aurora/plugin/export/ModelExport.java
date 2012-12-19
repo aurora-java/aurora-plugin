@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import aurora.plugin.export.task.IExcelTask;
 import uncertain.exception.BuiltinExceptionFactory;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -15,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import aurora.application.config.BaseServiceConfig;
 import aurora.i18n.ILocalizedMessageProvider;
 import aurora.i18n.IMessageProvider;
+import aurora.plugin.export.task.IReportTask;
 import aurora.plugin.poi.ExcelExportImpl;
 import aurora.presentation.component.std.config.DataSetConfig;
 import aurora.service.ServiceContext;
@@ -75,20 +75,20 @@ public class ModelExport {
 		boolean enableTask = isEnableTask(parameters);
 		if (enableTask) {
 			if (excelDir == null) {
-				IExcelTask excelTask = (IExcelTask) mObjectRegistry
-						.getInstanceOfType(IExcelTask.class);
+				IReportTask excelTask = (IReportTask) mObjectRegistry
+						.getInstanceOfType(IReportTask.class);
 				if (excelTask == null)
 					throw BuiltinExceptionFactory
 							.createInstanceNotFoundException(null,
-									IExcelTask.class, this.getClass()
+									IReportTask.class, this.getClass()
 											.getCanonicalName());
-				File excelDirectory = new File(excelTask.getExcelDir());
+				File excelDirectory = new File(excelTask.getReportDir());
 				if (!excelDirectory.exists())
 					throw new IllegalArgumentException("File "
-							+ excelTask.getExcelDir() + " is not exits!");
+							+ excelTask.getReportDir() + " is not exits!");
 				if (!excelDirectory.isDirectory())
 					throw new IllegalArgumentException("File "
-							+ excelTask.getExcelDir() + " is not directory!");
+							+ excelTask.getReportDir() + " is not directory!");
 				excelDir = excelDirectory;
 			}
 		}
