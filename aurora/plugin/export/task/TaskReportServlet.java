@@ -35,15 +35,19 @@ import aurora.service.http.HttpServiceInstance;
 import aurora.service.http.WebContextInit;
 import aurora.service.validation.ErrorMessage;
 
-public class ExcelTaskServlet extends HttpServlet {
+public class TaskReportServlet extends HttpServlet {
+	
+
 	private static final long serialVersionUID = -8531728996484927927L;
 	public static final String DEFAULT_JSON_CONTENT_TYPE = "application/json;charset=utf-8";
 	public final String KEY_CHARSET = "GBK";
+	public final static String EXECL_2003_EXTENSION = ".xls";
+	public final static String EXECL_2007_EXTENSION = ".xlsx";
 
 	private HttpServiceFactory mServiceFactory;
 	private IObjectRegistry registry;
 
-	private String excelDir;
+	private String reportDir;
 	private IProcedureManager procedureManager;
 	private Procedure pre_service_proc;
 
@@ -64,29 +68,32 @@ public class ExcelTaskServlet extends HttpServlet {
 		procedureManager = (IProcedureManager) registry.getInstanceOfType(IProcedureManager.class);
 		if (procedureManager == null)
 			throw BuiltinExceptionFactory.createInstanceNotFoundException(null, IProcedureManager.class, this.getClass().getName());
-		IExcelTask excelTaskConfig = (IExcelTask) registry.getInstanceOfType(IExcelTask.class);
-		if (excelTaskConfig == null)
-			throw BuiltinExceptionFactory.createInstanceNotFoundException(null, IExcelTask.class, this.getClass().getCanonicalName());
-		excelDir = excelTaskConfig.getExcelDir();
-		CompositeMap accessChecker = excelTaskConfig.getAccessChecker();
+		IReportTask reportTaskConfig = (IReportTask) registry.getInstanceOfType(IReportTask.class);
+		if (reportTaskConfig == null)
+			throw BuiltinExceptionFactory.createInstanceNotFoundException(null, IReportTask.class, this.getClass().getCanonicalName());
+		reportDir = reportTaskConfig.getReportDir();
+		CompositeMap accessChecker = reportTaskConfig.getAccessChecker();
 		pre_service_proc = procedureManager.createProcedure(accessChecker);
 	}
 
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String fileName = request.getParameter("file");
+		String fileName = request.getParameter("fileName");
 		if (fileName == null)
 			return;
+		String fileNameDesc = request.getParameter("fileNameDesc");
+		if(fileNameDesc == null)
+			fileNameDesc = fileName;
 		HttpServiceInstance svc = mServiceFactory.createHttpService(fileName, request, response, this);
 		try {
 			boolean is_success = checkPreService(fileName, svc);
 			if (is_success) {
 				String operation = getOperation(request);
-				File excelFile = new File(excelDir, fileName);
+				File reportFile = new File(reportDir, fileName);
 				if ("download".equals(operation)) {
-					downLoad(response, svc, excelFile);
+					downLoad(response, svc, reportFile,fileNameDesc);
 				} else if ("delete".equals(operation)) {
-					delete(response, svc, excelFile);
+					delete(response, svc, reportFile);
 				} else {
 					ErrorMessage message = new ErrorMessage(null, "This operation:" + operation + " is not support!", null);
 					svc.getServiceContext().setError(message.getObjectContext());
@@ -104,8 +111,8 @@ public class ExcelTaskServlet extends HttpServlet {
 	protected boolean checkPreService(String fileName, HttpServiceInstance svc) {
 		if (svc == null)
 			throw new IllegalArgumentException("HttpServiceInstance can not be null");
-		if (fileName == null || (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx"))) {
-			ErrorMessage message = new ErrorMessage(null, "This file '" + fileName + "' is not an excel file!", null);
+		if (!validateFileExtension(fileName)) {
+			ErrorMessage message = new ErrorMessage(null, "This file '" + fileName + "' is not an report file!", null);
 			svc.getServiceContext().setError(message.getObjectContext());
 			return false;
 		}
@@ -121,6 +128,12 @@ public class ExcelTaskServlet extends HttpServlet {
 			is_success = false;
 		return is_success;
 	}
+	//just for excel
+	private boolean validateFileExtension(String fileName){
+		if(fileName == null)
+			return false;
+		return fileName.toLowerCase().endsWith(EXECL_2003_EXTENSION) || fileName.toLowerCase().endsWith(EXECL_2007_EXTENSION);
+	}
 
 	protected String getOperation(HttpServletRequest request) {
 		if (request == null)
@@ -135,7 +148,7 @@ public class ExcelTaskServlet extends HttpServlet {
 		((ServiceInstance) svc).clear();
 	}
 
-	protected void downLoad(HttpServletResponse response, HttpServiceInstance svc, File file) throws IOException {
+	protected void downLoad(HttpServletResponse response, HttpServiceInstance svc, File file,String fileNameDesc) throws IOException {
 		if (svc == null)
 			throw new IllegalArgumentException("HttpServiceInstance can not be null");
 		if (!file.exists()) {
@@ -144,9 +157,10 @@ public class ExcelTaskServlet extends HttpServlet {
 			onCreateFailResponse(response, svc.getContextMap(), null);
 			return;
 		}
+		//just for excel
 		response.setContentType("application/vnd.ms-excel");
 		response.setCharacterEncoding(KEY_CHARSET);
-		response.setHeader("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileNameDesc + "\"");
 		OutputStream os = response.getOutputStream();
 		FileInputStream fis = null;
 		try {

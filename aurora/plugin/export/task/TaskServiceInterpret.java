@@ -30,9 +30,9 @@ public class TaskServiceInterpret {
 		CompositeMap parameter = servicContext.getParameter();
 		if (!parameter.getBoolean(KEY_GENERATE_STATE, false))
 			return EventModel.HANDLE_NORMAL;
-		IExcelTask excelTask = (IExcelTask) mObjectRegistry.getInstanceOfType(IExcelTask.class);
-		if (excelTask == null)
-			throw BuiltinExceptionFactory.createInstanceNotFoundException(null, IExcelTask.class, this.getClass().getCanonicalName());
+		IReportTask reportTask = (IReportTask) mObjectRegistry.getInstanceOfType(IReportTask.class);
+		if (reportTask == null)
+			throw BuiltinExceptionFactory.createInstanceNotFoundException(null, IReportTask.class, this.getClass().getCanonicalName());
 		IDatabaseServiceFactory databaseServiceFactory = (IDatabaseServiceFactory) mObjectRegistry
 				.getInstanceOfType(IDatabaseServiceFactory.class);
 		if (databaseServiceFactory == null)
@@ -46,9 +46,9 @@ public class TaskServiceInterpret {
 			child.addChild(parsedSvcConfig);
 
 		// create new task and record on database
-		CompositeMap excelTaskTemplate = excelTask.getExcelTaskTemplate();
-		AsyncTask newExcelTask = (AsyncTask) mOcManager.createObject(excelTaskTemplate);
-		newExcelTask.execute(context);
+		CompositeMap reportTaskTemplate = reportTask.getReportTaskTemplate();
+		AsyncTask newReportTask = (AsyncTask) mOcManager.createObject(reportTaskTemplate);
+		newReportTask.execute(context);
 
 		// send transaction Type message
 		IMessageDispatcher messageDispatcher = (IMessageDispatcher) RuntimeContext.getInstance(context).getInstanceOfType(

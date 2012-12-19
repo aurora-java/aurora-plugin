@@ -11,10 +11,8 @@ import uncertain.logging.LoggingContext;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 
-public class ExcelRemove extends AbstractEntry{
-	public final static String EXECL_2003_EXTENSION = ".xls";
-	public final static String EXECL_2007_EXTENSION = ".xlsx";
-	
+public class ReportRemove extends AbstractEntry{
+
 	public String fullPath;
 
 	@Override
@@ -22,8 +20,8 @@ public class ExcelRemove extends AbstractEntry{
 		if(fullPath == null)
 			throw BuiltinExceptionFactory.createAttributeMissing(this, "fullPath");
 		fullPath = TextParser.parse(fullPath, runner.getContext());
-		if (!fullPath.toLowerCase().endsWith(EXECL_2003_EXTENSION) && !fullPath.toLowerCase().endsWith(EXECL_2007_EXTENSION)) {
-			throw new IllegalArgumentException("This file '" + fullPath + "' is not an excel file!");
+		if (!validateFileExtension(fullPath)) {
+			throw new IllegalArgumentException("This file '" + fullPath + "' is not an report file!");
 		}
 		ILogger logger = LoggingContext.getLogger(runner.getContext(),this.getClass().getCanonicalName());
 		File file = new File(fullPath);
@@ -33,6 +31,12 @@ public class ExcelRemove extends AbstractEntry{
 		if (!is_success) {
 			logger.warning("This file '" + fullPath + "' can not be deleted!");
 		}
+	}
+	//just for excel
+	private boolean validateFileExtension(String fileName){
+		if(fileName == null)
+			return false;
+		return fileName.toLowerCase().endsWith(TaskReportServlet.EXECL_2003_EXTENSION) || fileName.toLowerCase().endsWith(TaskReportServlet.EXECL_2007_EXTENSION);
 	}
 	public String getFullPath() {
 		return fullPath;
