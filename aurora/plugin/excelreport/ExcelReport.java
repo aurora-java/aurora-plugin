@@ -72,9 +72,10 @@ public class ExcelReport extends AbstractEntry {
 		} else {
 			IObjectRegistry or=this.uncertainEngine.getObjectRegistry();
 			IExcelTask excelTask=(IExcelTask)or.getInstanceOfType(IExcelTask.class);
-			String fileFullPath = excelTask.getExcelDir()+"/"+excelReport.getFileName();
+			String fileFullPath = excelTask.getExcelDir()+"/"+"excel"+System.currentTimeMillis()+excelReport.getFormat();
 			os = new FileOutputStream(fileFullPath);
 			context.putObject("/parameter/@file_path", fileFullPath,true);
+			context.putObject("/parameter/@file_name", excelReport.getFileName(),true);
 		}
 		excelReport.setOutputStream(os);
 		try {
