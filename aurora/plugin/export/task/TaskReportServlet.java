@@ -78,9 +78,15 @@ public class TaskReportServlet extends HttpServlet {
 
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
 		String fileName = request.getParameter("fileName");
-		if (fileName == null)
+		if (fileName == null){
+			HttpServiceInstance svc = mServiceFactory.createHttpService("emptyFileName", request, response, this);
+			ErrorMessage message = new ErrorMessage(null, "This parameter 'fileName' is null, please check it.", null);
+			svc.getServiceContext().setError(message.getObjectContext());
+			onCreateFailResponse(response, svc.getContextMap(), null);
 			return;
+		}
 		String fileNameDesc = request.getParameter("fileNameDesc");
 		if(fileNameDesc == null)
 			fileNameDesc = fileName;
@@ -159,8 +165,9 @@ public class TaskReportServlet extends HttpServlet {
 		}
 		//just for excel
 		response.setContentType("application/vnd.ms-excel");
-		response.setCharacterEncoding(KEY_CHARSET);
-		response.setHeader("Content-Disposition", "attachment; filename=\"" + fileNameDesc + "\"");
+//		response.setCharacterEncoding(KEY_CHARSET);
+		String isoFileNameDesc = new String(fileNameDesc.getBytes(), "ISO-8859-1");
+		response.setHeader("Content-Disposition", "attachment; filename=\"" + isoFileNameDesc + "\"");
 		OutputStream os = response.getOutputStream();
 		FileInputStream fis = null;
 		try {
