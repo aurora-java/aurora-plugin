@@ -202,6 +202,7 @@ public class TaskReportServlet extends HttpServlet {
 				ErrorMessage message = new ErrorMessage(null, "Can not delete this file!", null);
 				svc.getServiceContext().setError(message.getObjectContext());
 				onCreateFailResponse(response, svc.getContextMap(), null);
+				return;
 			}
 		}
 		JSONObject json = new JSONObject();
