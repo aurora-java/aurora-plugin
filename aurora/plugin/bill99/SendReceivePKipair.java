@@ -16,6 +16,14 @@ import aurora.plugin.bill99.pos.CerEncode;
 
 public class SendReceivePKipair {
 
+	// 配置文件名
+	private String configFile;
+	
+
+	public SendReceivePKipair(String configFile) {
+		super();
+		this.configFile = configFile;
+	}
 
 	public String signMsg(String signMsg) {
 
@@ -51,8 +59,9 @@ public class SendReceivePKipair {
 		return base64;
 	}
 
-	private static String getValue(String key) {
-		String value = Configuration.getInstance().getValue(key);
+	private  String getValue(String key) {
+		String value = Configuration.getValue(configFile, key);
+//				.getInstance().getValue(key);
 		return value == null ? "" : value;
 	}
 

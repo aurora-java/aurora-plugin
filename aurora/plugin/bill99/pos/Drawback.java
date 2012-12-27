@@ -161,7 +161,8 @@ public class Drawback extends AbstractEntry {
 	}
 
 	private String getVaule(String key) {
-		String value = Configuration.getInstance().getValue(key);
+		String value = Configuration.getValue(Configuration.DEFAULT_CONFIG_FILE, key);
+//		String value = Configuration.getInstance().getValue(key);
 		return value == null ? "" : value;
 	}
 

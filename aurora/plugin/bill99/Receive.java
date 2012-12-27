@@ -98,6 +98,9 @@ public class Receive extends AbstractEntry {
 	// 获取加密签名串
 	private String signMsg;
 
+	// 配置文件名
+	private String configFile;
+
 	public void run(ProcedureRunner runner) throws Exception {
 		CompositeMap context = runner.getContext();
 		HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance
@@ -105,6 +108,9 @@ public class Receive extends AbstractEntry {
 		HttpServletRequest request = serviceInstance.getRequest();
 		request.setCharacterEncoding("GBK");
 		ServiceContext service = ServiceContext.createServiceContext(context);
+
+		configFile = getValue(context, this.getConfigFile());
+
 		CompositeMap model = service.getModel();
 
 		CompositeMap bill99 = model.createChild("bill99");
@@ -115,12 +121,12 @@ public class Receive extends AbstractEntry {
 		// 设置人民币网关密钥
 		// /区分大小写
 
-//		setKey(getVaule(Bill99.key));
-		
-		key = getValue(context, this.getKey());
-		if (key == null || "".equals(key))
-			this.setKey(getVaule(Bill99.key));
-	
+		setKey(getVaule(Bill99.key));
+
+		// key = getValue(context, this.getKey());
+		// if (key == null || "".equals(key))
+		// this.setKey(getVaule(Bill99.key));
+
 		// 获取网关版本.固定值
 		// /快钱会根据版本号来调用对应的接口处理程序。
 		// /本代码版本号固定为v2.0
@@ -206,7 +212,7 @@ public class Receive extends AbstractEntry {
 					merchantSignMsg.toUpperCase());
 		} else if ("4".equals(signType)) {
 			String createReceiveMsg = createPKiReceiveMsg();
-			SendReceivePKipair pki = new SendReceivePKipair();
+			SendReceivePKipair pki = new SendReceivePKipair(configFile);
 			isSignFail = !pki.enCodeByCer(createReceiveMsg, signMsg);
 		} else {
 			throw new RuntimeException("接收来自块钱的signType 配置错误，1：为MD5，4：为签名方式");
@@ -330,7 +336,8 @@ public class Receive extends AbstractEntry {
 	}
 
 	private String getVaule(String key) {
-		String value = Configuration.getInstance().getValue(key);
+		String value = Configuration.getValue(configFile, key);
+		// .getInstance().getValue(key);
 		return value == null ? "" : value;
 	}
 
@@ -341,12 +348,21 @@ public class Receive extends AbstractEntry {
 	public void setKey(String key) {
 		this.key = key;
 	}
+
 	private String getValue(CompositeMap context, String key) {
 		if (key != null) {
 			return TextParser.parse(key, context);
 		} else {
 			return "";
 		}
+	}
+
+	public String getConfigFile() {
+		return configFile;
+	}
+
+	public void setConfigFile(String configFile) {
+		this.configFile = configFile;
 	}
 
 }

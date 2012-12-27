@@ -87,7 +87,8 @@ public class POSDrawback extends AbstractEntry {
 	}
 
 	private String getValue(String key) {
-		String value = Configuration.getInstance().getValue(key);
+//		String value = Configuration.getInstance().getValue(key);
+		String value = Configuration.getValue(Configuration.DEFAULT_CONFIG_FILE, key);
 		return value == null ? "" : value;
 	}
 

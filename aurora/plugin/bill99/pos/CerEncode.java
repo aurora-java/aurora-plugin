@@ -37,7 +37,8 @@ public class CerEncode {
 		return flag;
 	}
 	private static String getValue(String key) {
-		String value = Configuration.getInstance().getValue(key);
+		String value = Configuration.getValue(Configuration.DEFAULT_CONFIG_FILE, key);
+//		.getInstance().getValue(key);
 		return value == null ? "" : value;
 	}
 }

@@ -35,7 +35,8 @@ public class RefundFunction {
 	public static final String PASSWORD = getValue("pos_refund_password");
 
 	private static String getValue(String key) {
-		String value = Configuration.getInstance().getValue(key);
+//		String value = Configuration.getInstance().getValue(key);
+		String value = Configuration.getValue(Configuration.DEFAULT_CONFIG_FILE, key);
 		return value == null ? "" : value;
 	}
 

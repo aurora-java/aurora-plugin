@@ -49,6 +49,9 @@ public class Drawback extends AbstractEntry {
 	// 只允许使用字母、数字、- 、_,并以字母或数字开头
 	private String orderid;
 
+	// 配置文件名
+	private String configFile;
+
 	public void run(ProcedureRunner runner) throws Exception {
 		CompositeMap context = runner.getContext();
 		HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance
@@ -56,6 +59,7 @@ public class Drawback extends AbstractEntry {
 		HttpServletRequest request = serviceInstance.getRequest();
 		request.setCharacterEncoding("GBK");
 		ServiceContext service = ServiceContext.createServiceContext(context);
+		configFile = getValue(context, this.getConfigFile());
 		CompositeMap model = service.getModel();
 		this.initConfig();
 		CompositeMap bill99 = model.createChild("bill99");
@@ -169,7 +173,8 @@ public class Drawback extends AbstractEntry {
 	}
 
 	private String getVaule(String key) {
-		String value = Configuration.getInstance().getValue(key);
+		String value = Configuration.getValue(configFile, key);
+		// getInstance().getValue(key);
 		return value == null ? "" : value;
 	}
 
@@ -203,6 +208,14 @@ public class Drawback extends AbstractEntry {
 
 	public void setOrderid(String orderid) {
 		this.orderid = orderid;
+	}
+
+	public String getConfigFile() {
+		return configFile;
+	}
+
+	public void setConfigFile(String configFile) {
+		this.configFile = configFile;
 	}
 
 }

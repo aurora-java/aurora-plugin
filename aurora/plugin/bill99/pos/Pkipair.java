@@ -33,7 +33,7 @@ public class Pkipair {
 			Signature signature = Signature.getInstance("SHA1withRSA");
 			signature.initSign(priK);
 			signature.update(signMsg.getBytes("UTF-8"));
-			
+
 			sun.misc.BASE64Encoder encoder = new sun.misc.BASE64Encoder();
 			base64 = encoder.encode(signature.sign());
 
@@ -46,7 +46,9 @@ public class Pkipair {
 	}
 
 	private static String getValue(String key) {
-		String value = Configuration.getInstance().getValue(key);
+		String value = Configuration.getValue(
+				Configuration.DEFAULT_CONFIG_FILE, key);
+		// String value = Configuration.getInstance().getValue(key);
 		return value == null ? "" : value;
 	}
 }

@@ -125,6 +125,9 @@ public class Send extends AbstractEntry {
 	// 快钱付款地址
 	private String payUrl;
 
+	// 配置文件名
+	private String configFile;
+
 	public void run(ProcedureRunner runner) throws Exception {
 		CompositeMap context = runner.getContext();
 		HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance
@@ -133,6 +136,9 @@ public class Send extends AbstractEntry {
 		HttpServletRequest request = serviceInstance.getRequest();
 		request.setCharacterEncoding("GBK");
 		ServiceContext service = ServiceContext.createServiceContext(context);
+
+		configFile = getValue(context, this.getConfigFile());
+
 		CompositeMap model = service.getModel();
 		initConfig();
 		CompositeMap bill99 = model.createChild("bill99");
@@ -154,16 +160,17 @@ public class Send extends AbstractEntry {
 		payType = getValue(context, this.getPayType());
 		if (payType == null || "".equals(payType))
 			this.setPayType(getVaule(Bill99.payType));
-		
+
 		merchantAcctId = getValue(context, this.getMerchantAcctId());
 		if (merchantAcctId == null || "".equals(merchantAcctId))
 			this.setMerchantAcctId(getVaule(Bill99.merchantAcctId));
-		
+
 		key = getValue(context, this.getKey());
 		if (key == null || "".equals(key))
 			this.setKey(getVaule(Bill99.key));
-		
-		
+
+		// if (configFile == null || "".equals(configFile))
+		// this.setKey(getVaule(Bill99.key));
 
 		bill99.put(Bill99.inputCharset, inputCharset);
 		bill99.put(Bill99.pageUrl, pageUrl);
@@ -196,7 +203,7 @@ public class Send extends AbstractEntry {
 			String signMsg = createSignMD5MSG();
 			bill99.put(Bill99.signMsg, signMsg);
 		} else if ("4".equals(signType)) {
-			SendReceivePKipair pki = new SendReceivePKipair();
+			SendReceivePKipair pki = new SendReceivePKipair(configFile);
 			String signMsg = pki.signMsg(createPKIMessage());
 			bill99.put(Bill99.signMsg, signMsg);
 		} else {
@@ -287,8 +294,7 @@ public class Send extends AbstractEntry {
 				productDesc);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.ext1, ext1);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.ext2, ext2);
-		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.payType,
-				payType);
+		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.payType, payType);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.bankId, bankId);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.redoFlag, redoFlag);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.pid, pid);
@@ -349,7 +355,11 @@ public class Send extends AbstractEntry {
 	}
 
 	private String getVaule(String key) {
-		String value = Configuration.getInstance().getValue(key);
+		String value = Configuration
+				.getValue(
+						configFile == null || "".equals(configFile) ? Configuration.DEFAULT_CONFIG_FILE
+								: configFile, key);
+		// .getInstance().getValue(key);
 		return value == null ? "" : value;
 	}
 
@@ -511,6 +521,14 @@ public class Send extends AbstractEntry {
 
 	public void setKey(String key) {
 		this.key = key;
+	}
+
+	public String getConfigFile() {
+		return configFile;
+	}
+
+	public void setConfigFile(String configFile) {
+		this.configFile = configFile;
 	}
 
 }
