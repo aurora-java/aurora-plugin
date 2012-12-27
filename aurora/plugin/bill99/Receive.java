@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import javax.servlet.http.HttpServletRequest;
 
 import uncertain.composite.CompositeMap;
+import uncertain.composite.TextParser;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 import aurora.service.ServiceContext;
@@ -114,8 +115,12 @@ public class Receive extends AbstractEntry {
 		// 设置人民币网关密钥
 		// /区分大小写
 
-		key = getVaule(Bill99.key);
-
+//		setKey(getVaule(Bill99.key));
+		
+		key = getValue(context, this.getKey());
+		if (key == null || "".equals(key))
+			this.setKey(getVaule(Bill99.key));
+	
 		// 获取网关版本.固定值
 		// /快钱会根据版本号来调用对应的接口处理程序。
 		// /本代码版本号固定为v2.0
@@ -319,7 +324,7 @@ public class Receive extends AbstractEntry {
 				Bill99.errCode, errCode);
 		if ("1".equals(signType)) {
 			merchantSignMsgVal = Bill99.appendParam(merchantSignMsgVal,
-					Bill99.key, key);
+					Bill99.key, getKey());
 		}
 		return merchantSignMsgVal;
 	}
@@ -327,6 +332,21 @@ public class Receive extends AbstractEntry {
 	private String getVaule(String key) {
 		String value = Configuration.getInstance().getValue(key);
 		return value == null ? "" : value;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+	private String getValue(CompositeMap context, String key) {
+		if (key != null) {
+			return TextParser.parse(key, context);
+		} else {
+			return "";
+		}
 	}
 
 }

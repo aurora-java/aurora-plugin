@@ -154,6 +154,16 @@ public class Send extends AbstractEntry {
 		payType = getValue(context, this.getPayType());
 		if (payType == null || "".equals(payType))
 			this.setPayType(getVaule(Bill99.payType));
+		
+		merchantAcctId = getValue(context, this.getMerchantAcctId());
+		if (merchantAcctId == null || "".equals(merchantAcctId))
+			this.setMerchantAcctId(getVaule(Bill99.merchantAcctId));
+		
+		key = getValue(context, this.getKey());
+		if (key == null || "".equals(key))
+			this.setKey(getVaule(Bill99.key));
+		
+		
 
 		bill99.put(Bill99.inputCharset, inputCharset);
 		bill99.put(Bill99.pageUrl, pageUrl);
@@ -161,7 +171,7 @@ public class Send extends AbstractEntry {
 		bill99.put(Bill99.version, version);
 		bill99.put(Bill99.language, language);
 		bill99.put(Bill99.signType, signType);
-		bill99.put(Bill99.merchantAcctId, merchantAcctId);
+		bill99.put(Bill99.merchantAcctId, getMerchantAcctId());
 		bill99.put(Bill99.payerName, payerName);
 		bill99.put(Bill99.payerContactType, payerContactType);
 		bill99.put(Bill99.payerContact, payerContact);
@@ -179,7 +189,7 @@ public class Send extends AbstractEntry {
 		bill99.put(Bill99.redoFlag, redoFlag);
 		bill99.put(Bill99.pid, pid);
 		if ("1".equals(signType)) {
-			bill99.put(Bill99.key, key);
+			bill99.put(Bill99.key, getKey());
 		}
 		bill99.put(Bill99.payUrl, payUrl);
 		if ("1".equals(signType)) {
@@ -201,7 +211,6 @@ public class Send extends AbstractEntry {
 		} else {
 			return "";
 		}
-
 	}
 
 	private String createSignMD5MSG() throws UnsupportedEncodingException {
@@ -223,7 +232,7 @@ public class Send extends AbstractEntry {
 		signMsgVal = Bill99.appendParam(signMsgVal, "language", language);
 		signMsgVal = Bill99.appendParam(signMsgVal, "signType", signType);
 		signMsgVal = Bill99.appendParam(signMsgVal, "merchantAcctId",
-				merchantAcctId);
+				getMerchantAcctId());
 		signMsgVal = Bill99.appendParam(signMsgVal, "payerName", payerName);
 		signMsgVal = Bill99.appendParam(signMsgVal, "payerContactType",
 				payerContactType);
@@ -256,7 +265,7 @@ public class Send extends AbstractEntry {
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.language, language);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.signType, signType);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.merchantAcctId,
-				merchantAcctId);
+				getMerchantAcctId());
 		signMsgVal = Bill99
 				.appendParam(signMsgVal, Bill99.payerName, payerName);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.payerContactType,
@@ -283,17 +292,17 @@ public class Send extends AbstractEntry {
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.bankId, bankId);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.redoFlag, redoFlag);
 		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.pid, pid);
-		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.key, key);
+		signMsgVal = Bill99.appendParam(signMsgVal, Bill99.key, getKey());
 		return signMsgVal;
 	}
 
 	public void initConfig() {
 		// 人民币网关账户号
 		// 请登录快钱系统获取用户编号，用户编号后加01即为人民币网关账户号。
-		this.merchantAcctId = getVaule(Bill99.merchantAcctId);
+		this.setMerchantAcctId(getVaule(Bill99.merchantAcctId));
 		// 人民币网关密钥
 		// 区分大小写.请与快钱联系索取，
-		this.key = getVaule(Bill99.key);
+		this.setKey(getVaule(Bill99.key));
 
 		// 字符集.固定选择值。可为空。
 		// 只能选择1、2、3.
@@ -494,6 +503,14 @@ public class Send extends AbstractEntry {
 
 	public void setPayType(String payType) {
 		this.payType = payType;
+	}
+
+	public void setMerchantAcctId(String merchantAcctId) {
+		this.merchantAcctId = merchantAcctId;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
 	}
 
 }
