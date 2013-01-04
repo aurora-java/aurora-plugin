@@ -1,6 +1,7 @@
 package aurora.plugin.poi;
 
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class ExcelExportImpl {
 	public static final String KEY_DATA_TYPE = "dataType";
 	public static final String KEY_DATA_TYPE_NUMBER = "Number";
 	public static final String KEY_DATA_TYPE_STRING = "String";
+	public static final String KEY_DATA_FORMAT = "dataFormat";
 	ILocalizedMessageProvider localMsgProvider;
 	Workbook wb;
 
@@ -31,7 +33,7 @@ public class ExcelExportImpl {
 	final int numberLimit = 65535;
 	int headLevel;
 	HSSFCellStyle headstyle;
-	HSSFCellStyle bodystyle;
+	HSSFCellStyle bodystyle;	
 
 	public ExcelExportImpl(ILocalizedMessageProvider localMsgProvider) {
 		this.localMsgProvider = localMsgProvider;
@@ -63,7 +65,7 @@ public class ExcelExportImpl {
 		}
 
 		headerConfig = (new MergedHeader(column_config)).conifg;
-		wb = new HSSFWorkbook();
+		wb = new HSSFWorkbook();			
 		setCellStyle(wb);// 设置列style
 		createExcel();
 		try {
@@ -185,6 +187,10 @@ public class ExcelExportImpl {
 			while (it.hasNext()) {
 				cell = row.createCell(col);
 				CompositeMap record = (CompositeMap) it.next();
+				CellStyle dateStyle=wb.createCellStyle();
+				if(record.getString(this.KEY_DATA_FORMAT)!=null){	
+					dateStyle.setDataFormat(wb.createDataFormat().getFormat(record.getString(this.KEY_DATA_FORMAT)));
+				}
 				columnName = record.getString("name");
 				Object value = object.get(columnName);
 				bodystyle
@@ -196,7 +202,7 @@ public class ExcelExportImpl {
 						if (KEY_DATA_TYPE_STRING.equalsIgnoreCase(record
 								.getString(KEY_DATA_TYPE)))
 							cell.setCellValue(new HSSFRichTextString(value
-									.toString()));
+									.toString()));						
 						else {
 							try {
 								cell.setCellValue(Double.parseDouble(value
@@ -205,17 +211,21 @@ public class ExcelExportImpl {
 								cell.setCellValue(new HSSFRichTextString(value
 										.toString()));
 							}
-						}
+						}						
 					} else {
 						if (value instanceof String) {
 							cell.setCellValue(new HSSFRichTextString(value
 									.toString()));
-						}
-						if (value instanceof java.lang.Number) {
+						}else if (value instanceof java.lang.Number) {
 							cell.setCellValue(Double.parseDouble(value
 									.toString()));
-						}
+						}else{
+							if(value!=null)
+								cell.setCellValue(new HSSFRichTextString(value
+									.toString()));
+						}						
 					}
+					cell.setCellStyle(dateStyle);
 				}
 
 				if (!is_setwidth) {
