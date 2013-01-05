@@ -36,7 +36,6 @@ import aurora.service.http.WebContextInit;
 import aurora.service.validation.ErrorMessage;
 
 public class TaskReportServlet extends HttpServlet {
-	
 
 	private static final long serialVersionUID = -8531728996484927927L;
 	public static final String DEFAULT_JSON_CONTENT_TYPE = "application/json;charset=utf-8";
@@ -80,7 +79,7 @@ public class TaskReportServlet extends HttpServlet {
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		String fileName = request.getParameter("fileName");
-		if (fileName == null){
+		if (fileName == null) {
 			HttpServiceInstance svc = mServiceFactory.createHttpService("emptyFileName", request, response, this);
 			ErrorMessage message = new ErrorMessage(null, "This parameter 'fileName' is null, please check it.", null);
 			svc.getServiceContext().setError(message.getObjectContext());
@@ -88,7 +87,7 @@ public class TaskReportServlet extends HttpServlet {
 			return;
 		}
 		String fileNameDesc = request.getParameter("fileNameDesc");
-		if(fileNameDesc == null)
+		if (fileNameDesc == null)
 			fileNameDesc = fileName;
 		HttpServiceInstance svc = mServiceFactory.createHttpService(fileName, request, response, this);
 		try {
@@ -97,7 +96,7 @@ public class TaskReportServlet extends HttpServlet {
 				String operation = getOperation(request);
 				File reportFile = new File(reportDir, fileName);
 				if ("download".equals(operation)) {
-					downLoad(response, svc, reportFile,fileNameDesc);
+					downLoad(response, svc, reportFile, fileNameDesc);
 				} else if ("delete".equals(operation)) {
 					delete(response, svc, reportFile);
 				} else {
@@ -134,9 +133,10 @@ public class TaskReportServlet extends HttpServlet {
 			is_success = false;
 		return is_success;
 	}
-	//just for excel
-	private boolean validateFileExtension(String fileName){
-		if(fileName == null)
+
+	// just for excel
+	private boolean validateFileExtension(String fileName) {
+		if (fileName == null)
 			return false;
 		return fileName.toLowerCase().endsWith(EXECL_2003_EXTENSION) || fileName.toLowerCase().endsWith(EXECL_2007_EXTENSION);
 	}
@@ -154,7 +154,7 @@ public class TaskReportServlet extends HttpServlet {
 		((ServiceInstance) svc).clear();
 	}
 
-	protected void downLoad(HttpServletResponse response, HttpServiceInstance svc, File file,String fileNameDesc) throws IOException {
+	protected void downLoad(HttpServletResponse response, HttpServiceInstance svc, File file, String fileNameDesc) throws IOException {
 		if (svc == null)
 			throw new IllegalArgumentException("HttpServiceInstance can not be null");
 		if (!file.exists()) {
@@ -163,11 +163,12 @@ public class TaskReportServlet extends HttpServlet {
 			onCreateFailResponse(response, svc.getContextMap(), null);
 			return;
 		}
-		//just for excel
+		// just for excel
 		response.setContentType("application/vnd.ms-excel");
-//		response.setCharacterEncoding(KEY_CHARSET);
+		// response.setCharacterEncoding(KEY_CHARSET);
 		String isoFileNameDesc = new String(fileNameDesc.getBytes(), "ISO-8859-1");
 		response.setHeader("Content-Disposition", "attachment; filename=\"" + isoFileNameDesc + "\"");
+
 		OutputStream os = response.getOutputStream();
 		FileInputStream fis = null;
 		try {
@@ -256,11 +257,12 @@ public class TaskReportServlet extends HttpServlet {
 		}
 	}
 
-	private void prepareResponse(HttpServletResponse response)
-	{
+	private void prepareResponse(HttpServletResponse response) {
 		response.setContentType(DEFAULT_JSON_CONTENT_TYPE);
 		response.setHeader("Cache-Control", "no-cache, must-revalidate");
-		response.setHeader("Pragma", "no-cache");
+		// response.setHeader("Pragma", "no-cache");
+		// ie https
+		response.setHeader("pragma", "public");
 		response.setHeader("Expires", "0");
 	}
 }
