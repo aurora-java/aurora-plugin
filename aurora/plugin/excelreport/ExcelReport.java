@@ -159,6 +159,8 @@ public class ExcelReport extends AbstractEntry {
 			response.setHeader("Content-Disposition", "attachment; filename=\""
 					+ new String(excelReport.getFileName().getBytes(),
 							"ISO-8859-1") + "\"");
+			response.setHeader("cache-control", "must-revalidate");
+			response.setHeader("pragma", "public");	
 		} catch (UnsupportedEncodingException e) {
 			throw e;
 		}

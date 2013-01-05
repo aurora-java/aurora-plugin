@@ -333,6 +333,8 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 		String fileName = "excel";
 		response.setContentType(excel2007.getMimeType());
 		response.setCharacterEncoding(XML_ENCODING);
+		response.setHeader("cache-control", "must-revalidate");
+		response.setHeader("pragma", "public");	
 		response.setHeader("Content-Disposition", "attachment; filename=\""+ fileName + excel2007.getFileExtension()+"\"");
 	}
 }

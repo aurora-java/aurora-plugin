@@ -175,7 +175,8 @@ public class ModelOutput {
 			response.setContentType("application/vnd.ms-excel");
 			response.setCharacterEncoding(KEY_CHARSET);
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + new String(fileName.getBytes(), "ISO-8859-1") + ".xls\"");
-
+			response.setHeader("cache-control", "must-revalidate");
+			response.setHeader("pragma", "public");	
 			excelFactory.createExcel(getExportData(context), getColumnConfig(context), response.getOutputStream(), (CompositeMap) context
 					.getParameter().getChild(this.KEY_MERGE_COLUMN));
 		} else {
