@@ -7,6 +7,5 @@
 		elementName="cell-style" nameSpace="aurora.plugin.excelreport" />
 	<class-mapping className="aurora.plugin.excelreport.FontWrap"
 		elementName="font" nameSpace="aurora.plugin.excelreport" />
-
 </class-registry>
 
