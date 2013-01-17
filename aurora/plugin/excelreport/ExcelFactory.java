@@ -13,11 +13,22 @@ public class ExcelFactory {
 	public final String KEY_CONTENT = "content";
 	public final String KEY_FORMULA = "formula";
 	private CreationHelper createHelper;
+	
+	Workbook wb = null;
+	CompositeMap context;
+
+	public Workbook getWorkbook() {
+		return wb;
+	}
+	
+	public CompositeMap getContext() {
+		return context;
+	}	
 
 	public void createExcel(CompositeMap context, ExcelReport excelReport)
 			throws Exception {
 		if(excelReport.getSheets()==null)return;	
-		Workbook wb = null;
+		this.context=context;
 		if (ExcelReport.KEY_EXCEL2007_SUFFIX.equalsIgnoreCase(excelReport.getFormat()))
 			wb = new XSSFWorkbook();
 		else
@@ -26,7 +37,7 @@ public class ExcelFactory {
 		if(excelReport.getStyles()!=null)
 			styles = createStyles(wb, excelReport);
 		for (SheetWrap sheetObj : excelReport.getSheets()) {
-			sheetObj.createSheet(wb, context, this);
+			sheetObj.createSheet(this);
 		}
 		wb.write(excelReport.getOutputStream());		
 		excelReport.getOutputStream().close();

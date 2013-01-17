@@ -13,14 +13,14 @@ public class TableColumn {
 	CompositeMap columns;
 	SubtotalConfig[] groups;
 	int index;
-	
+
 	public int getIndex() {
 		return index;
 	}
 
 	public void setIndex(int index) {
 		this.index = index;
-	}	
+	}
 
 	public SubtotalConfig[] getGroups() {
 		return groups;
@@ -62,8 +62,6 @@ public class TableColumn {
 		this.titleStyle = titleStyle;
 	}
 
-
-
 	public String getCellStyle() {
 		return cellStyle;
 	}
@@ -71,8 +69,6 @@ public class TableColumn {
 	public void setCellStyle(String cellStyle) {
 		this.cellStyle = cellStyle;
 	}
-
-
 
 	public int getGroupLevel() {
 		return groupLevel;

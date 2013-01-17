@@ -28,6 +28,8 @@ public class CellStyleWrap {
 	String dataFormat;//数据格式
 
 	String name;
+	
+	final String KEY_ALIGN_LEFT="ALIGN_LEFT";
 
 	public String getName() {
 		return name;
@@ -207,7 +209,7 @@ public class CellStyleWrap {
 		if (ExcelFactory.isNotNull(this.getAlign())) {
 			style.setAlignment(IndexedCellStyle.valueOf(this.getAlign())
 					.getIndex());
-			if("ALIGN_LEFT".equals(this.getAlign())){
+			if(this.KEY_ALIGN_LEFT.equals(this.getAlign())){
 				style.setIndention(this.getIndent());
 			}
 		}
