@@ -12,6 +12,7 @@ import uncertain.composite.TextParser;
 
 public class SheetWrap {
 	String name;
+	boolean displayGridlines=true;
 	DynamicContent dynamicContent;
 	CellData[] staticContent;
 
@@ -23,6 +24,7 @@ public class SheetWrap {
 
 	public void createSheet(ExcelFactory excelFactory) {
 		this.excelSheet = excelFactory.getWorkbook().createSheet(this.getName());
+		this.excelSheet.setDisplayGridlines(this.displayGridlines);
 		this.excelFactory = excelFactory;
 		if (this.getDynamicContent() != null)
 			this.offsetRowIndex = this.getDynamicContent().createContent(excelFactory, this.excelSheet);
@@ -92,4 +94,13 @@ public class SheetWrap {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	public boolean getDisplayGridlines() {
+		return displayGridlines;
+	}
+
+	public void setDisplayGridlines(boolean displayGridlines) {
+		this.displayGridlines = displayGridlines;
+	}	
+	
 }

@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -17,44 +16,32 @@ import org.apache.poi.ss.util.CellReference;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.transform.GroupConfig;
 import uncertain.composite.transform.GroupTransformer;
-import uncertain.core.UncertainEngine;
-import uncertain.ocm.OCManager;
 
-public class DynamicContent {
-	int totalCount = -1;
+public class DynamicContent {	
 	String cell = "A";
-	String dataModel;
 	int row = 1;
-	CompositeMap columns;
-	List<TableColumn> columnList;
-	// LinkedList<LinkedList<Integer[]>> groupRowList=new
-	// LinkedList<LinkedList<Integer[]>>();
-	// Map<Integer,Integer> limitMap=new HashMap<Integer,Integer>();
-	// int groupLimit=6;
-	OCManager mOCManager;
-	Map<String, TableColumn> columnsMap = new HashMap<String, TableColumn>();
-	// Map<String, List<TableColumn>> groupMap = new HashMap<String,
-	// List<TableColumn>>();
-
+	String dataModel;
+	TableColumn[] tableColumns;
+	boolean freezeEnable=false;
+	boolean displayTitle=true;
+	
+	int totalCount = -1;
 	private int rowIndex = 0;
 	private Sheet excelSheet;
 	ExcelFactory excelFactory;
-
+	Map<String, TableColumn> columnsMap = new HashMap<String, TableColumn>();
 	CompositeMap groupMap = new CompositeMap();
-
-	public CompositeMap getGroupMap() {
-		return groupMap;
-	}
+	
+	final String KEY_LEVEL_NAME="level";
 
 	public void createGroupMap() {
-		Iterator<TableColumn> iterator = columnList.iterator();
-		TableColumn column;
+		if (this.getColumns() == null)
+			return;
 		int level = 0;
 		CompositeMap record;
 		String[] groupFields;
 		List<SubtotalConfig> list = new LinkedList<SubtotalConfig>();
-		while (iterator.hasNext()) {
-			column = iterator.next();
+		for (TableColumn column : this.getColumns()) {
 			SubtotalConfig[] groupConfigs = column.getGroups();
 			if (groupConfigs != null) {
 				for (SubtotalConfig config : groupConfigs) {
@@ -67,7 +54,7 @@ public class DynamicContent {
 						if (level == 0)
 							throw new RuntimeException("groupField:"
 									+ groupField + ";groupLevel is null or 0");
-						record = groupMap.getChild("level" + level);
+						record = groupMap.getChild(this.KEY_LEVEL_NAME + level);
 						SubtotalConfig configClone = new SubtotalConfig();
 						configClone.setGroupDesc(config.getGroupDesc());
 						configClone.setGroupField(config.getGroupField());
@@ -85,104 +72,14 @@ public class DynamicContent {
 				}
 			}
 		}
-
 	}
 
-	// public void createGroupMap() {
-	// Iterator<TableColumn> iterator = columnList.iterator();
-	// TableColumn column;
-	// List<TableColumn> list = new LinkedList<TableColumn>();
-	//
-	// int level = 0;
-	//
-	// while (iterator.hasNext()) {
-	// column = iterator.next();
-	//
-	// if (level != column.getGroupLevel()) {
-	// if (list.size() != 0) {
-	// groupMap.put("level" + (level + 1), list);
-	// list = new LinkedList<TableColumn>();
-	// }
-	// level = column.getGroupLevel();
-	// }
-	// if (column.getGroupFormula() != null)
-	// list.add(column);
-	// }
-	// if (list.size() != 0)
-	// groupMap.put("level" + (level + 1), list);
-	// }
-
-	public Map<String, TableColumn> getColumnsMap() {
-		return columnsMap;
-	}
-
-	public void putColumnsMap(String name, TableColumn tableColumn) {
-		columnsMap.put(name, tableColumn);
-	}
-
-	public DynamicContent(UncertainEngine uncertainEngine) {
-		mOCManager = uncertainEngine.getOcManager();
-	}
-
-	public String getCell() {
-		return cell;
-	}
-
-	public void setCell(String cell) {
-		this.cell = cell;
-	}
-
-	public String getDataModel() {
-		return dataModel;
-	}
-
-	public void setDataModel(String dataModel) {
-		this.dataModel = dataModel;
-	}
-
-	public int getRow() {
-		return row;
-	}
-
-	public void setRow(int row) {
-		this.row = row;
-	}
-
-	public CompositeMap getColumns() {
-		return columns;
-	}
-
-	public void setColumns(CompositeMap columns) {
-		this.columns = columns;
-		setTableColumnList(columns);
-	}
-
-	public List<TableColumn> getTableColumnList() {
-		return this.columnList;
-	}
-
-	public void setTableColumnList(CompositeMap columns) {
-		Iterator colIt = columns.getChildIterator();
-		if (colIt == null)
-			return;
-
-		List<TableColumn> colList = new LinkedList<TableColumn>();
-		CompositeMap colConfig;
-		while (colIt.hasNext()) {
-			colConfig = (CompositeMap) colIt.next();
-			TableColumn tableColumn = (TableColumn) mOCManager
-					.createObject(colConfig);
-			colList.add(tableColumn);
-		}
-		this.columnList = colList;
-	}
-
-	public int createContent(CompositeMap context, ExcelFactory excelFactory,
-			Sheet excelSheet) {
+	public int createContent(ExcelFactory excelFactory, Sheet excelSheet) {
 		this.excelSheet = excelSheet;
 		this.excelFactory = excelFactory;
-		createTableTitle(context);
-		CompositeMap data = (CompositeMap) context.getObject(getDataModel());
+		createTableTitle(excelFactory.getContext());
+		CompositeMap data = (CompositeMap) excelFactory.getContext().getObject(
+				getDataModel());
 		if (data == null)
 			return this.rowIndex;
 		GroupConfig[] groupConfig = createGroupConfig(data);
@@ -203,20 +100,14 @@ public class DynamicContent {
 	}
 
 	void createTableTitle(CompositeMap context) {
-		List<TableColumn> list = getTableColumnList();
-		if (list == null)
+		if(!this.getDisplayTitle())return;
+		if (this.getColumns() == null)
 			return;
-
+		CellStyle style;
 		this.rowIndex = getRow();
 		Row row = ExcelFactory.createRow(this.excelSheet, this.rowIndex);
-
-		CellStyle style;
-		TableColumn column;
-
 		int cellnum = CellReference.convertColStringToIndex(getCell());
-		Iterator<TableColumn> it = list.iterator();
-		while (it.hasNext()) {
-			column = it.next();
+		for (TableColumn column : this.getColumns()) {
 			Cell cell = row.createCell(cellnum++);
 			this.excelFactory.setCellValue(cell, column.getTitle());
 			style = this.excelFactory.getStyle(column.getTitleStyle());
@@ -224,24 +115,19 @@ public class DynamicContent {
 				cell.setCellStyle(style);
 			}
 		}
-		this.excelSheet.createFreezePane(0, this.rowIndex);// 冻结
+		if(this.getFreezeEnable())
+			this.excelSheet.createFreezePane(0, this.rowIndex);// 冻结
 	}
 
 	CompositeMap createRecord(CompositeMap record) {
-		List<TableColumn> list = getTableColumnList();
-		if (list == null)
+		if (this.getColumns() == null)
 			return null;
-
-		TableColumn column;
 		Row row = ExcelFactory.createRow(this.excelSheet, ++this.rowIndex);
 		int cellnum = CellReference.convertColStringToIndex(getCell());
-		Iterator<TableColumn> it = list.iterator();
-		while (it.hasNext()) {
-			column = it.next();
+		for (TableColumn column : this.getColumns()) {
 			Cell cell = row.createCell(cellnum++);
 			Object value = record.get(column.getField());
 			this.excelFactory.setCellValue(cell, value);
-
 			if (column.getCellStyle() != null
 					&& !"".equals(column.getCellStyle()))
 				cell.setCellStyle(excelFactory.styles.get(column.getCellStyle()));
@@ -253,16 +139,15 @@ public class DynamicContent {
 	}
 
 	GroupConfig[] createGroupConfig(CompositeMap dataModel) {
-		List<TableColumn> list = getTableColumnList();
-		Iterator<TableColumn> it = list.iterator();
-		TableColumn column = null;
+		if (this.getColumns() == null)
+			return null;
+
 		CompositeMap record = null;
 		StringBuffer buffer = null;
 		int level = 0;
 		int index = CellReference.convertColStringToIndex(getCell());
 		CompositeMap levelMap = new CompositeMap();
-		while (it.hasNext()) {
-			column = it.next();
+		for (TableColumn column : this.getColumns()) {
 			column.setIndex(index);
 			putColumnsMap(column.getField(), column);
 			level = column.getGroupLevel();
@@ -278,14 +163,15 @@ public class DynamicContent {
 			}
 			index++;
 		}
+
 		TreeSet<Integer> keySet = new TreeSet<Integer>(levelMap.keySet());
 		Iterator<Integer> iterator = keySet.descendingIterator();
 		while (iterator.hasNext()) {
 			level = iterator.next();
 			buffer = (StringBuffer) levelMap.get(level);
-			record = new CompositeMap("level" + level);
+			record = new CompositeMap(this.KEY_LEVEL_NAME + level);
 			record.put(GroupConfig.KEY_GROUP_KEY_FIELDS, buffer.toString());
-			record.put(GroupConfig.KEY_RECORD_NAME, "level" + level);
+			record.put(GroupConfig.KEY_RECORD_NAME, this.KEY_LEVEL_NAME + level);
 			this.groupMap.addChild(record);
 		}
 
@@ -300,7 +186,7 @@ public class DynamicContent {
 			return null;
 	}
 
-	CompositeMap aaa(List<SubtotalConfig> groupList,
+	CompositeMap createGroupData(List<SubtotalConfig> groupList,
 			List<CompositeMap> rowList, boolean is_total) {
 		Map<String, TableColumn> columnMap = getColumnsMap();
 		Iterator<SubtotalConfig> colIt = groupList.iterator();
@@ -310,8 +196,6 @@ public class DynamicContent {
 		TableColumn column;
 
 		SubtotalConfig stConfig;
-		LinkedList<Integer[]> list = new LinkedList<Integer[]>();
-
 		int firstRownum = 0;
 		int endRownum = 0;
 		boolean is_flag = false;
@@ -385,14 +269,8 @@ public class DynamicContent {
 			}
 			if (is_group) {
 				if (!is_total) {
-					// this.groupLimit--;
 					this.excelSheet.groupRow(firstRownum - 1,
 							(this.rowIndex - 2));
-					// Integer[] groupRows={firstRownum - 1,this.rowIndex - 2};
-					// limitMap.put(firstRownum - 1, this.groupLimit);
-					// list.add(groupRows);
-					// System.out.println("this.excelSheet.groupRow("+(firstRownum
-					// - 1)+","+ (this.rowIndex - 2)+");");
 				}
 				is_group = false;
 			}
@@ -403,97 +281,9 @@ public class DynamicContent {
 			map.put("end", endRownum);
 			return map;
 		} else {
-			// this.groupRowList.add(list);
 			return null;
 		}
 	}
-
-	// CompositeMap aaa(List<TableColumn> groupList, List<CompositeMap> rowList,
-	// boolean is_total,String level) {
-	// Map<String, TableColumn> columnMap = getColumnsMap();
-	// Iterator<TableColumn> colIt = groupList.iterator();
-	// String curGroupFormula = null;
-	// Row row = null;
-	// TableColumn column;
-	// int firstRownum = 0;
-	// int endRownum = 0;
-	// boolean is_flag = false;
-	// boolean is_group = false;
-	// while (colIt.hasNext()) {
-	// column = colIt.next();
-	// if (!column.getGroupFormula().equals(curGroupFormula)) {
-	// curGroupFormula = column.getGroupFormula();
-	// row = ExcelFactory.createRow(this.excelSheet, ++this.rowIndex);
-	// is_flag = true;
-	// is_group = true;
-	// if (is_total)
-	// totalCount++;
-	// }
-	// if (column.getGroupFormula() != null) {
-	// Cell cell = row.createCell(column.getIndex());
-	// StringBuffer colBuffer = new StringBuffer("SUBTOTAL(");
-	// colBuffer.append(column.getGroupFormula());
-	// colBuffer.append(",");
-	// String ref1 = null;
-	// String ref2 = null;
-	// Iterator<CompositeMap> iterator = rowList.iterator();
-	// String value = null;
-	// boolean is_first = true;
-	// while (iterator.hasNext()) {
-	// CompositeMap map1 = iterator.next();
-	// value = ((CompositeMap) map1.get("record"))
-	// .getString(column.getGroupField());
-	// if (is_first) {
-	// firstRownum = map1.getInt("rownum");
-	// ref1 = CellReference.convertNumToColString(cell
-	// .getColumnIndex()) + firstRownum;
-	// colBuffer.append(ref1);
-	// colBuffer.append(":");
-	// is_first = false;
-	// } else {
-	// endRownum = map1.getInt("rownum");
-	// ref2 = CellReference.convertNumToColString(cell
-	// .getColumnIndex()) + endRownum;
-	// }
-	// }
-	// if (ref2 == null) {
-	// ref2 = ref1;
-	// endRownum = firstRownum;
-	// }
-	// colBuffer.append(ref2);
-	// colBuffer.append(")");
-	// cell.setCellFormula(colBuffer.toString());
-	// if (is_flag) {
-	// String field = column.getGroupField();
-	// TableColumn groupColumn = columnMap.get(field);
-	// Cell groupCell = row.createCell(groupColumn.getIndex());
-	// if (is_total)
-	// groupCell.setCellValue(value + " "
-	// + column.getTotalDesc());
-	// else
-	// groupCell.setCellValue(value + " "
-	// + column.getGroupDesc());
-	// groupCell.setCellStyle(excelFactory.styles.get("group"));
-	// }
-	//
-	// }
-	// if (is_group) {
-	// if (!is_total) {
-	// this.excelSheet.groupRow(firstRownum - 1,
-	// (this.rowIndex - 2));
-	// }
-	// is_group = false;
-	// }
-	// }
-	// if (is_total) {
-	// CompositeMap map = new CompositeMap();
-	// map.put("first", firstRownum);
-	// map.put("end", endRownum);
-	// return map;
-	// } else {
-	// return null;
-	// }
-	// }
 
 	List<CompositeMap> createTableGroup(CompositeMap dataModel) {
 		Iterator it = dataModel.getChildIterator();
@@ -508,13 +298,13 @@ public class DynamicContent {
 				}
 			}
 			if (rowList.size() != 0) {
-				if (dataModel.getName().startsWith("level")) {
+				if (dataModel.getName().startsWith(this.KEY_LEVEL_NAME)) {
 					CompositeMap groupMap = getGroupMap();
 					String levelName = dataModel.getName();
 					List<SubtotalConfig> list = (List<SubtotalConfig>) groupMap
 							.getChild(levelName).get("list");
 					if (list != null) {
-						aaa(list, rowList, false);
+						createGroupData(list, rowList, false);
 					}
 				} else {
 					CompositeMap m = null;
@@ -525,96 +315,77 @@ public class DynamicContent {
 						String levelName = record.getName();
 						List<SubtotalConfig> list1 = (List<SubtotalConfig>) record
 								.get("list");
-						m = aaa(list1, rowList, true);
+						m = createGroupData(list1, rowList, true);
 					}
 					int firstRownum = m.getInt("first");
 					int endRownum = m.getInt("end");
-					// Iterator<LinkedList<Integer[]>>
-					// groupRowIterator=groupRowList.descendingIterator();
-					// while(groupRowIterator.hasNext()){
-					// boolean isFirst=true;
-					// int firstNum=0;
-					// LinkedList<Integer[]> groupRow=groupRowIterator.next();
-					// if(isFirst){
-					// Iterator<Integer[]> aaa=groupRow.descendingIterator();
-					// while(aaa.hasNext()){
-					// Integer[] groupRows=aaa.next();
-					// firstNum=groupRows[0];
-					// this.excelSheet.groupRow(groupRows[0], groupRows[1]);
-					// System.out.println("this.excelSheet.groupRow("+groupRows[0]+","+groupRows[1]+");");
-					// this.groupLimit--;
-					// }
-					// }else{
-					// int index=0;
-					// Iterator<Integer[]> aaa=groupRow.descendingIterator();
-					// while(aaa.hasNext()){
-					// Integer[] groupRows=aaa.next();
-					// if(firstNum<=groupRows[0]){
-					// if(index<this.groupLimit){
-					// this.excelSheet.groupRow(groupRows[0], groupRows[1]);
-					// System.out.println("this.excelSheet.groupRow("+groupRows[0]+","+groupRows[1]+");");
-					// index++;
-					// }
-					// }else{
-					// int limit=limitMap.get(groupRows[0]);
-					// if(limit>0){
-					// this.excelSheet.groupRow(groupRows[0], groupRows[1]);
-					// System.out.println("this.excelSheet.groupRow("+groupRows[0]+","+groupRows[1]+");");
-					// limit--;
-					// limitMap.put(groupRows[0], limit);
-					// }
-					//
-					// }
-					// }
-					// }
-					// isFirst=false;
-					// }
 					this.excelSheet.groupRow(firstRownum - 1, endRownum
 							+ totalCount);
-					// System.out.println("this.excelSheet.groupRow("+(firstRownum
-					// - 1)+","+ (endRownum + totalCount)+");");
-					// this.excelSheet.groupRow(48,65);
-					// this.excelSheet.groupRow(48,64);
-					// this.excelSheet.groupRow(48,63);
-					// this.excelSheet.groupRow(48,62);
-					// this.excelSheet.groupRow(58,61);
-					// this.excelSheet.groupRow(58,60);
-					// this.excelSheet.groupRow(53,56);
-					// this.excelSheet.groupRow(53,55);
-					// this.excelSheet.groupRow(48,51);
-					// this.excelSheet.groupRow(48,50);
-					// this.excelSheet.groupRow(37,46);
-					// this.excelSheet.groupRow(37,45);
-					// this.excelSheet.groupRow(37,44);
-					// this.excelSheet.groupRow(37,43);
-					// this.excelSheet.groupRow(37,42);
-					// this.excelSheet.groupRow(37,41);
-					// this.excelSheet.groupRow(22,35);
-					// this.excelSheet.groupRow(22,34);
-					// this.excelSheet.groupRow(22,33);
-					// this.excelSheet.groupRow(22,32);
-					// this.excelSheet.groupRow(28,31);
-					// this.excelSheet.groupRow(28,30);
-					//
-					// this.excelSheet.groupRow(22,26);
-					// this.excelSheet.groupRow(22,25);
-					// this.excelSheet.groupRow(2,20);
-					// this.excelSheet.groupRow(2,19);
-					// this.excelSheet.groupRow(2,18);
-					// this.excelSheet.groupRow(2,17);
-					// this.excelSheet.groupRow(13,16);
-					// this.excelSheet.groupRow(13,15);
-					//
-					// this.excelSheet.groupRow(7,11);
-					// this.excelSheet.groupRow(7,10);
-					//
-					// this.excelSheet.groupRow(2,5);
-					// this.excelSheet.groupRow(2,4);
-					// this.excelSheet.groupRow(2,66);
+
 				}
 			}
 		}
 		return rowList;
 	}
 
+	public Map<String, TableColumn> getColumnsMap() {
+		return columnsMap;
+	}
+
+	public void putColumnsMap(String name, TableColumn tableColumn) {
+		columnsMap.put(name, tableColumn);
+	}
+
+	public String getCell() {
+		return cell;
+	}
+
+	public void setCell(String cell) {
+		this.cell = cell;
+	}
+
+	public String getDataModel() {
+		return dataModel;
+	}
+
+	public void setDataModel(String dataModel) {
+		this.dataModel = dataModel;
+	}
+
+	public int getRow() {
+		return row;
+	}
+
+	public void setRow(int row) {
+		this.row = row;
+	}
+
+	public void setColumns(TableColumn[] tableColumns) {
+		this.tableColumns = tableColumns;
+	}
+
+	public TableColumn[] getColumns() {
+		return this.tableColumns;
+	}
+
+	public CompositeMap getGroupMap() {
+		return groupMap;
+	}
+
+	public boolean getFreezeEnable() {
+		return freezeEnable;
+	}
+
+	public void setFreezeEnable(boolean freezeEnable) {
+		this.freezeEnable = freezeEnable;
+	}
+
+	public boolean getDisplayTitle() {
+		return displayTitle;
+	}
+
+	public void setDisplayTitle(boolean displayTitle) {
+		this.displayTitle = displayTitle;
+	}		
+	
 }
