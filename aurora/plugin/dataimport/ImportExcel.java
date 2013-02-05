@@ -185,7 +185,7 @@ public class ImportExcel extends AbstractEntry {
 		
 		for (int i = 0; i < maxcell; i++) {
 			String valueString = data.getString("C" + i);
-			if(valueString!=null||!"".equals(valueString)){
+			if(valueString!=null&&!"".equals(valueString)){
 				is_null=false;
 				break;
 			}				
