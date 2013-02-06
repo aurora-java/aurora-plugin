@@ -3,12 +3,12 @@ package aurora.plugin.script.engine;
 import java.io.File;
 import java.io.IOException;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Script;
-import org.mozilla.javascript.Scriptable;
 
 import uncertain.composite.CompositeMap;
 import aurora.application.sourcecode.SourceCodeUtil;
+import aurora.javascript.Context;
+import aurora.javascript.Script;
+import aurora.javascript.Scriptable;
 import aurora.plugin.script.scriptobject.ScriptShareObject;
 
 public class ScriptImportor {

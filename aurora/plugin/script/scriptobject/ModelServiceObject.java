@@ -2,10 +2,6 @@ package aurora.plugin.script.scriptobject;
 
 import java.io.IOException;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.ScriptableObject;
 
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
@@ -18,6 +14,10 @@ import aurora.database.service.BusinessModelServiceContext;
 import aurora.database.service.DatabaseServiceFactory;
 import aurora.database.service.ServiceOption;
 import aurora.database.service.SqlServiceContext;
+import aurora.javascript.Context;
+import aurora.javascript.Function;
+import aurora.javascript.NativeObject;
+import aurora.javascript.ScriptableObject;
 
 public class ModelServiceObject extends ScriptableObject {
 

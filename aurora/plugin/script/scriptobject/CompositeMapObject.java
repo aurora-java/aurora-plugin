@@ -2,13 +2,13 @@ package aurora.plugin.script.scriptobject;
 
 import java.util.List;
 
-import org.mozilla.javascript.Callable;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.NativeJavaObject;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
+import aurora.javascript.Callable;
+import aurora.javascript.Context;
+import aurora.javascript.Function;
+import aurora.javascript.NativeArray;
+import aurora.javascript.NativeJavaObject;
+import aurora.javascript.Scriptable;
+import aurora.javascript.ScriptableObject;
 
 import uncertain.composite.CompositeMap;
 

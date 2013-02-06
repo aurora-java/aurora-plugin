@@ -3,15 +3,15 @@ package aurora.plugin.script.scriptobject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.mozilla.javascript.Callable;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 
 import uncertain.composite.CompositeMap;
 import aurora.application.action.HttpSessionCopy;
 import aurora.application.action.HttpSessionOperate;
+import aurora.javascript.Callable;
+import aurora.javascript.Context;
+import aurora.javascript.Function;
+import aurora.javascript.Scriptable;
+import aurora.javascript.ScriptableObject;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 

@@ -2,7 +2,6 @@ package aurora.plugin.script;
 
 import javax.script.ScriptException;
 
-import org.mozilla.javascript.RhinoException;
 
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.IObjectRegistry;
@@ -10,6 +9,7 @@ import uncertain.ocm.OCManager;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 import aurora.application.action.ActionUtil;
+import aurora.javascript.RhinoException;
 import aurora.plugin.script.engine.InterruptException;
 import aurora.plugin.script.engine.ScriptRunner;
 
@@ -61,6 +61,7 @@ public class ServerScript extends AbstractEntry {
 
 	@Override
 	public void run(ProcedureRunner runner) throws Exception {
+		long t = System.nanoTime();
 		CompositeMap context = runner.getContext();
 		if (exp == null)
 			exp = cdata;
@@ -87,6 +88,9 @@ public class ServerScript extends AbstractEntry {
 			sb.append("message : " + re.getMessage() + "\n");
 			// re.printStackTrace();
 			throw new ScriptException(sb.toString());
+		} finally {
+			System.out.println("server-script:" + (System.nanoTime() - t)
+					/ 1000000 + "ms");
 		}
 	}
 

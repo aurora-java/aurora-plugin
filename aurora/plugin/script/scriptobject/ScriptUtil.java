@@ -5,14 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.ProcedureRunner;
+import aurora.javascript.Context;
+import aurora.javascript.NativeArray;
+import aurora.javascript.Scriptable;
+import aurora.javascript.ScriptableObject;
 import aurora.plugin.script.engine.AuroraScriptEngine;
 
 public class ScriptUtil {

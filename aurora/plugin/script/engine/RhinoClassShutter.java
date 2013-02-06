@@ -3,7 +3,7 @@ package aurora.plugin.script.engine;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mozilla.javascript.ClassShutter;
+import aurora.javascript.ClassShutter;
 
 /**
  * This class prevents script access to certain sensitive classes. Note that

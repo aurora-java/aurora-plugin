@@ -2,10 +2,10 @@ package aurora.plugin.script.scriptobject;
 
 import java.lang.reflect.Method;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.ScriptableObject;
+import aurora.javascript.Context;
+import aurora.javascript.Function;
+import aurora.javascript.NativeObject;
+import aurora.javascript.ScriptableObject;
 
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.ClassRegistry;

@@ -3,11 +3,11 @@ package aurora.plugin.script.engine;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 
-import org.mozilla.javascript.ClassShutter;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.NativeJavaObject;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.WrapFactory;
+import aurora.javascript.ClassShutter;
+import aurora.javascript.Context;
+import aurora.javascript.NativeJavaObject;
+import aurora.javascript.Scriptable;
+import aurora.javascript.WrapFactory;
 
 /**
  * This wrap factory is used for seimport static

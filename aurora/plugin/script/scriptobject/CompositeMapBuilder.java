@@ -1,8 +1,8 @@
 package aurora.plugin.script.scriptobject;
 
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
+import aurora.javascript.Context;
+import aurora.javascript.Function;
+import aurora.javascript.Scriptable;
 
 import uncertain.composite.CompositeMap;
 

@@ -1,10 +1,10 @@
 package aurora.plugin.script.scriptobject;
 
-import org.mozilla.javascript.ScriptableObject;
 
 import uncertain.composite.CompositeMap;
 import uncertain.proc.ProcedureRunner;
 import aurora.application.action.AuroraCookie;
+import aurora.javascript.ScriptableObject;
 
 public class CookieObject extends ScriptableObject {
 
