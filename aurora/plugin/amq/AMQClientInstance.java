@@ -102,15 +102,15 @@ public class AMQClientInstance extends AbstractLocatableObject implements ILifeC
 		};
 		initConsumersThread.start();
 		moniteStart();
-		Runtime.getRuntime().addShutdownHook(new Thread(){
-			public void run(){
-				try {
-					onShutdown();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+//		Runtime.getRuntime().addShutdownHook(new Thread(){
+//			public void run(){
+//				try {
+//					onShutdown();
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
 		registry.registerInstance(IMessageStub.class, this);
 		return true;
 	}
