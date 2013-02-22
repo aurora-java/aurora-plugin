@@ -214,7 +214,7 @@ public class DynamicContent {
 			}
 
 			if (stConfig.getGroupFormula() != null) {
-				column = this.getColumnsMap().get(curField);
+				column = this.getColumnsMap().get(stConfig.getColumnField());
 				Cell cell = row.createCell(column.getIndex());
 				StringBuffer colBuffer = new StringBuffer("SUBTOTAL(");
 				colBuffer.append(stConfig.getGroupFormula());
