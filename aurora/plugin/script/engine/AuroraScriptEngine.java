@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-
 import uncertain.cache.INamedCacheFactory;
 import uncertain.composite.CompositeMap;
 import uncertain.core.UncertainEngine;
@@ -115,8 +114,8 @@ public class AuroraScriptEngine {
 			ScriptableObject.defineClass(topLevel, ActionEntryObject.class);
 			topLevel.defineFunctionProperties(new String[] { "print",
 					"println", "raise_app_error", "$instance", "$cache",
-					"$config", "$bm", "$define" }, AuroraScriptEngine.class,
-					ScriptableObject.DONTENUM);
+					"$config", "$bm", "$define", "$logger" },
+					AuroraScriptEngine.class, ScriptableObject.DONTENUM);
 			cx.evaluateString(topLevel, js, aurora_core_js, 1, null);
 			// --define useful method
 			ScriptableObject cmBuilder = (ScriptableObject) cx
@@ -227,6 +226,16 @@ public class AuroraScriptEngine {
 		if (args.length > 1)
 			bm.jsSet_option(args[1]);
 		return bm;
+	}
+
+	public static Object $logger(Context cx, Scriptable thisObj, Object[] args,
+			Function funObj) {
+		String topic = "server-script";
+		if (args.length > 0)
+			topic = "" + args[0];
+		CompositeMap context = (CompositeMap) cx
+				.getThreadLocal(KEY_SERVICE_CONTEXT);
+		return uncertain.logging.LoggingContext.getLogger(context, topic);
 	}
 
 	public static void $define(Context cx, Scriptable thisObj, Object[] args,
