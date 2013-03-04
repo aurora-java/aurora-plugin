@@ -1,7 +1,5 @@
 package aurora.plugin.export.task;
 
-
-
 import java.io.File;
 
 import uncertain.composite.TextParser;
@@ -11,6 +9,8 @@ import uncertain.logging.LoggingContext;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 
+
+//删除本地报表文件
 public class ReportRemove extends AbstractEntry{
 
 	public String fullPath;

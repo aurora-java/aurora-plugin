@@ -3,7 +3,7 @@ package aurora.plugin.export.task;
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.IConfigurable;
 
-
+//WEB-INF下report-task.config配置文件接口的实现类
 public class ReportTask implements IReportTask,IConfigurable{
 	private String reportDir;
 	private CompositeMap accessPrivilegeConfig ;

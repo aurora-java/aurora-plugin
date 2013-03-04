@@ -35,6 +35,8 @@ import aurora.service.http.HttpServiceInstance;
 import aurora.service.http.WebContextInit;
 import aurora.service.validation.ErrorMessage;
 
+
+//报表下载和删除等管理操作的网页访问
 public class TaskReportServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8531728996484927927L;

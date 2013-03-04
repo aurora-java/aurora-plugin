@@ -14,6 +14,8 @@ import aurora.database.service.IDatabaseServiceFactory;
 import aurora.service.ServiceContext;
 import aurora.service.ServiceInstance;
 
+
+//适用于Grid数据的导出：添加一个后台任务
 public class TaskServiceInterpret {
 
 	public final String KEY_GENERATE_STATE = "_generate_state_task";
