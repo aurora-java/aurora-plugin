@@ -10,7 +10,6 @@ import uncertain.proc.IProcedureManager;
 import uncertain.proc.Procedure;
 import uncertain.proc.ProcedureRunner;
 import aurora.database.service.IDatabaseServiceFactory;
-import aurora.plugin.export.ModelOutput;
 import aurora.service.IConfigurableService;
 import aurora.service.ServiceInstance;
 import aurora.service.controller.ControllerProcedures;
@@ -18,16 +17,17 @@ import aurora.service.http.AbstractFacadeServlet;
 
 public class ModelExportTask extends AbstractEntry {
 	
-	public final String PARTICIPANT_LIST_EXPORT_CATEGORY = "export";//It need define export category in service-listener.config.
-	public final String KEY_COLUMN_CONFIG = "_column_config_";
-	public final String KEY_FILE_NAME = "_file_name_";
-	public final String KEY_CHARSET = "GBK";
-	public final String KEY_PROMPT = "prompt";
-	public final String KEY_DATA_INDEX = "name";
-	public final String KEY_COLUMN = "column";
-	public final String KEY_WIDTH = "width";
-	public final String KEY_GENERATE_STATE = "_generate_state_task";
-	public final String KEY_FORMAT = "_format";
+	public final static String PARTICIPANT_LIST_EXPORT_CATEGORY = "export";//It need define export category in service-listener.config.
+	public final static String KEY_COLUMN_CONFIG = "_column_config_";
+	public final static String KEY_FILE_NAME = "_file_name_";
+	public final static String KEY_CHARSET = "GBK";
+	public final static String KEY_PROMPT = "prompt";
+	public final static String KEY_DATA_INDEX = "name";
+	public final static String KEY_COLUMN = "column";
+	public final static String KEY_WIDTH = "width";
+	public final static String KEY_GENERATE_STATE = "_generate_state_task";
+	public final static String KEY_FORMAT = "_format";
+	public final static String KEY_ENABLETASK = "enableTask";
 
 	public final String KEY_URL = "${/parameter/@url}";
 
@@ -44,8 +44,8 @@ public class ModelExportTask extends AbstractEntry {
 		CompositeMap parameter = context.getChild("parameter");
 		if (parameter != null) {
 			parameter.remove(KEY_GENERATE_STATE);
-			parameter.put(ModelOutput.KEY_GENERATE_STATE, true);
-			parameter.put(ModelOutput.KEY_ENABLETASK, true);
+			parameter.put(ModelExportTask.KEY_GENERATE_STATE, true);
+			parameter.put(ModelExportTask.KEY_ENABLETASK, true);
 		}
 		CompositeMap parsedSvcConfigNode = context.getChild("parsedSvcConfig");
 		if (parsedSvcConfigNode != null && parsedSvcConfigNode.getChilds() != null) {
