@@ -15,15 +15,13 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
 import uncertain.core.UncertainEngine;
-import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 
 import aurora.database.service.SqlServiceContext;
 import aurora.plugin.csv.CsvParse;
-import aurora.plugin.poi.ExcelParse;
 import aurora.plugin.poi.eventmodel.XLSParse;
-import aurora.plugin.poi.eventmodel.XLSXParse;
+import aurora.plugin.poi.usermodel.XLSXParse;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 
@@ -45,21 +43,22 @@ public class ImportExcel extends AbstractEntry {
 	public String attribute5;
 	public String dataSourceName;
 	UncertainEngine mUncertainEngine;
-	Connection conn;	
-	
-	public ImportExcel(UncertainEngine uncertainEngine){
-		mUncertainEngine=uncertainEngine;
-	}	
-	
+	Connection conn;
+	String lineSql = "fnd_interface_load_pkg.ins_fnd_interface_lines(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+	CallableStatement lineCstm = null;
+	boolean is_first = true;
+
+	public ImportExcel(UncertainEngine uncertainEngine) {
+		mUncertainEngine = uncertainEngine;
+	}
+
 	public String getTemplate_code() {
 		return template_code;
 	}
 
-
 	public void setTemplate_code(String template_code) {
 		this.template_code = template_code;
 	}
-
 
 	public String getDataSourceName() {
 		return dataSourceName;
@@ -67,7 +66,7 @@ public class ImportExcel extends AbstractEntry {
 
 	public void setDataSourceName(String dataSourceName) {
 		this.dataSourceName = dataSourceName;
-	}	
+	}
 
 	public void run(ProcedureRunner runner) throws Exception {
 		CompositeMap context = runner.getContext();
@@ -76,26 +75,40 @@ public class ImportExcel extends AbstractEntry {
 				.getInstance(context);
 		SqlServiceContext sqlServiceContext = SqlServiceContext
 				.createSqlServiceContext(context);
-		
+
 		conn = sqlServiceContext.getNamedConnection(dataSourceName);
-		
-		if(conn==null){
-			sqlServiceContext.initConnection(mUncertainEngine.getObjectRegistry(),dataSourceName);
+
+		if (conn == null) {
+			sqlServiceContext.initConnection(
+					mUncertainEngine.getObjectRegistry(), dataSourceName);
 			conn = sqlServiceContext.getNamedConnection(dataSourceName);
 		}
-		
+
 		saveHead();
-		
+
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload up = new ServletFileUpload(factory);
 		List items = up.parseRequest(serviceInstance.getRequest());
 		Iterator i = items.iterator();
-		while (i.hasNext()) {
-			FileItem fileItem = (FileItem) i.next();
-			if (!fileItem.isFormField()) {
-				fileName = fileItem.getName();
-				String suffix = fileName.substring(fileName.lastIndexOf("."));
-				parseFile(fileItem.getInputStream(), suffix.toLowerCase(), this);
+		try {
+			while (i.hasNext()) {
+				FileItem fileItem = (FileItem) i.next();
+				if (!fileItem.isFormField()) {
+					fileName = fileItem.getName();
+					String suffix = fileName.substring(fileName
+							.lastIndexOf("."));
+					parseFile(fileItem.getInputStream(), suffix.toLowerCase(),
+							this);
+				}
+			}
+			lineCstm.executeBatch();
+		} finally {
+			if (this.lineCstm != null) {
+				try {
+					lineCstm.close();
+				} catch (Exception e) {
+
+				}
 			}
 		}
 	}
@@ -104,7 +117,7 @@ public class ImportExcel extends AbstractEntry {
 		CallableStatement cstm = null;
 		String headSql = "fnd_interface_load_pkg.ins_fnd_interface_headers(?,?,?,?,?,?,?,?,?,?,?)";
 		try {
-			cstm = conn.prepareCall("{call "+headSql+"}");
+			cstm = conn.prepareCall("{call " + headSql + "}");
 			cstm.setLong(1, new Long(header_id));
 			if (job_id == null)
 				cstm.setNull(2, java.sql.Types.NUMERIC);
@@ -113,7 +126,7 @@ public class ImportExcel extends AbstractEntry {
 			cstm.setString(3, "NEW");
 			cstm.setString(4, user_id);
 			cstm.setString(5, fileName);
-			if(template_code == null)
+			if (template_code == null)
 				cstm.setNull(6, java.sql.Types.VARCHAR);
 			else
 				cstm.setString(6, template_code);
@@ -146,13 +159,13 @@ public class ImportExcel extends AbstractEntry {
 
 	void parseFile(InputStream is, String suffix, ImportExcel importExcel)
 			throws Exception {
-		if(XLS_KEY.equals(suffix)){
-			XLSParse xlsParse=new XLSParse();
+		if (XLS_KEY.equals(suffix)) {
+			XLSParse xlsParse = new XLSParse();
 			xlsParse.parseFile(is, importExcel);
 		}
 		if (XLSX_KEY.equals(suffix)) {
-			XLSXParse xlsxParse=new XLSXParse();
-			xlsxParse.parseFile(is, importExcel);		
+			XLSXParse xlsxParse = new XLSXParse();
+			xlsxParse.parseFile(is, importExcel);
 		} else if (CSV_KEY.equals(suffix) || TXT_KEY.equals(suffix)) {
 			if (separator == null)
 				throw new IllegalArgumentException("separator is undefined");
@@ -168,7 +181,7 @@ public class ImportExcel extends AbstractEntry {
 		user_id = TextParser.parse(user_id, context);
 		if (user_id == null && "".equals(user_id))
 			throw new IllegalArgumentException("user_id is undefined");
-		template_code= TextParser.parse(template_code, context);
+		template_code = TextParser.parse(template_code, context);
 		job_id = TextParser.parse(job_id, context);
 		attribute1 = TextParser.parse(attribute1, context);
 		attribute2 = TextParser.parse(attribute2, context);
@@ -177,50 +190,49 @@ public class ImportExcel extends AbstractEntry {
 		attribute5 = TextParser.parse(attribute5, context);
 	}
 
-	public void saveLine(CompositeMap data, int rownum) throws SQLException {		
+	public void saveLine(CompositeMap data, int rownum) throws SQLException {
 		if (data.getLong("maxCell") == null)
-			return;		
+			return;
 		int maxcell = data.getInt("maxCell");
-		boolean is_null=true;
-		
+		boolean is_null = true;
+
 		for (int i = 0; i < maxcell; i++) {
 			String valueString = data.getString("C" + i);
-			if(valueString!=null&&!"".equals(valueString)){
-				is_null=false;
+			if (valueString != null && !"".equals(valueString)) {
+				is_null = false;
 				break;
-			}				
-		}
-		//过滤空行
-		if(is_null)
-			return;		
-		StringBuffer lineSql = new StringBuffer("fnd_interface_load_pkg.ins_fnd_interface_lines(?,?,?,?,?,?,?");
-		for (int i = 0; i < maxcell; i++) {
-			lineSql.append(",?");
-		}
-		lineSql.append(")");
-		CallableStatement cstm = null;
-		try {
-			cstm = conn.prepareCall("{call " + lineSql + "}");
-			cstm.setLong(1, new Long(header_id));
-			cstm.setNull(2, java.sql.Types.VARCHAR);
-			cstm.setNull(3, java.sql.Types.VARCHAR);
-			cstm.setString(4, user_id);
-			cstm.setLong(5, rownum);
-			cstm.setNull(6, java.sql.Types.VARCHAR);
-			cstm.setNull(7, java.sql.Types.NUMERIC);
-			String valueString;
-			for (int i = 0; i < maxcell; i++) {
-				valueString = data.getString("C" + i);
-				if (valueString == null)
-					cstm.setNull(8 + i, java.sql.Types.VARCHAR);
-				else
-					cstm.setString(8 + i, valueString);
 			}
-			cstm.execute();
-		} finally {
-			if (cstm != null)
-				cstm.close();
 		}
+		// 过滤空行
+		if (is_null)
+			return;
+		if (is_first) {
+			is_first = false;
+			StringBuffer lineSql = new StringBuffer(
+					"fnd_interface_load_pkg.ins_fnd_interface_lines(?,?,?,?,?,?,?");
+			for (int i = 0; i < maxcell; i++) {
+				lineSql.append(",?");
+			}
+			lineSql.append(")");
+			this.lineCstm = conn.prepareCall("{call " + lineSql + "}");
+		}
+
+		lineCstm.setLong(1, new Long(header_id));
+		lineCstm.setNull(2, java.sql.Types.VARCHAR);
+		lineCstm.setNull(3, java.sql.Types.VARCHAR);
+		lineCstm.setString(4, user_id);
+		lineCstm.setLong(5, rownum);
+		lineCstm.setNull(6, java.sql.Types.VARCHAR);
+		lineCstm.setNull(7, java.sql.Types.NUMERIC);
+		String valueString;
+		for (int i = 0; i < maxcell; i++) {
+			valueString = data.getString("C" + i);
+			if (valueString == null)
+				lineCstm.setNull(8 + i, java.sql.Types.VARCHAR);
+			else
+				lineCstm.setString(8 + i, valueString);
+		}
+		lineCstm.addBatch();		
 	}
 
 	public String getHeader_id() {
