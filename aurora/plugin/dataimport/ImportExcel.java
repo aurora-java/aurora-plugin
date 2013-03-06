@@ -224,8 +224,16 @@ public class ImportExcel extends AbstractEntry {
 			}
 			lineSql.append(",?)");
 			if(this.lineCstm!=null){
-				this.lineCstm.close();
-				this.lineCstm=null;
+				try{
+					this.lineCstm.executeBatch();					
+				}finally{
+					try {
+						lineCstm.close();
+					} catch (Exception e) {
+
+					}
+					this.lineCstm=null;
+				}
 			}
 			this.lineCstm = conn.prepareCall("{call " + lineSql + "}");
 		}
