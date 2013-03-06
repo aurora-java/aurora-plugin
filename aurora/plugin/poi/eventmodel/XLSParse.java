@@ -113,11 +113,11 @@ public class XLSParse implements HSSFListener {
 				if(orderedBSRs == null) {
 					orderedBSRs = BoundSheetRecord.orderByBofPosition(boundSheetRecords);
 				}
-				output.println();
-				output.println( 
-						orderedBSRs[sheetIndex].getSheetname() +
-						" [" + (sheetIndex+1) + "]:"
-				);
+//				output.println();
+//				output.println( 
+//						orderedBSRs[sheetIndex].getSheetname() +
+//						" [" + (sheetIndex+1) + "]:"
+//				);
 			}
 			break;
 
@@ -239,10 +239,10 @@ public class XLSParse implements HSSFListener {
 
 		// If we got something to print out, do so
 		if(thisStr != null) {
-			if(thisColumn > 0) {
-				output.print(',');
-			}
-			output.print(thisStr);
+//			if(thisColumn > 0) {
+//				output.print(',');
+//			}
+//			output.print(thisStr);
 			dataMap.putString("C"+thisColumn, thisStr);
 		}
 
@@ -258,9 +258,9 @@ public class XLSParse implements HSSFListener {
 			if(minColumns > 0) {
 				// Columns are 0 based
 				if(lastColumnNumber == -1) { lastColumnNumber = 0; }
-				for(int i=lastColumnNumber; i<(minColumns); i++) {
-					output.print(',');
-				}
+//				for(int i=lastColumnNumber; i<(minColumns); i++) {
+//					output.print(',');
+//				}
 			}
 
 			// End the row
@@ -270,7 +270,7 @@ public class XLSParse implements HSSFListener {
 			} catch (SQLException e) {
 				throw new RuntimeException(e);
 			}
-			output.println();			
+//			output.println();			
 			dataMap=new CompositeMap("record");
 			// We're onto a new row
 			lastColumnNumber = -1;

@@ -241,11 +241,11 @@ public class XLSXParse {
                 if (lastColumnNumber == -1) {
                     lastColumnNumber = 0;
                 }
-                for (int i = lastColumnNumber; i < thisColumn; ++i)
-                    output.print(',');
+//                for (int i = lastColumnNumber; i < thisColumn; ++i)
+//                    output.print(',');
 
                 // Might be the empty string.
-                output.print(thisStr);
+//                output.print(thisStr);
                 dataMap.putString("C"+this.thisColumn, thisStr);
                 // Update column
                 if (thisColumn > -1)
@@ -259,13 +259,13 @@ public class XLSXParse {
                     if (lastColumnNumber == -1) {
                         lastColumnNumber = 0;
                     }
-                    for (int i = lastColumnNumber; i < (this.minColumnCount); i++) {
-                        output.print(',');
-                    }
+//                    for (int i = lastColumnNumber; i < (this.minColumnCount); i++) {
+//                        output.print(',');
+//                    }
                 }
 
                 // We're onto a new row
-                output.println();
+//                output.println();
                 try {
                 	dataMap.putInt("maxCell", lastColumnNumber+1);
 					importProcessor.saveLine(dataMap, lastRowNumber);
@@ -360,9 +360,9 @@ public class XLSXParse {
         int index = 0;
         while (iter.hasNext()) {
             InputStream stream = iter.next();
-            String sheetName = iter.getSheetName();
-            this.output.println();
-            this.output.println(sheetName + " [index=" + index + "]:");
+//            String sheetName = iter.getSheetName();
+//            this.output.println();
+//            this.output.println(sheetName + " [index=" + index + "]:");
             processSheet(styles, strings, stream);
             stream.close();
             ++index;
