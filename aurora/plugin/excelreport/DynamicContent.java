@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 
 import uncertain.composite.CompositeMap;
+import uncertain.composite.TextParser;
 import uncertain.composite.transform.GroupConfig;
 import uncertain.composite.transform.GroupTransformer;
 
@@ -109,7 +110,7 @@ public class DynamicContent {
 		int cellnum = CellReference.convertColStringToIndex(getCell());
 		for (TableColumn column : this.getColumns()) {
 			Cell cell = row.createCell(cellnum++);
-			this.excelFactory.setCellValue(cell, column.getTitle());
+			this.excelFactory.setCellValue(cell, TextParser.parse(column.getTitle(), context));
 			style = this.excelFactory.getStyle(column.getTitleStyle());
 			if (ExcelFactory.isNotNull(style)) {
 				cell.setCellStyle(style);
