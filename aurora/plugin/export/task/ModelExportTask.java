@@ -28,7 +28,8 @@ public class ModelExportTask extends AbstractEntry {
 	public final static String KEY_DATA_INDEX = "name";
 	public final static String KEY_COLUMN = "column";
 	public final static String KEY_WIDTH = "width";
-	public final static String KEY_GENERATE_STATE = "_generate_state_task";
+	public final static String KEY_GENERATE_STATE_TASK = "_generate_state_task";
+	public final static String KEY_GENERATE_STATE = "_generate_state";
 	public final static String KEY_FORMAT = "_format";
 	public final static String KEY_ENABLETASK = "enableTask";
 
@@ -46,7 +47,7 @@ public class ModelExportTask extends AbstractEntry {
 		context = runner.getContext();
 		CompositeMap parameter = context.getChild("parameter");
 		if (parameter != null) {
-			parameter.remove(KEY_GENERATE_STATE);
+			parameter.remove(KEY_GENERATE_STATE_TASK);
 			parameter.put(ModelExportTask.KEY_GENERATE_STATE, true);
 			parameter.put(ModelExportTask.KEY_ENABLETASK, true);
 		}
