@@ -55,7 +55,10 @@ public class ExcelParse {
 			is_new=false;
 			is_write = false;			
 			record.putInt("maxCell", maxCellNum);
-			record.putString("sheetName", sheetName);			
+			if(i==0)
+				record.putString("sheetName", "sheetName");	
+			else
+				record.putString("sheetName", sheetName);			
 			for (int j = 0; j < maxCellNum; j++) {
 				String value = null;
 				cell = row.getCell(j);
