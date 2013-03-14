@@ -18,7 +18,7 @@ import uncertain.composite.CompositeMap;
 import aurora.plugin.dataimport.ImportExcel;
 
 public class ExcelParse {
-	DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
 	public void parseFile(InputStream is, ImportExcel importProcessor,
 			String suffix) throws IOException, SQLException {
@@ -42,6 +42,7 @@ public class ExcelParse {
 		CompositeMap record;
 		String sheetName = sheet.getSheetName();
 		int  l = sheet.getLastRowNum();
+		int maxCellNum=sheet.getRow(0).getLastCellNum();
 		System.out.println("导入文件sheet("+sheetName+")最后一行是："+(l+1));
 		boolean is_write = false;
 		boolean is_new=true;
@@ -52,8 +53,7 @@ public class ExcelParse {
 			record = new CompositeMap("record");
 			record.putBoolean("is_new", is_new);
 			is_new=false;
-			is_write = false;
-			int maxCellNum = row.getLastCellNum();
+			is_write = false;			
 			record.putInt("maxCell", maxCellNum);
 			record.putString("sheetName", sheetName);			
 			for (int j = 0; j < maxCellNum; j++) {
@@ -63,10 +63,14 @@ public class ExcelParse {
 					if (cell.getCellType() == Cell.CELL_TYPE_STRING)
 						value = cell.getRichStringCellValue().toString();
 					if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-
 						try {
 							Double.parseDouble(cell.toString());
-							value = Double.toString(cell.getNumericCellValue());
+							if(cell.toString().endsWith(".0")){
+								Long a=new Double(cell.getNumericCellValue()).longValue();
+								value=a.toString();
+							}else{
+								value = Double.toString(cell.getNumericCellValue());
+							}
 						} catch (Exception e) {
 							if (cell.getDateCellValue() != null)
 								value = df.format(cell.getDateCellValue());
