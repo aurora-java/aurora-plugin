@@ -1,9 +1,14 @@
 package aurora.plugin.source.gen;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.xml.sax.SAXException;
+
+import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.IterationHandle;
 
@@ -213,9 +218,16 @@ public class ModelMapParser {
 	}
 
 	public String getComboDisplayField(CompositeMap fieldMap) {
-		if (true)
-			return "getComboDisplayField";
-		return null;
+//		if (true)
+//			return "getComboDisplayField";
+		String optionModel = fieldMap.getString("options", "");
+		CompositeMap modelMap = loadModelMap(optionModel);
+//		defaultdisplayfield
+//		 <bm:primary-key>
+//	        <bm:pk-field name="job3310_pk"/>
+//	    </bm:primary-key>
+		return modelMap.getString("defaultDisplayField", "");
+		
 		// DataSetFieldUtil dataSetFieldUtil = new DataSetFieldUtil(
 		// file.getProject(), fieldMap.getString("field_name", ""),
 		// fieldMap.getString("options", ""));
@@ -229,10 +241,39 @@ public class ModelMapParser {
 		// return value;
 	}
 
-	public String getComboValueField(CompositeMap fieldMap) {
-		if (true)
-			return "getComboValueField";
+	private CompositeMap loadModelMap(String optionModel) {
+//		CompositeMap config = mCompositeLoader.loadFromClassPath(name, ext);
+//		File configFolder = getConfigFolder();
+		CompositeLoader loader = new CompositeLoader();
+		try {
+			return loader.loadByFullFilePath("/Users/shiliyan/Desktop/work/aurora/workspace/runtime-aurora_protype/test.aurora.project/web/WEB-INF/classes/hr/emp/job3310.bm");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
+	}
+
+	private File getConfigFolder() {
+		return new File("/Users/shiliyan/Desktop/work/aurora/workspace/aurora_runtime/hap/WebContent/WEB-INF");
+	}
+
+	public String getComboValueField(CompositeMap fieldMap) {
+//		if (true)
+//			return "getComboValueField";
+		String optionModel = fieldMap.getString("options", "");
+		CompositeMap modelMap = loadModelMap(optionModel);
+//		defaultdisplayfield
+//		 <bm:primary-key>
+//	        <bm:pk-field name="job3310_pk"/>
+//	    </bm:primary-key>
+		CompositeMap child = modelMap.getChild("primary-key");
+		CompositeMap child2 = child.getChild("pk-field");
+		String r = child2.getString("name", "");
+		return r;
 		// DataSetFieldUtil dataSetFieldUtil = new DataSetFieldUtil(
 		// file.getProject(), fieldMap.getString("field_name", ""),
 		// fieldMap.getString("options", ""));

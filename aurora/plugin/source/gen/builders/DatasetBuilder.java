@@ -1,6 +1,7 @@
 package aurora.plugin.source.gen.builders;
 
 import java.util.List;
+import java.util.Map;
 
 import uncertain.composite.CompositeMap;
 import aurora.plugin.source.gen.BuilderSession;
@@ -35,8 +36,27 @@ public class DatasetBuilder extends DefaultSourceBuilder {
 			}
 			session.appendResult(sb.toString());
 		}
-//		return 
-		
+		if("datasetfields".equals(event)){
+			CompositeMap currentContext = session.getCurrentContext();
+			List<?> childsNotNull = currentContext.getChildsNotNull();
+			for (Object object : childsNotNull) {
+				if(object instanceof CompositeMap){
+					BuilderSession copy = session.getCopy();
+					copy.setCurrentContext((CompositeMap) object);
+					String bindTemplate = session.getSourceGenManager().bindTemplate(copy);
+					session.appendResult(bindTemplate);
+				}
+			}
+		}
 	}
-
+	protected Map<String, String> getAttributeMapping() {
+		Map<String, String> attributeMapping = super.getAttributeMapping();
+		attributeMapping.put("lookupCode", "lookupCode");
+		attributeMapping.put("model", "model");
+		attributeMapping.put("query_ds", "queryDataSet");
+		attributeMapping.put("bindName", "bindName");
+		attributeMapping.put("bindTarget", "bindTarget");
+		attributeMapping.put("queryUrl", "queryUrl");
+		return attributeMapping;
+	}
 }

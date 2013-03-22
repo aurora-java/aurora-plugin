@@ -3,6 +3,7 @@ package aurora.plugin.source.gen.builders;
 import java.util.List;
 
 import uncertain.composite.CompositeMap;
+import uncertain.composite.XMLOutputter;
 import aurora.plugin.source.gen.BuilderSession;
 import aurora.plugin.source.gen.ButtonScriptGenerator;
 import aurora.plugin.source.gen.ModelMapParser;
@@ -100,12 +101,25 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 				scripts.append(s);
 			}
 		}
-		session.appendResult(scripts.toString());
+		String string = scripts.toString();
+		session.appendResult(format(string));
 
 		// var renderers = parser.getComponents('renderer');
 		// for ( var i = 0; i < renderers.size(); i++) {
 		// var renderer = renderers.get(i);
 		//
 		// }
+	}
+	private String format(String s) {
+		JSBeautifier bf = new JSBeautifier();
+		String prefix = XMLOutputter.DEFAULT_INDENT
+				+ XMLOutputter.DEFAULT_INDENT;
+		String indent = XMLOutputter.DEFAULT_INDENT + prefix;
+		String jsCodeNew = (XMLOutputter.LINE_SEPARATOR + bf.beautify(s,
+				bf.opts))
+				.replaceAll("\n", XMLOutputter.LINE_SEPARATOR + indent)
+				+ XMLOutputter.LINE_SEPARATOR + prefix;
+		// if (jsCodeNew.equals(jsCode))
+		return jsCodeNew;
 	}
 }

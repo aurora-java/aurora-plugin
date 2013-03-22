@@ -1,6 +1,7 @@
 package aurora.plugin.source.gen.builders;
 
 import java.util.List;
+import java.util.Map;
 
 import uncertain.composite.CompositeMap;
 import aurora.plugin.source.gen.BuilderSession;
@@ -26,6 +27,13 @@ public class LinkBuilder extends DefaultSourceBuilder {
 			}
 			session.appendResult(sb.toString());
 		}
-
+	}
+	protected Map<String, String> getAttributeMapping() {
+		Map<String, String> attributeMapping = super.getAttributeMapping();
+		attributeMapping.put("id", "id");
+		attributeMapping.put("url", "url");
+		attributeMapping.put("model", "model");
+		attributeMapping.put("action", "action");
+		return attributeMapping;
 	}
 }

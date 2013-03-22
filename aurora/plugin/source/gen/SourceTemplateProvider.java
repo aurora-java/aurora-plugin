@@ -149,7 +149,7 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 		try {
 			StringWriter sw = new StringWriter();
 			Map<String, Object> p = new HashMap<String, Object>();
-			p.put("context", context);
+			p.put("context", new TemplateModelWrapper(context));
 			p.put("config", defineConfig());
 			p.put("action", new ActionMethod(session));
 			p.put("properties", new PropertiesMethod(session));

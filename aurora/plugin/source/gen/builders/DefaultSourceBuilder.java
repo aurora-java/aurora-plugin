@@ -63,6 +63,7 @@ public class DefaultSourceBuilder implements ISourceBuilder {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("markid", "markid");
 		map.put("component_type", "component_type");
+		map.put("name", "name");
 		return map;
 	}
 

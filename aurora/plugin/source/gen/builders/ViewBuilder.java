@@ -18,9 +18,8 @@ public class ViewBuilder extends DefaultSourceBuilder {
 	}
 
 	private void buildDatasetsContext(BuilderSession session) {
-		CompositeMap currentModel = session.getCurrentModel();
-		ModelMapParser mmp = new ModelMapParser(currentModel);
 		CompositeMap currentContext = session.getCurrentContext();
+		ModelMapParser mmp = getModelMapParser(session);
 		List<CompositeMap> datasets = mmp.getDatasets();
 		for (CompositeMap ds : datasets) {
 			String ds_id = genDatasetID(ds, session);
@@ -57,8 +56,12 @@ public class ViewBuilder extends DefaultSourceBuilder {
 			newDS.setName("dataset");
 			for (CompositeMap field : datasetFields) {
 				field.put("field_name", field.getParent().getString("name", ""));
-				field.put("field_type",
-						field.getParent().getString("component_type", ""));
+				String fieldType = field.getParent().getString(
+						"component_type", "");
+				if ("gridcolumn".equals(fieldType)) {
+					fieldType = field.getParent().getString("editor", "");
+				}
+				field.put("field_type", fieldType);
 				if (isLov(field)) {
 					genLovDSField(session, field);
 				}
@@ -66,26 +69,35 @@ public class ViewBuilder extends DefaultSourceBuilder {
 					genComboDSField(session, field);
 				}
 
-				newDS.addChild((CompositeMap) field.clone());
+				CompositeMap clone = (CompositeMap) field.clone();
+				clone.setName("field");
+				clone.setPrefix("a");
+				newDS.addChild((CompositeMap) clone);
 			}
 			currentContext.addChild(newDS);
 		}
 
 	}
 
-	public void genLovDSField(BuilderSession session, CompositeMap field) {
+	ModelMapParser getModelMapParser(BuilderSession session) {
 		CompositeMap currentModel = session.getCurrentModel();
 		ModelMapParser mmp = new ModelMapParser(currentModel);
-		List<CompositeMap> lovMaps = mmp.getLovMaps(field);
-		field.put("lovService", field.getString("options", ""));
-		if (lovMaps != null) {
-			mmp.bindMapping(field, lovMaps);
-		}
+		return mmp;
+	}
+
+	public void genLovDSField(BuilderSession session, CompositeMap field) {
+		ModelMapParser mmp = getModelMapParser(session);
+//		List<CompositeMap> lovMaps = mmp.getLovMaps(field);
+//		field.put("lovService", field.getString("options", ""));
+//		if (lovMaps != null) {
+//			mmp.bindMapping(field, lovMaps);
+//		}
+		field.put("displayField", mmp.getComboDisplayField(field));
+		field.put("valueField", mmp.getComboValueField(field));
 	}
 
 	public void genComboDSField(BuilderSession session, CompositeMap field) {
-		CompositeMap currentModel = session.getCurrentModel();
-		ModelMapParser mmp = new ModelMapParser(currentModel);
+		ModelMapParser mmp = getModelMapParser(session);
 		String model = field.getString("options", "");
 		String lookupCode = null;
 		if ("".equals(model)) {
@@ -116,8 +128,7 @@ public class ViewBuilder extends DefaultSourceBuilder {
 	}
 
 	private void calBindTarget(BuilderSession session) {
-		CompositeMap currentModel = session.getCurrentModel();
-		ModelMapParser mmp = new ModelMapParser(currentModel);
+		ModelMapParser mmp = getModelMapParser(session);
 		List<CompositeMap> datasets = mmp.getDatasets();
 		for (CompositeMap ds : datasets) {
 			if (ds.getParent().getString("component_type", "").equals("grid")) {
@@ -170,8 +181,7 @@ public class ViewBuilder extends DefaultSourceBuilder {
 	}
 
 	private void buildLinkContext(BuilderSession session) {
-		CompositeMap currentModel = session.getCurrentModel();
-		ModelMapParser mmp = new ModelMapParser(currentModel);
+		ModelMapParser mmp = getModelMapParser(session);
 		CompositeMap currentContext = session.getCurrentContext();
 		List<CompositeMap> buttons = mmp.getComponents("button");
 		for (CompositeMap button : buttons) {
@@ -194,23 +204,6 @@ public class ViewBuilder extends DefaultSourceBuilder {
 				renderer.put("link_id", link.getString("id", ""));
 			}
 		}
-	}
-
-	@Override
-	protected void buildChildComponent(BuilderSession session) {
-		super.buildChildComponent(session);
-	}
-
-	@Override
-	public void buildChildComponent(BuilderSession session,
-			CompositeMap currentModel) {
-		super.buildChildComponent(session, currentModel);
-	}
-
-	@Override
-	protected void buildAttribute(CompositeMap currentModel,
-			CompositeMap context, Map<String, String> attributeMapping) {
-		super.buildAttribute(currentModel, context, attributeMapping);
 	}
 
 	public void actionEvent(String event, BuilderSession session) {

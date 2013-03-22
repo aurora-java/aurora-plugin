@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.xml.sax.SAXException;
+
 import aurora.plugin.source.gen.builders.ISourceBuilder;
 import aurora.presentation.ViewComponentPackage;
 import uncertain.composite.CompositeLoader;
@@ -43,8 +45,15 @@ public class SourceGenManager {
 		session.setModel(screenModel);
 
 		String buildComponent = buildComponent(session,screenModel);
-
-		System.out.println(buildComponent);
+		CompositeLoader parser = new CompositeLoader();
+		try {
+			buildComponent = parser.loadFromString(buildComponent, "utf-8").toXML();
+			System.out.println(buildComponent);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		}
 
 		// template.bindtemplate
 		// tmplConfig init

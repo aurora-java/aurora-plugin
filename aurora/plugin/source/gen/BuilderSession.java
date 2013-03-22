@@ -104,10 +104,12 @@ public class BuilderSession {
 	}
 
 	public String buildComponent(CompositeMap model) {
-		return this.sourceGenManager.buildComponent(this,model);
+		return this.sourceGenManager.buildComponent(this, model);
 	}
 
 	public void appendResult(String result) {
+		if ("".equals(result))
+			return;
 		getEventResult().append(result);
 		getEventResult().append("\n");
 	}
@@ -141,12 +143,13 @@ public class BuilderSession {
 	public void setIdg(IDGenerator idg) {
 		this.idg = idg;
 	}
-	
+
 	public Object execActionEvent(String event, CompositeMap context) {
 		StringBuilder sb = new StringBuilder();
-		Collection<String> values =sourceGenManager.getBuilders().values();
+		Collection<String> values = sourceGenManager.getBuilders().values();
 		for (String clazz : values) {
-			ISourceBuilder newInstance = sourceGenManager.createNewInstance(clazz);
+			ISourceBuilder newInstance = sourceGenManager
+					.createNewInstance(clazz);
 			if (newInstance != null) {
 				BuilderSession bs = this.getCopy();
 				((ISourceBuilder) newInstance).actionEvent(event, bs);
