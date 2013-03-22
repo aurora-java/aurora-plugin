@@ -218,8 +218,8 @@ public class ModelMapParser {
 	}
 
 	public String getComboDisplayField(CompositeMap fieldMap) {
-//		if (true)
-//			return "getComboDisplayField";
+		if (true)
+			return "getComboDisplayField";
 		String optionModel = fieldMap.getString("options", "");
 		CompositeMap modelMap = loadModelMap(optionModel);
 //		defaultdisplayfield
@@ -262,8 +262,8 @@ public class ModelMapParser {
 	}
 
 	public String getComboValueField(CompositeMap fieldMap) {
-//		if (true)
-//			return "getComboValueField";
+		if (true)
+			return "getComboValueField";
 		String optionModel = fieldMap.getString("options", "");
 		CompositeMap modelMap = loadModelMap(optionModel);
 //		defaultdisplayfield
