@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-registry>
+  <package-mapping packageName="aurora.plugin.export.word"/>
+  <class-mapping className="aurora.plugin.export.word.WordExport" elementName="word-export" nameSpace="http://www.aurora-framework.org/application"/>
+
+</class-registry>
