@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<u:instance-config xmlns:u="uncertain.pkg">
+	<u:instances>
+		<u:configurable-instance configFile="source-gen-manager.config">
+			<u:description>用于生成screen和bm的源代码</u:description>
+		</u:configurable-instance>
+		<u:configurable-instance configFile="source-template-config.config">
+			<u:description>用于生成screen和bm的源代码</u:description>
+			<!-- <u:required-instances>
+				<u:type typeName="aurora.plugin.source.gen.SourceGenManager" />
+			</u:required-instances> -->
+			
+		</u:configurable-instance>
+	</u:instances>
+</u:instance-config>

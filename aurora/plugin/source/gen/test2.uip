@@ -1,107 +1,62 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ViewDiagram bindTemplate="template/search.xml" templatetype="serach" component_type="screenBody" markid="12342153" unBindModels="">
-    <Form name="form_name" column="3" component_type="form" height="116" labelWidth="80" markid="bcbe4b0" prompt="" row="3" sectiontype="SECTION_TYPE_QUERY" title="Form" width="658">
-        <Dataset name="" class="aurora.ide.meta.gef.editors.models.QueryDataSet" component_type="querydataset" markid="10f7ef9f" model="hr.emp.emp3310_for_query"/>
-        <CHILD_LIST>
-            <Combox name="dept3310_pk" component_type="comboBox" emptyText="" markid="7caba647" prompt="部门" type="comboBox" typeCase="" width="120">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="279a61ad" readOnly="false" required="false" uncheckedValue="N"/>
-            </Combox>
-            <TextField name="emp_c2" component_type="textField" emptyText="" markid="4103bc02" prompt="姓名" type="textField" typeCase="" width="120">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="1c14a519" readOnly="false" required="false" uncheckedValue="N"/>
-            </TextField>
-            <NumberField name="emp_c3" component_type="numberField" emptyText="" markid="5f55b990" prompt="年龄" type="numberField" typeCase="" width="120">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="26838573" readOnly="false" required="false" uncheckedValue="N"/>
-            </NumberField>
-            <DatePicker name="emp_c4_from" component_type="datePicker" emptyText="" markid="56a896fa" prompt="入职日期从" type="datePicker" typeCase="" width="120">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="25744a9c" readOnly="false" required="false" uncheckedValue="N"/>
-            </DatePicker>
-            <DatePicker name="emp_c4_to" component_type="datePicker" emptyText="" markid="274ce1fd" prompt="入职日期到" type="datePicker" typeCase="" width="120">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="53850507" readOnly="false" required="false" uncheckedValue="N"/>
-            </DatePicker>
-            <LOV name="job3310_pk" component_type="lov" emptyText="" markid="293d740f" prompt="职位" type="lov" typeCase="" width="120">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="223e93aa" readOnly="false" required="false" uncheckedValue="N"/>
-            </LOV>
-            <Combox name="emp_c5" component_type="comboBox" emptyText="" markid="391c5c5c" prompt="是否管理员" type="comboBox" typeCase="" width="120">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="7aa7758e" readOnly="false" required="false" uncheckedValue="N"/>
-            </Combox>
-        </CHILD_LIST>
-    </Form>
-    <HBox name="" component_type="hBox" height="43" labelWidth="80" markid="796f6496" prompt="" width="202">
-        <Dataset name="" class="aurora.ide.meta.gef.editors.models.QueryDataSet" component_type="querydataset" markid="34f223" model=""/>
-        <CHILD_LIST>
-            <Button name="" component_type="button" height="20" markid="1404d7f0" text="查询" type="" width="80">
-                <ButtonClicker id="query" markid="7798ce82">
-                    <ref:Grid xmlns:ref="meta.reference" comment="target" referenceid="18c92ff9"/>
-                </ButtonClicker>
-                <parameters/>
-            </Button>
-            <Button name="" component_type="button" height="20" markid="76bdc53e" text="重置" type="" width="80">
-                <ButtonClicker id="reset" markid="60b20be">
-                    <ref:Form xmlns:ref="meta.reference" comment="target" referenceid="bcbe4b0"/>
-                </ButtonClicker>
-                <parameters/>
-            </Button>
-        </CHILD_LIST>
-    </HBox>
-    <Grid name="grid_name" component_type="grid" height="380" markid="18c92ff9" navBarType="complex" sectiontype="SECTION_TYPE_RESULT" width="750">
-        <Dataset name="" autoQuery="false" class="aurora.ide.meta.gef.editors.models.ResultDataSet" component_type="resultdataset" markid="2ca7887e" model="hr.emp.emp3310_for_query" pageSize="10" selectionModel="multiple">
-            <ref:Form xmlns:ref="meta.reference" comment="target" referenceid="bcbe4b0"/>
-            <ref:Grid xmlns:ref="meta.reference" comment="owner" referenceid="18c92ff9"/>
-        </Dataset>
-        <Toolbar>
-            <Button name="" component_type="button" markid="4f735faa" type="excel"/>
-            <Button name="" component_type="button" markid="11d8f879" type="clear"/>
-        </Toolbar>
-        <CHILD_LIST>
-            <GridColumn name="dep_c1_ref" component_type="gridcolumn" editor="" markid="3f5735fd" prompt="部门" width="100">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="6c2d4e47" readOnly="false" required="false" uncheckedValue="N"/>
-                <Renderer name="" component_type="renderer" displaytext="" functionname="" markid="76999587" openpath="" renderertype="NONE_RENDERER">
-                    <function/>
-                    <parameters/>
-                </Renderer>
-            </GridColumn>
-            <GridColumn name="emp_c2" component_type="gridcolumn" editor="" markid="70ea0c2a" prompt="姓名" width="100">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="4967519d" readOnly="false" required="false" uncheckedValue="N"/>
-                <Renderer name="" component_type="renderer" displaytext="" functionname="" markid="15c4d350" openpath="" renderertype="NONE_RENDERER">
-                    <function/>
-                    <parameters/>
-                </Renderer>
-            </GridColumn>
-            <GridColumn name="emp_c3" component_type="gridcolumn" editor="" markid="3de817d1" prompt="年龄" width="100">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="79f7fcd0" readOnly="false" required="false" uncheckedValue="N"/>
-                <Renderer name="" component_type="renderer" displaytext="" functionname="" markid="5073ba17" openpath="" renderertype="NONE_RENDERER">
-                    <function/>
-                    <parameters/>
-                </Renderer>
-            </GridColumn>
-            <GridColumn name="emp_c4" component_type="gridcolumn" editor="" markid="7eea8370" prompt="入职日期" width="100">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="3e9b69e6" readOnly="false" required="false" uncheckedValue="N"/>
-                <Renderer name="" component_type="renderer" displaytext="" functionname="Aurora.formatDate" markid="7a0eab2e" openpath="" renderertype="INNER_FUNCTION">
-                    <function/>
-                    <parameters/>
-                </Renderer>
-            </GridColumn>
-            <GridColumn name="job_c1_ref" component_type="gridcolumn" editor="" markid="5908979c" prompt="职位" width="100">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="72b1f125" readOnly="false" required="false" uncheckedValue="N"/>
-                <Renderer name="" component_type="renderer" displaytext="" functionname="" markid="4319b06e" openpath="" renderertype="NONE_RENDERER">
-                    <function/>
-                    <parameters/>
-                </Renderer>
-            </GridColumn>
-            <GridColumn name="emp_c5" component_type="gridcolumn" editor="" markid="61ef8774" prompt="是否管理员" width="100">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="6e58f809" readOnly="false" required="false" uncheckedValue="N"/>
-                <Renderer name="" component_type="renderer" displaytext="" functionname="" markid="34a602e7" openpath="" renderertype="NONE_RENDERER">
-                    <function/>
-                    <parameters/>
-                </Renderer>
-            </GridColumn>
-            <GridColumn name="emp_c5_lookup" component_type="gridcolumn" editor="" markid="51b69500" prompt="是否管理员" width="100">
-                <DatasetField checkedValue="Y" component_type="datasetfield" lovGridHeight="350" lovHeight="500" lovWidth="500" markid="5d18d011" readOnly="false" required="false" uncheckedValue="N"/>
-                <Renderer name="" component_type="renderer" displaytext="" functionname="" markid="29f05ce9" openpath="" renderertype="NONE_RENDERER">
-                    <function/>
-                    <parameters/>
-                </Renderer>
-            </GridColumn>
-        </CHILD_LIST>
-    </Grid>
-</ViewDiagram>
+<screenBody component_type="screenBody" class_name="aurora.plugin.source.gen.screen.model.ScreenBody" markid="611de50">
+    <containmentList propertye_id="component_children">
+        <form labelWidth="80" width="658" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" container_section_type="SECTION_TYPE_QUERY" markid="e4f15c3" title="Form" height="86">
+            <querydataset propertye_id="i_dataset_delegate" component_type="querydataset" class_name="aurora.plugin.source.gen.screen.model.QueryDataSet" markid="6a1dbc8b"/>
+            <containmentList propertye_id="component_children">
+                <numberField width="120" component_type="numberField" allowNegative="true" allowFormat="false" class_name="aurora.ide.meta.gef.editors.components.input.NumberField" markid="2a8820fa" height="20" name="num" prompt="number" allowDecimals="true">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="4f2d12e6" lovGridHeight="350" name="null" lovWidth="500" lovHeight="500"/>
+                </numberField>
+                <checkBox text="text" width="120" component_type="checkBox" class_name="aurora.plugin.source.gen.screen.model.CheckBox" markid="602fe64a" height="20" name="check" prompt="check">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="68b8359b" lovGridHeight="350" checkedValue="Y" uncheckedValue="N" name="null" lovWidth="500" defaultValue="N" lovHeight="500"/>
+                </checkBox>
+                <lov width="120" component_type="lov" class_name="aurora.ide.meta.gef.editors.components.input.LOV" markid="3721bae0" height="20" name="lov" prompt="lov">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="773e467" lovGridHeight="350" name="null" lovWidth="500" lovHeight="500"/>
+                </lov>
+                <comboBox class_name="aurora.ide.meta.gef.editors.components.input.Combox" markid="7fe3a7ec"/>
+            </containmentList>
+        </form>
+        <grid navBarType="complex" width="750" component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" container_section_type="SECTION_TYPE_RESULT" markid="2f678f0e" height="380">
+            <resultdataset selectionModel="multiple" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="202b723c">
+                <reference propertye_id="dataset_query_container" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="458d1a4"/>
+            </resultdataset>
+            <toolbar propertye_id="toolbar" component_type="toolbar" class_name="aurora.plugin.source.gen.screen.model.Toolbar" markid="38ad8817">
+                <containmentList propertye_id="component_children">
+                    <button text="button" width="80" component_type="button" type="save" class_name="aurora.plugin.source.gen.screen.model.Button" markid="4583e712" height="20">
+                        <inner_buttonclicker propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="56b77265"/>
+                    </button>
+                    <button text="button" width="80" component_type="button" type="add" class_name="aurora.plugin.source.gen.screen.model.Button" markid="5956d3a9" height="20">
+                        <inner_buttonclicker propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="53622a11"/>
+                    </button>
+                </containmentList>
+            </toolbar>
+            <containmentList propertye_id="component_children">
+                <gridcolumn width="100" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="75ffcdd7" editor="lov" height="60" name="bb" prompt="prompt">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="1fc1cb1" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
+                    <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="4ebfa97b" renderer_type="NONE_RENDERER"/>
+                </gridcolumn>
+                <gridcolumn width="100" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="1d15a3af" editor="textField" height="60" name="aa" prompt="prompt">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="69644a50" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
+                    <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="374b003e" renderer_type="NONE_RENDERER"/>
+                </gridcolumn>
+                <gridcolumn width="100" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="5f664de3" editor="comboBox" height="60" prompt="prompt">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="2f6728ec" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
+                    <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="1dafb644" renderer_type="NONE_RENDERER"/>
+                </gridcolumn>
+            </containmentList>
+        </grid>
+        <hBox labelWidth="80" width="298" component_type="hBox" class_name="aurora.plugin.source.gen.screen.model.HBox" markid="214e6393" height="43">
+            <containmentList propertye_id="component_children">
+                <button text="提交" width="80" component_type="button" class_name="aurora.plugin.source.gen.screen.model.Button" markid="10e76514" height="20">
+                    <inner_buttonclicker button_click_actionid="reset" propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="4cbb138d">
+                        <reference propertye_id="button_click_target_component" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="e4f15c3"/>
+                    </inner_buttonclicker>
+                </button>
+                <button text="保存" width="80" component_type="button" class_name="aurora.plugin.source.gen.screen.model.Button" markid="654339ed" height="20">
+                    <inner_buttonclicker button_click_actionid="save" propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="d3b8dae">
+                        <reference propertye_id="button_click_target_component" component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" markid="2f678f0e"/>
+                    </inner_buttonclicker>
+                </button>
+            </containmentList>
+        </hBox>
+    </containmentList>
+</screenBody>
