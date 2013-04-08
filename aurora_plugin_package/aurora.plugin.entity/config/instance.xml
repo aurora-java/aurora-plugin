@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<u:instance-config xmlns:u="uncertain.pkg">
+	<u:instances>
+		<u:configurable-instance configFile="entity-generator-config.config" >
+            <u:description>实体生成配置文件</u:description>
+        </u:configurable-instance>
+	</u:instances>
+</u:instance-config>
