@@ -51,7 +51,6 @@ public class ResultDataSet extends Dataset {
 		this.setComponentType(RESULTDATASET);
 		this.setSelectable(false);
 		this.setSelectionMode(SELECT_NONE);
-		this.setQueryContainer(new Form());
 	}
 
 

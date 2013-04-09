@@ -17,13 +17,14 @@ public class GridBuilder extends DefaultSourceBuilder {
 				!"".equals(gridContext.getString("navBarType", "")));
 
 		CompositeMap gridModel = session.getCurrentModel();
-		CompositeMap toolbar = gridModel.getChild("Toolbar");
+		CompositeMap toolbar = gridModel.getChildByAttrib("component_type","toolbar");
 		if (toolbar != null) {
 			toolbar = (CompositeMap) toolbar.clone();
 			gridContext.addChild(toolbar);
 		}
 		CompositeMap editors = gridContext.createChild("editors");
-		CompositeMap child_list = gridModel.getChild("CHILD_LIST");
+		CompositeMap child_list = gridModel.getChildByAttrib("propertye_id",
+				"component_children");
 		if (child_list != null) {
 			List childsNotNull = child_list.getChildsNotNull();
 			for (Object object : childsNotNull) {
@@ -41,6 +42,7 @@ public class GridBuilder extends DefaultSourceBuilder {
 									.genEditorID(editor);
 							editorMap.put("id", genEditorID);
 							((CompositeMap) object).put("editor", genEditorID);
+							((CompositeMap) object).put("editor_type", editor);
 						}
 					}
 				}
@@ -86,7 +88,8 @@ public class GridBuilder extends DefaultSourceBuilder {
 				&& "grid".equalsIgnoreCase(session.getCurrentModel().getString(
 						"component_type", ""))) {
 			CompositeMap gridModel = session.getCurrentModel();
-			CompositeMap child_list = gridModel.getChild("CHILD_LIST");
+			CompositeMap child_list = gridModel.getChildByAttrib("propertye_id",
+					"component_children");
 			if (child_list != null) {
 				List childsNotNull = child_list.getChildsNotNull();
 				for (Object object : childsNotNull) {

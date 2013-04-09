@@ -18,8 +18,11 @@ public class DatasetBuilder extends DefaultSourceBuilder {
 		if ("dataset".equals(event)) {
 			CompositeMap currentContext = session.getCurrentContext();
 			List<?> childs = currentContext.getChilds();
+			if(childs ==null)
+				return;
 			StringBuilder sb = new StringBuilder();
-			for (Object c : childs) {
+			for (int i = 0; i < childs.size(); i++) {
+				Object c= childs.get(i);
 				if (c instanceof CompositeMap) {
 					if ("dataset".equalsIgnoreCase(((CompositeMap) c).getName())) {
 						SourceGenManager sourceGenManager = session
@@ -33,6 +36,8 @@ public class DatasetBuilder extends DefaultSourceBuilder {
 						sb.append(s);
 					}
 				}
+			
+				
 			}
 			session.appendResult(sb.toString());
 		}

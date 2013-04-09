@@ -15,6 +15,8 @@ import freemarker.template.TemplateModelException;
 
 public class TemplateModelWrapper implements TemplateHashModel {
 
+	public static final String COMPONENT_CHILDREN = "component_children";
+
 	private static final String INIT_PROCEDURE = "initprocedure";
 
 	private static final String IS_BOX = "isbox";
@@ -39,7 +41,7 @@ public class TemplateModelWrapper implements TemplateHashModel {
 	private String name;
 
 	private static final String[] INNER_KEYS = { CDATA, COMPONENTS, RAWNAME,
-			 IS_LAYOUT, IS_BOX, HAS_CHILD, INIT_PROCEDURE };
+			IS_LAYOUT, IS_BOX, HAS_CHILD, INIT_PROCEDURE ,COMPONENT_CHILDREN};
 
 	public TemplateModelWrapper(CompositeMap cm) {
 		this(cm.getName(), cm);
@@ -63,16 +65,21 @@ public class TemplateModelWrapper implements TemplateHashModel {
 		if (isInnerKey(key)) {
 			return getInnerValue(key);
 		}
+		if("type".equals(key)){
+			System.out.println();
+		}
 		String compositeValue = getCompositeValue(key, cm);
 		if (compositeValue != null) {
 			return dow.wrap(compositeValue);
 		}
-
+		
 		@SuppressWarnings("rawtypes")
 		List childsNotNull = cm.getChildsNotNull();
 		for (Object object : childsNotNull) {
 			if (object instanceof CompositeMap) {
-				if (key.equalsIgnoreCase(((CompositeMap) object).getName())) {
+				if (key.equalsIgnoreCase(((CompositeMap) object).getName())
+						|| key.equalsIgnoreCase(((CompositeMap) object)
+								.getString("component_type", ""))) {
 					return new TemplateModelWrapper(
 							((CompositeMap) object).getName(),
 							(CompositeMap) object);
@@ -80,7 +87,7 @@ public class TemplateModelWrapper implements TemplateHashModel {
 			}
 		}
 
-		return null;
+		return dow.wrap("");
 	}
 
 	private TemplateModel getInnerValue(String key)
@@ -88,6 +95,21 @@ public class TemplateModelWrapper implements TemplateHashModel {
 		if (CDATA.equalsIgnoreCase(key)) {
 			String text = cm.getText();
 			return dow.wrap(text == null ? "" : text);
+		}
+		if (COMPONENT_CHILDREN.equalsIgnoreCase(key)) {
+			CompositeMap childrenMap = cm.getChildByAttrib("propertye_id",
+					COMPONENT_CHILDREN);
+			List<TemplateModel> models = new ArrayList<TemplateModel>();
+			if(childrenMap==null){
+				return dow.wrap(models);
+			}
+			@SuppressWarnings("rawtypes")
+			List childsNotNull = childrenMap.getChildsNotNull();
+			for (Object object : childsNotNull) {
+				models.add(new TemplateModelWrapper(((CompositeMap) object)
+						.getName(), (CompositeMap) object));
+			}
+			return dow.wrap(models);
 		}
 		if (COMPONENTS.equalsIgnoreCase(key)) {
 			@SuppressWarnings("rawtypes")
@@ -103,10 +125,10 @@ public class TemplateModelWrapper implements TemplateHashModel {
 			String text = cm.getRawName();
 			return dow.wrap(text == null ? "" : text);
 		}
-//		if (NAME.equalsIgnoreCase(key)) {
-//			String text = cm.getName();
-//			return dow.wrap(text == null ? "" : text);
-//		}
+		// if (NAME.equalsIgnoreCase(key)) {
+		// String text = cm.getName();
+		// return dow.wrap(text == null ? "" : text);
+		// }
 		if (IS_LAYOUT.equalsIgnoreCase(key)) {
 			List childs = cm.getChildsNotNull();
 			return dow.wrap(childs.size() > 0);

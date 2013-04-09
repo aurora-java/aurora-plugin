@@ -10,7 +10,6 @@ import aurora.plugin.source.gen.BuilderSession;
 
 public class DefaultSourceBuilder implements ISourceBuilder {
 
-	
 	@Override
 	public void buildContext(BuilderSession session) {
 		CompositeMap currentModel = session.getCurrentModel();
@@ -24,7 +23,8 @@ public class DefaultSourceBuilder implements ISourceBuilder {
 	protected void buildChildComponent(BuilderSession session) {
 		CompositeMap currentModel = session.getCurrentModel();
 		buildChildComponent(session, currentModel);
-		CompositeMap child = currentModel.getChild("CHILD_LIST");
+		CompositeMap child = currentModel.getChildByAttrib("propertye_id",
+				"component_children");
 		if (child != null)
 			buildChildComponent(session, child);
 	}
@@ -35,8 +35,9 @@ public class DefaultSourceBuilder implements ISourceBuilder {
 		if (childs != null) {
 			for (Object object : childs) {
 				if (object instanceof CompositeMap) {
-					if ("CHILD_LIST".equalsIgnoreCase(((CompositeMap) object)
-							.getName())) {
+					if ("component_children"
+							.equalsIgnoreCase(((CompositeMap) object)
+									.getString("propertye_id", ""))) {
 						continue;
 					}
 					String buildComponent = session

@@ -12,6 +12,8 @@ public class LinkBuilder extends DefaultSourceBuilder {
 		if ("link".equals(event)) {
 			CompositeMap currentContext = session.getCurrentContext();
 			List<?> childs = currentContext.getChilds();
+			if(childs==null)
+				return;
 			StringBuilder sb = new StringBuilder();
 			for (Object c : childs) {
 				if (c instanceof CompositeMap) {

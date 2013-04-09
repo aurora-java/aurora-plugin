@@ -8,6 +8,7 @@ import aurora.plugin.source.gen.BuilderSession;
 import aurora.plugin.source.gen.ButtonScriptGenerator;
 import aurora.plugin.source.gen.ModelMapParser;
 import aurora.plugin.source.gen.RendererScriptGenerator;
+import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
 
 public class ScriptBuilder extends DefaultSourceBuilder {
 
@@ -29,13 +30,13 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 		List<CompositeMap> buttons = mmp.getComponents("button");
 		ButtonScriptGenerator bsg = new ButtonScriptGenerator(session);
 		for (CompositeMap button : buttons) {
-			CompositeMap clicker = button.getChild("ButtonClicker");
+			CompositeMap clicker = button.getChild("inner_buttonclicker");
 			String functionName = session.getIDGenerator().genID(
 					"functionName", 0);
 			button.put("click", functionName);
 			String datasetID = mmp.getButtonTargetDatasetID(button);
 			if (clicker != null) {
-				String id = clicker.getString("id", "");
+				String id = clicker.getString(ComponentInnerProperties.BUTTON_CLICK_ACTIONID, "");
 				if ("custom".equalsIgnoreCase(id)) {
 					String s = clicker.getChild("function").getText();
 					functionName = mmp.getFunctionName(s);
@@ -70,7 +71,7 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 
 		List<CompositeMap> renderers = mmp.getComponents("renderer");
 		for (CompositeMap renderer : renderers) {
-			String type = renderer.getString("renderertype", "");
+			String type = renderer.getString(ComponentInnerProperties.RENDERER_TYPE, "");
 			if ("INNER_FUNCTION".equals(type)) {
 				renderer.put("renderer", renderer.getString("functionname", ""));
 			}

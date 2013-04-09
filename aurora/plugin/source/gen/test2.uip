@@ -12,12 +12,14 @@
                 <lov width="120" component_type="lov" class_name="aurora.ide.meta.gef.editors.components.input.LOV" markid="3721bae0" height="20" name="lov" prompt="lov">
                     <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="773e467" lovGridHeight="350" name="null" lovWidth="500" lovHeight="500"/>
                 </lov>
-                <comboBox class_name="aurora.ide.meta.gef.editors.components.input.Combox" markid="7fe3a7ec"/>
+       			<comboBox width="120" component_type="comboBox" name="aaa" class_name="aurora.plugin.source.gen.screen.model.Combox" markid="4c7dbfe" height="20" prompt="状态">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="5d3c0325" lovGridHeight="350" name="null" lovWidth="500" lovHeight="500"/>
+                </comboBox>
             </containmentList>
         </form>
-        <grid navBarType="complex" width="750" component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" container_section_type="SECTION_TYPE_RESULT" markid="2f678f0e" height="380">
-            <resultdataset selectionModel="multiple" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="202b723c">
-                <reference propertye_id="dataset_query_container" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="458d1a4"/>
+        <grid navBarType="complex" width="750"  component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" container_section_type="SECTION_TYPE_RESULT" markid="2f678f0e" height="380">
+            <resultdataset selectionModel="multiple" model="a.b.c" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="202b723c">
+                <reference propertye_id="dataset_query_container" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="e4f15c3"/>
             </resultdataset>
             <toolbar propertye_id="toolbar" component_type="toolbar" class_name="aurora.plugin.source.gen.screen.model.Toolbar" markid="38ad8817">
                 <containmentList propertye_id="component_children">
@@ -38,9 +40,38 @@
                     <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="69644a50" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
                     <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="374b003e" renderer_type="NONE_RENDERER"/>
                 </gridcolumn>
-                <gridcolumn width="100" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="5f664de3" editor="comboBox" height="60" prompt="prompt">
+                <gridcolumn width="100" component_type="gridcolumn" name="ccc" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="5f664de3" editor="comboBox" height="60" prompt="prompt">
                     <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="2f6728ec" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
                     <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="1dafb644" renderer_type="NONE_RENDERER"/>
+                </gridcolumn>
+            </containmentList>
+        </grid>
+        <grid navBarType="complex" width="750"  component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" container_section_type="SECTION_TYPE_RESULT" markid="2f6781f0e1" height="380">
+            <resultdataset selectionModel="multiple" model="a.b.c.b" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="2012b723c1">
+                <reference propertye_id="dataset_query_container" component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" markid="2f678f0e"/>
+            </resultdataset>
+            <toolbar propertye_id="toolbar" component_type="toolbar" class_name="aurora.plugin.source.gen.screen.model.Toolbar" markid="38ad188171">
+                <containmentList propertye_id="component_children">
+                    <button text="button" width="80" component_type="button" type="save" class_name="aurora.plugin.source.gen.screen.model.Button" markid="45831e7112" height="20">
+                        <inner_buttonclicker propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="56b7117265"/>
+                    </button>
+                    <button text="button" width="80" component_type="button" type="add" class_name="aurora.plugin.source.gen.screen.model.Button" markid="595116d3a9" height="20">
+                        <inner_buttonclicker propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="5316212a11"/>
+                    </button>
+                </containmentList>
+            </toolbar>
+            <containmentList propertye_id="component_children">
+                <gridcolumn width="100" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="75f1fcdd7" editor="lov" height="60" name="bb" prompt="prompt">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="11fc11cb1" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
+                    <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="4eb1fa97b" renderer_type="NONE_RENDERER"/>
+                </gridcolumn>
+                <gridcolumn width="100" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="1d15a13af" editor="textField" height="60" name="aa" prompt="prompt">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="696441a50" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
+                    <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="3714b003e" renderer_type="NONE_RENDERER"/>
+                </gridcolumn>
+                <gridcolumn width="100" component_type="gridcolumn" name="ccc" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="5f6614de3" editor="comboBox" height="60" prompt="prompt">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="2f61728ec" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
+                    <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="1dafb1644" renderer_type="NONE_RENDERER"/>
                 </gridcolumn>
             </containmentList>
         </grid>

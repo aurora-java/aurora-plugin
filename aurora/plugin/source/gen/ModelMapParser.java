@@ -106,9 +106,9 @@ public class ModelMapParser {
 	}
 
 	public String getFunctionName(String script) {
-		 JavascriptRhino js = new JavascriptRhino(script);
-		 String name = js.getFirstFunctionName();
-		 return name == null ? "" : name;
+		JavascriptRhino js = new JavascriptRhino(script);
+		String name = js.getFirstFunctionName();
+		return name == null ? "" : name;
 	}
 
 	public boolean isRealDataset(CompositeMap ds) {
@@ -119,7 +119,7 @@ public class ModelMapParser {
 	public boolean isSectionComponent(CompositeMap parent) {
 		if (parent == null)
 			return false;
-		String sectionType = parent.getString("sectiontype", "");
+		String sectionType = parent.getString("container_section_type", "");
 		if ("SECTION_TYPE_QUERY".equalsIgnoreCase(sectionType)
 				|| "SECTION_TYPE_RESULT".equalsIgnoreCase(sectionType)) {
 			return true;
@@ -134,6 +134,7 @@ public class ModelMapParser {
 				"datasetfield");
 		for (CompositeMap f : components) {
 			if (hasDSFieldChild(parent, f)) {
+				f.put("ds_markid", ds.getString("markid", ""));
 				fields.add(f);
 			}
 		}
@@ -222,12 +223,12 @@ public class ModelMapParser {
 			return "getComboDisplayField";
 		String optionModel = fieldMap.getString("options", "");
 		CompositeMap modelMap = loadModelMap(optionModel);
-//		defaultdisplayfield
-//		 <bm:primary-key>
-//	        <bm:pk-field name="job3310_pk"/>
-//	    </bm:primary-key>
+		// defaultdisplayfield
+		// <bm:primary-key>
+		// <bm:pk-field name="job3310_pk"/>
+		// </bm:primary-key>
 		return modelMap.getString("defaultDisplayField", "");
-		
+
 		// DataSetFieldUtil dataSetFieldUtil = new DataSetFieldUtil(
 		// file.getProject(), fieldMap.getString("field_name", ""),
 		// fieldMap.getString("options", ""));
@@ -242,23 +243,23 @@ public class ModelMapParser {
 	}
 
 	private CompositeMap loadModelMap(String optionModel) {
-//		CompositeMap config = mCompositeLoader.loadFromClassPath(name, ext);
-//		File configFolder = getConfigFolder();
+		// CompositeMap config = mCompositeLoader.loadFromClassPath(name, ext);
+		// File configFolder = getConfigFolder();
 		CompositeLoader loader = new CompositeLoader();
 		try {
-			return loader.loadByFullFilePath("/Users/shiliyan/Desktop/work/aurora/workspace/runtime-aurora_protype/test.aurora.project/web/WEB-INF/classes/hr/emp/job3310.bm");
+			return loader
+					.loadByFullFilePath("/Users/shiliyan/Desktop/work/aurora/workspace/aurora_runtime/test_aurora/webRoot/WEB-INF/classes/aaa.bm");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 
 	private File getConfigFolder() {
-		return new File("/Users/shiliyan/Desktop/work/aurora/workspace/aurora_runtime/hap/WebContent/WEB-INF");
+		return new File(
+				"/Users/shiliyan/Desktop/work/aurora/workspace/aurora_runtime/hap/WebContent/WEB-INF");
 	}
 
 	public String getComboValueField(CompositeMap fieldMap) {
@@ -266,10 +267,10 @@ public class ModelMapParser {
 			return "getComboValueField";
 		String optionModel = fieldMap.getString("options", "");
 		CompositeMap modelMap = loadModelMap(optionModel);
-//		defaultdisplayfield
-//		 <bm:primary-key>
-//	        <bm:pk-field name="job3310_pk"/>
-//	    </bm:primary-key>
+		// defaultdisplayfield
+		// <bm:primary-key>
+		// <bm:pk-field name="job3310_pk"/>
+		// </bm:primary-key>
 		CompositeMap child = modelMap.getChild("primary-key");
 		CompositeMap child2 = child.getChild("pk-field");
 		String r = child2.getString("name", "");
@@ -354,26 +355,30 @@ public class ModelMapParser {
 	// }
 
 	public String getButtonTargetDatasetID(final CompositeMap buttonMap) {
-		CompositeMap clicker = buttonMap.getChild("ButtonClicker");
-		if(clicker==null){
+		CompositeMap clicker = buttonMap.getChild("inner_buttonclicker");
+		if (clicker == null) {
 			return "";
 		}
-		CompositeMap childByAttrib = clicker.getChildByAttrib("comment",
-				"target");
+		CompositeMap childByAttrib = clicker.getChildByAttrib("propertye_id",
+				"button_click_target_component");
 		if (childByAttrib == null) {
 			return "";
 		}
-		final String refID = childByAttrib.getString("referenceid", "");
+		final String refID = childByAttrib.getString("markid", "");
 
 		modelMap.iterate(new IterationHandle() {
 
 			@Override
 			public int process(CompositeMap map) {
 				if (refID.equals(map.getString("markid"))) {
-					CompositeMap child = map.getChild("Dataset");
-					String id = child.getString("ds_id", "");
-					buttonMap.put("ds_id", id);
-					return IterationHandle.IT_BREAK;
+					// CompositeMap child = map.getChild("Dataset");
+					CompositeMap child = map.getChildByAttrib("propertye_id",
+							"i_dataset_delegate");
+					if (child != null) {
+						String id = child.getString("ds_id", "");
+						buttonMap.put("ds_id", id);
+						return IterationHandle.IT_BREAK;
+					}
 				}
 				return IterationHandle.IT_CONTINUE;
 			}
@@ -386,7 +391,8 @@ public class ModelMapParser {
 		modelMap.iterate(new IterationHandle() {
 			@Override
 			public int process(CompositeMap map) {
-				if (markid.equals(map.getString("markid"))) {
+				if (markid.equals(map.getString("markid"))
+						&& "reference".equals(map.getName()) == false) {
 					maps[0] = map;
 					return IterationHandle.IT_BREAK;
 				}
@@ -398,5 +404,52 @@ public class ModelMapParser {
 
 	public String[] getParametersDetail(CompositeMap renderer, String string) {
 		return new String[] { "aa", "bb" };
+	}
+
+	public String[] findComboFieldOption(final CompositeMap field) {
+		String ds_markid = field.getString("ds_markid", "");
+		CompositeMap dsMap = this.getComponentByID(ds_markid);
+		String model = dsMap.getString("model", "");
+		CompositeMap bmFileMap = loadModelMap(model);
+		final String[] options = new String[] { "", "" };
+		bmFileMap.iterate(new IterationHandle() {
+			public int process(CompositeMap map) {
+				if ("field".equalsIgnoreCase(map.getName())
+						&& map.getString("name", "").equalsIgnoreCase(
+								field.getString("field_name", ""))) {
+					options[0] = map.getString("options", "");
+					options[1] = map.getString("lookupCode", "");
+					return IterationHandle.IT_BREAK;
+				}
+				return IterationHandle.IT_CONTINUE;
+			}
+		}, false);
+
+		return options;
+	}
+
+	public Object getComboValueField(String[] models, CompositeMap field) {
+		String model = models[0];
+		if ("".equals(model) == false) {
+			CompositeMap modelMap = loadModelMap(model);
+			// defaultdisplayfield
+			// <bm:primary-key>
+			// <bm:pk-field name="job3310_pk"/>
+			// </bm:primary-key>
+			CompositeMap child = modelMap.getChild("primary-key");
+			CompositeMap child2 = child.getChild("pk-field");
+			String r = child2.getString("name", "");
+			return r;
+		}
+		return "code_value";
+	}
+
+	public Object getComboDisplayField(String[] models, CompositeMap field) {
+		String model = models[0];
+		if ("".equals(model) == false) {
+			CompositeMap modelMap = loadModelMap(model);
+			return modelMap.getString("defaultDisplayField", "");
+		}
+		return "code_value_name";
 	}
 }

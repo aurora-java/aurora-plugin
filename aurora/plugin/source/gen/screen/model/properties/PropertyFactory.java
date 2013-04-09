@@ -20,9 +20,9 @@ public class PropertyFactory implements ComponentInnerProperties,
 	}
 
 	private IPropertyDescriptor[] createPropertyDescriptors(String componentType) {
-		CompositeMap map = loadXML();
-		propertyMap.clear();
-		parseComponent(map);
+//		CompositeMap map = loadXML();
+//		propertyMap.clear();
+//		parseComponent(map);
 		DefaultPropertyDescriptor[] defaultPropertyDescriptors = propertyMap
 				.get(componentType.toLowerCase());
 		return defaultPropertyDescriptors == null ? new IPropertyDescriptor[0]

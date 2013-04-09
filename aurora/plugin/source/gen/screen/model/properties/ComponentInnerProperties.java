@@ -7,10 +7,13 @@ public interface ComponentInnerProperties {
 	String LOCATION_Y = "location_y";
 	String LOCATION = "location";
 	String DATASET_OWNER = "dataset_owner";
+	
+	String OPEN_PATH = "openpath";
 	String DATASET_QUERY_CONTAINER = "dataset_query_container";
 	String BUTTON_CLICK_TARGET_COMPONENT = "button_click_target_component";
 	String BUTTON_CLICK_ACTIONID = "button_click_actionid";
-	String BUTTON_CLICK_OPENPATH = "button_click_openpath";
+//	String BUTTON_CLICK_OPENPATH = "button_click_openpath";
+	String BUTTON_CLICK_OPENPATH= OPEN_PATH;
 	String BUTTON_CLICK_CLOSEWINDOWID = "button_click_closewindowid";
 	String BUTTON_CLICK_FUNCTION = "button_click_function";
 	String BUTTON_CLICK_PARAMETERS = "button_click_parameters";
@@ -24,7 +27,8 @@ public interface ComponentInnerProperties {
 	String PARAMETER_NAME = "parameter_name";
 	String PARAMETER_VALUE = "parameter_value";
 	
-	String RENDERER_OPEN_PATH = "renderer_open_path";
+//	String RENDERER_OPEN_PATH = "renderer_open_path";
+	String RENDERER_OPEN_PATH= OPEN_PATH;
 	String RENDERER_LABELTEXT = "renderer_labeltext";
 	String RENDERER_FUNCTION_NAME = "renderer_function_name";
 	String RENDERER_FUNCTION = "renderer_function";
