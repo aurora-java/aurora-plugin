@@ -89,8 +89,8 @@ public class ServerScript extends AbstractEntry {
 			// re.printStackTrace();
 			throw new ScriptException(sb.toString());
 		} finally {
-			System.out.println("server-script:" + (System.nanoTime() - t)
-					/ 1000000 + "ms");
+//			System.out.println("server-script:" + (System.nanoTime() - t)
+//					/ 1000000 + "ms");
 		}
 	}
 
