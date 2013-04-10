@@ -10,4 +10,5 @@ public interface KEYS {
 	static final String PROPERTYE_ID = "propertye_id";
 	static final String MARKID = "markid";
 	static final String CLASS_NAME = "class_name";
+	public static final String CDATA_NODE = "cdataNode";
 }

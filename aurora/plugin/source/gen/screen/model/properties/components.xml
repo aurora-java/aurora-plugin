@@ -20,7 +20,7 @@
 		<attribute id="button_click_actionid" style="simple,save,inner" />
 		<attribute id="button_click_openpath" style="simple,save,inner" />
 		<attribute id="button_click_closewindowid" style="simple,save,inner" />
-		<attribute id="button_click_function" style="simple,save,inner" />
+		<attribute id="button_click_function" style="save,inner,_cdata" />
 		<attribute id="button_click_openpath" style="simple,save,inner" />
 		<attribute id="button_click_parameters" style="containment,save,inner,list" />
 	</component>

@@ -60,6 +60,7 @@ public class PropertyFactory implements ComponentInnerProperties,
 		styleMap.put("_boolean", IPropertyDescriptor._boolean);
 		styleMap.put("_int", IPropertyDescriptor._int);
 		styleMap.put("_float", IPropertyDescriptor._float);
+		styleMap.put("_cdata", IPropertyDescriptor._cdata);
 		CompositeMap map = loadXML();
 		parseComponent(map);
 	}

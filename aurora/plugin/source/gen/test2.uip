@@ -83,8 +83,11 @@
                     </inner_buttonclicker>
                 </button>
                 <button text="button" width="80" component_type="button" class_name="aurora.plugin.source.gen.screen.model.Button" markid="2a2a0cd3" height="20">
-                    <inner_buttonclicker button_click_actionid="custom" propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="266bb3f5" button_click_function="function a(){      }">
+                    <inner_buttonclicker button_click_actionid="custom" propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="266bb3f5" >
                         <reference propertye_id="button_click_target_component" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="e4f15c3"/>
+                    <cdataNode propertye_id="button_click_function"><![CDATA[
+         function xxxxxxxxxxxxxsa(){      }
+        ]]></cdataNode>
                     </inner_buttonclicker>
                 </button>
             </containmentList>

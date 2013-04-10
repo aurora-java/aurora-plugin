@@ -25,8 +25,8 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 
 	public void genScripts(BuilderSession session) {
 		CompositeMap currentModel = session.getCurrentModel();
-		ModelMapParser mmp =session.createModelMapParser(currentModel);
-//		ModelMapParser mmp = new ModelMapParser(currentModel);
+		ModelMapParser mmp = session.createModelMapParser(currentModel);
+		// ModelMapParser mmp = new ModelMapParser(currentModel);
 		StringBuilder scripts = new StringBuilder();
 		List<CompositeMap> buttons = mmp.getComponents("button");
 		ButtonScriptGenerator bsg = new ButtonScriptGenerator(session);
@@ -37,10 +37,12 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 			button.put("click", functionName);
 			String datasetID = mmp.getButtonTargetDatasetID(button);
 			if (clicker != null) {
-				String id = clicker.getString(ComponentInnerProperties.BUTTON_CLICK_ACTIONID, "");
+				String id = clicker.getString(
+						ComponentInnerProperties.BUTTON_CLICK_ACTIONID, "");
 				if ("custom".equalsIgnoreCase(id)) {
-					CompositeMap child = clicker.getChild("function");
-					if(child!=null){
+					CompositeMap child = clicker.getChildByAttrib(
+							"propertye_id", "button_click_function");
+					if (child != null) {
 						String s = child.getText();
 						functionName = mmp.getFunctionName(s);
 						button.put("click", functionName);
@@ -75,7 +77,8 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 
 		List<CompositeMap> renderers = mmp.getComponents("renderer");
 		for (CompositeMap renderer : renderers) {
-			String type = renderer.getString(ComponentInnerProperties.RENDERER_TYPE, "");
+			String type = renderer.getString(
+					ComponentInnerProperties.RENDERER_TYPE, "");
 			if ("INNER_FUNCTION".equals(type)) {
 				renderer.put("renderer", renderer.getString("functionname", ""));
 			}
@@ -115,6 +118,7 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 		//
 		// }
 	}
+
 	private String format(String s) {
 		JSBeautifier bf = new JSBeautifier();
 		String prefix = XMLOutputter.DEFAULT_INDENT

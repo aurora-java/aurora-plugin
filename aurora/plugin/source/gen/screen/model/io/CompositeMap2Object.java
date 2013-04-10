@@ -173,6 +173,15 @@ public class CompositeMap2Object implements KEYS {
 				setPropertyValue(propId, value);
 
 		}
+
+		public void cdataNode(IPropertyDescriptor pd) {
+			String propId = ((DefaultPropertyDescriptor) pd).getStringId();
+			CompositeMap child = cmap.getChildByAttrib(CDATA_NODE,
+					PROPERTYE_ID, propId);
+			if (child != null) {
+				setPropertyValue(propId, child.getText());
+			}
+		}
 	}
 
 	private AuroraComponent xml2Object(CompositeMap map) {
@@ -186,6 +195,9 @@ public class CompositeMap2Object implements KEYS {
 					continue;
 				}
 
+				if ((style & IPropertyDescriptor._cdata) != 0) {
+					helper.cdataNode(pd);
+				}
 				if ((style & IPropertyDescriptor.simple) != 0) {
 					helper.simple(pd);
 				}

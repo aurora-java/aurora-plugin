@@ -8,7 +8,6 @@ import aurora.plugin.source.gen.screen.model.ScreenBody;
 import aurora.plugin.source.gen.screen.model.properties.DefaultPropertyDescriptor;
 import aurora.plugin.source.gen.screen.model.properties.IPropertyDescriptor;
 import aurora.plugin.source.gen.screen.model.properties.PropertyFactory;
-import aurora.plugin.source.gen.screen.model.properties.TestPropertyFactory;
 
 public class Object2CompositeMap implements KEYS {
 
@@ -17,8 +16,9 @@ public class Object2CompositeMap implements KEYS {
 		return object2xml.toXML();
 	}
 
-	private class MapHelper {
+	private class MapHelper { 
 
+		
 		CompositeMap map;
 
 		MapHelper(CompositeMap map) {
@@ -141,6 +141,14 @@ public class Object2CompositeMap implements KEYS {
 				map.addChild(arrayMap);
 			}
 		}
+
+		public void cdataNode(IPropertyDescriptor pd, Object propertyValue) {
+			CompositeMap compositeMap = new CompositeMap(CDATA_NODE);
+			compositeMap.put(PROPERTYE_ID,
+					((DefaultPropertyDescriptor) pd).getStringId());
+			compositeMap.setText("" + propertyValue);
+			map.addChild(compositeMap);
+		}
 	}
 
 	private CompositeMap object2XML(AuroraComponent component) {
@@ -157,6 +165,9 @@ public class Object2CompositeMap implements KEYS {
 				Object propertyValue = component
 						.getPropertyValue(((DefaultPropertyDescriptor) pd)
 								.getStringId());
+				if ((style & IPropertyDescriptor._cdata) != 0) {
+					helper.cdataNode(pd, propertyValue);
+				}
 				if ((style & IPropertyDescriptor.simple) != 0) {
 					helper.simple(pd, propertyValue);
 				}
