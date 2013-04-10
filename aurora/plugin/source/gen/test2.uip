@@ -1,7 +1,7 @@
 <screenBody component_type="screenBody" diagram_bind_template="workflow_submit" class_name="aurora.plugin.source.gen.screen.model.ScreenBody" markid="611de50">
     <containmentList propertye_id="component_children">
         <form labelWidth="80" width="658" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" container_section_type="SECTION_TYPE_QUERY" markid="e4f15c3" title="Form" height="86">
-            <querydataset propertye_id="i_dataset_delegate" component_type="querydataset" class_name="aurora.plugin.source.gen.screen.model.QueryDataSet" markid="6a1dbc8b"/>
+            <querydataset propertye_id="i_dataset_delegate" model="aaa" component_type="querydataset" class_name="aurora.plugin.source.gen.screen.model.QueryDataSet" markid="6a1dbc8b"/>
             <containmentList propertye_id="component_children">
                 <numberField width="120" component_type="numberField" allowNegative="true" allowFormat="false" class_name="aurora.ide.meta.gef.editors.components.input.NumberField" markid="2a8820fa" height="20" name="num" prompt="number" allowDecimals="true">
                     <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="4f2d12e6" lovGridHeight="350" name="null" lovWidth="500" lovHeight="500"/>
@@ -18,7 +18,7 @@
             </containmentList>
         </form>
         <grid navBarType="complex" width="750"  component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" container_section_type="SECTION_TYPE_RESULT" markid="2f678f0e" height="380">
-            <resultdataset selectionModel="multiple" model="a.b.c" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="202b723c">
+            <resultdataset selectionModel="multiple" model="aaa" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="202b723c">
                 <reference propertye_id="dataset_query_container" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="e4f15c3"/>
             </resultdataset>
             <toolbar propertye_id="toolbar" component_type="toolbar" class_name="aurora.plugin.source.gen.screen.model.Toolbar" markid="38ad8817">
@@ -47,7 +47,7 @@
             </containmentList>
         </grid>
         <grid navBarType="complex" width="750"  component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" container_section_type="SECTION_TYPE_RESULT" markid="2f6781f0e1" height="380">
-            <resultdataset selectionModel="multiple" model="a.b.c.b" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="2012b723c1">
+            <resultdataset selectionModel="multiple" model="aaa" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="2012b723c1">
                 <reference propertye_id="dataset_query_container" component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" markid="2f678f0e"/>
             </resultdataset>
             <toolbar propertye_id="toolbar" component_type="toolbar" class_name="aurora.plugin.source.gen.screen.model.Toolbar" markid="38ad188171">
@@ -77,14 +77,14 @@
         </grid>
         <hBox labelWidth="80" width="298" component_type="hBox" class_name="aurora.plugin.source.gen.screen.model.HBox" markid="214e6393" height="43">
             <containmentList propertye_id="component_children">
-                <button text="提交" width="80" component_type="button" class_name="aurora.plugin.source.gen.screen.model.Button" markid="10e76514" height="20">
-                    <inner_buttonclicker button_click_actionid="custom" propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="4cbb138d">
-                        <reference propertye_id="button_click_target_component" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="e4f15c3"/>
-                    </inner_buttonclicker>
-                </button>
                 <button text="保存" width="80" component_type="button" class_name="aurora.plugin.source.gen.screen.model.Button" markid="654339ed" height="20">
                     <inner_buttonclicker button_click_actionid="save" propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="d3b8dae">
                         <reference propertye_id="button_click_target_component" component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" markid="2f678f0e"/>
+                    </inner_buttonclicker>
+                </button>
+                <button text="button" width="80" component_type="button" class_name="aurora.plugin.source.gen.screen.model.Button" markid="2a2a0cd3" height="20">
+                    <inner_buttonclicker button_click_actionid="custom" propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="266bb3f5" button_click_function="function a(){      }">
+                        <reference propertye_id="button_click_target_component" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="e4f15c3"/>
                     </inner_buttonclicker>
                 </button>
             </containmentList>

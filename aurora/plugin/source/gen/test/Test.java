@@ -3,6 +3,8 @@ package aurora.plugin.source.gen.test;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.xml.sax.SAXException;
+
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import aurora.plugin.source.gen.SourceGenManager;
@@ -15,7 +17,15 @@ public class Test {
 		sgm.setTemplateProvider(stp);
 		stp.setSourceGenManager(sgm);
 		stp.initialize();
-		sgm.buildScreen(loadCompositeMap());
+		try {
+			sgm.buildScreen(loadCompositeMap());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	public static CompositeMap loadCompositeMap() {
 		InputStream is = null;

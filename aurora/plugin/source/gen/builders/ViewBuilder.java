@@ -86,8 +86,9 @@ public class ViewBuilder extends DefaultSourceBuilder {
 
 	ModelMapParser getModelMapParser(BuilderSession session) {
 		CompositeMap currentModel = session.getCurrentModel();
-		ModelMapParser mmp = new ModelMapParser(currentModel);
-		return mmp;
+		return session.createModelMapParser(currentModel);
+		// ModelMapParser mmp = new ModelMapParser(currentModel);
+		// return mmp;
 	}
 
 	public void genLovDSField(BuilderSession session, CompositeMap field) {

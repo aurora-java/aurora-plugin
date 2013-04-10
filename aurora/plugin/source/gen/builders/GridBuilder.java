@@ -41,6 +41,7 @@ public class GridBuilder extends DefaultSourceBuilder {
 							String genEditorID = session.getIDGenerator()
 									.genEditorID(editor);
 							editorMap.put("id", genEditorID);
+							editorMap.put("editor_type",editor);
 							((CompositeMap) object).put("editor", genEditorID);
 							((CompositeMap) object).put("editor_type", editor);
 						}

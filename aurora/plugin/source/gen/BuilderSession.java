@@ -158,4 +158,7 @@ public class BuilderSession {
 		}
 		return sb.toString();
 	}
+	public ModelMapParser createModelMapParser(CompositeMap model){
+		return sourceGenManager.createModelMapParser(model);
+	}
 }

@@ -37,7 +37,8 @@ public class SourceGenManager {
 
 	public void buildTestScreen() {
 		try {
-			buildScreen(Test.loadCompositeMap());
+			CompositeMap buildScreen = buildScreen(Test.loadCompositeMap());
+			System.out.println(buildScreen.toXML());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -214,6 +215,11 @@ public class SourceGenManager {
 
 	public void setBuilders(Map<String, String> builders) {
 		this.builders = builders;
+	}
+
+	public ModelMapParser createModelMapParser(CompositeMap model) {
+		ModelMapParser mmp =new ModelMapParser(registry,model);
+		return mmp;
 	}
 
 }

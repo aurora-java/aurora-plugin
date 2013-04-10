@@ -25,7 +25,8 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 
 	public void genScripts(BuilderSession session) {
 		CompositeMap currentModel = session.getCurrentModel();
-		ModelMapParser mmp = new ModelMapParser(currentModel);
+		ModelMapParser mmp =session.createModelMapParser(currentModel);
+//		ModelMapParser mmp = new ModelMapParser(currentModel);
 		StringBuilder scripts = new StringBuilder();
 		List<CompositeMap> buttons = mmp.getComponents("button");
 		ButtonScriptGenerator bsg = new ButtonScriptGenerator(session);
