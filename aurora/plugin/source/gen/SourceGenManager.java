@@ -12,7 +12,6 @@ import uncertain.composite.CompositeMap;
 import uncertain.composite.IterationHandle;
 import uncertain.core.UncertainEngine;
 import uncertain.ocm.IObjectRegistry;
-import uncertain.pkg.ComponentPackage;
 import uncertain.pkg.IPackageManager;
 import uncertain.pkg.PackageManager;
 import aurora.plugin.source.gen.builders.ISourceBuilder;
@@ -37,10 +36,18 @@ public class SourceGenManager {
 	}
 
 	public void buildTestScreen() {
-		buildScreen(Test.loadCompositeMap());
+		try {
+			buildScreen(Test.loadCompositeMap());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public void buildScreen(CompositeMap modelMap) {
+	public CompositeMap buildScreen(CompositeMap modelMap) throws IOException, SAXException {
 		// load package
 		loadBuilders();
 		BuilderSession session = new BuilderSession(this);
@@ -49,15 +56,17 @@ public class SourceGenManager {
 
 		String buildComponent = buildComponent(session, screenModel);
 		CompositeLoader parser = new CompositeLoader();
-		try {
-			buildComponent = parser.loadFromString(buildComponent, "utf-8")
-					.toXML();
-			System.out.println(buildComponent);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		}
+//		try {
+			CompositeMap loadFromString = parser.loadFromString(buildComponent, "utf-8");
+			return loadFromString;
+//			buildComponent = loadFromString
+//					.toXML();
+//			System.out.println(buildComponent);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} catch (SAXException e) {
+//			e.printStackTrace();
+//		}
 
 		// template.bindtemplate
 		// tmplConfig init

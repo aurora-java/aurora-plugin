@@ -164,16 +164,18 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 		} catch (TemplateException e) {
 			// log
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		} catch (IOException e) {
 			// log
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		// out.write(sw.toString());
 
 		// getcomponents builder
 		// builders.run action
 
-		return "";
+//		return "";
 	}
 
 	public String buildBM(CompositeMap modelMap) {
