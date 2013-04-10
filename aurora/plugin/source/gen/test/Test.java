@@ -17,7 +17,7 @@ public class Test {
 		stp.initialize();
 		sgm.buildScreen(loadCompositeMap());
 	}
-	static CompositeMap loadCompositeMap() {
+	public static CompositeMap loadCompositeMap() {
 		InputStream is = null;
 		try {
 			is = SourceTemplateProvider.class.getResourceAsStream("test2.uip");

@@ -242,7 +242,7 @@ public class ModelMapParser {
 		// return value;
 	}
 
-	private CompositeMap loadModelMap(String optionModel) {
+	public CompositeMap loadModelMap(String optionModel) {
 		// CompositeMap config = mCompositeLoader.loadFromClassPath(name, ext);
 		// File configFolder = getConfigFolder();
 		CompositeLoader loader = new CompositeLoader();

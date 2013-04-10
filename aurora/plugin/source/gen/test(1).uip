@@ -1,0 +1,61 @@
+<screenBody component_type="screenBody" class_name="aurora.plugin.source.gen.screen.model.ScreenBody" markid="11934f32">
+    <containmentList propertye_id="component_children">
+        <form labelWidth="80" width="600" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" container_section_type="SECTION_TYPE_QUERY" markid="5e3464a1" title="编辑 - 订单" height="80" column="2">
+            <resultdataset model="custom.custom_entity1" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="7c2ab5da"/>
+            <containmentList propertye_id="component_children">
+                <textField width="120" component_type="textField" class_name="aurora.plugin.source.gen.screen.model.TextField" markid="23c623a8" height="20" name="field_1_29" prompt="编号">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="254efcf1" lovGridHeight="350" name="field_1_29" lovWidth="500" lovHeight="500"/>
+                </textField>
+                <comboBox width="120" component_type="comboBox" class_name="aurora.plugin.source.gen.screen.model.Combox" markid="64c04559" height="20" name="field_1_31" prompt="状态">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="b0909bc" lovGridHeight="350" name="field_1_31" lovWidth="500" lovHeight="500"/>
+                </comboBox>
+                <textField width="120" component_type="textField" class_name="aurora.plugin.source.gen.screen.model.TextField" markid="7e5e1b4c" height="20" name="field_1_32" prompt="备注">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="54525b64" lovGridHeight="350" name="field_1_32" lovWidth="500" lovHeight="500"/>
+                </textField>
+            </containmentList>
+        </form>
+        <grid navBarType="complex" width="600" component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" container_section_type="SECTION_TYPE_RESULT" markid="244af210" height="210">
+            <resultdataset model="custom.custom_entity4" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="73e9745">
+                <reference propertye_id="dataset_query_container" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="5e3464a1"/>
+            </resultdataset>
+            <toolbar propertye_id="toolbar" component_type="toolbar" class_name="aurora.plugin.source.gen.screen.model.Toolbar" markid="1e3d36ba">
+                <containmentList propertye_id="component_children">
+                    <button text="button" width="80" component_type="button" type="add" class_name="aurora.plugin.source.gen.screen.model.Button" markid="44d3fcd8" height="20">
+                        <inner_buttonclicker propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="3877a90f"/>
+                    </button>
+                    <button text="button" width="80" component_type="button" type="delete" class_name="aurora.plugin.source.gen.screen.model.Button" markid="37fc34bf" height="20">
+                        <inner_buttonclicker propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="676827d6"/>
+                    </button>
+                </containmentList>
+            </toolbar>
+            <containmentList propertye_id="component_children">
+                <gridcolumn width="100" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="392a0078" editor="textfield" height="60" name="field_4_5" prompt="行号">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="2de48d50" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
+                    <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="77f996b9" renderer_type="NONE_RENDERER"/>
+                </gridcolumn>
+                <gridcolumn width="100" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="1c8acd87" editor="lov" height="60" name="entity7_id" prompt="物品">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="14d0fa91" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
+                    <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="23f25044" renderer_type="NONE_RENDERER"/>
+                </gridcolumn>
+                <gridcolumn width="187" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="1adf6bb8" editor="numberfield" height="60" name="field_4_7" prompt="单价">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="78980f77" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
+                    <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="471f8b7b" renderer_type="NONE_RENDERER"/>
+                </gridcolumn>
+                <gridcolumn width="100" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="6c7927b7" editor="numberfield" height="60" name="field_4_8" prompt="数量">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="2f29239a" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
+                    <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="35e06ba6" renderer_type="NONE_RENDERER"/>
+                </gridcolumn>
+            </containmentList>
+        </grid>
+        <hBox labelWidth="80" width="200" component_type="hBox" class_name="aurora.plugin.source.gen.screen.model.HBox" markid="670f87a3" height="43">
+            <containmentList propertye_id="component_children">
+                <button text="button" width="80" component_type="button" class_name="aurora.plugin.source.gen.screen.model.Button" markid="2a2a0cd3" height="20">
+                    <inner_buttonclicker button_click_actionid="custom" propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="266bb3f5" button_click_function="function a(){      }">
+                        <reference propertye_id="button_click_target_component" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="5e3464a1"/>
+                    </inner_buttonclicker>
+                </button>
+            </containmentList>
+        </hBox>
+    </containmentList>
+</screenBody>
+

@@ -2,22 +2,21 @@ package aurora.plugin.source.gen;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.xml.sax.SAXException;
 
-import aurora.plugin.source.gen.builders.ISourceBuilder;
-import aurora.presentation.ViewComponentPackage;
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.IterationHandle;
+import uncertain.core.UncertainEngine;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.pkg.ComponentPackage;
 import uncertain.pkg.IPackageManager;
-import uncertain.pkg.PackageConfigurationError;
 import uncertain.pkg.PackageManager;
+import aurora.plugin.source.gen.builders.ISourceBuilder;
+import aurora.plugin.source.gen.test.Test;
 
 public class SourceGenManager {
 
@@ -34,20 +33,25 @@ public class SourceGenManager {
 
 	public SourceGenManager(IObjectRegistry registry) {
 		this.registry = registry;
-		registry.registerInstance(this);
+		// registry.registerInstance(this);
+	}
+
+	public void buildTestScreen() {
+		buildScreen(Test.loadCompositeMap());
 	}
 
 	public void buildScreen(CompositeMap modelMap) {
 		// load package
 		loadBuilders();
-		BuilderSession	session = new BuilderSession(this);
+		BuilderSession session = new BuilderSession(this);
 		CompositeMap screenModel = createScreenModel(modelMap);
 		session.setModel(screenModel);
 
-		String buildComponent = buildComponent(session,screenModel);
+		String buildComponent = buildComponent(session, screenModel);
 		CompositeLoader parser = new CompositeLoader();
 		try {
-			buildComponent = parser.loadFromString(buildComponent, "utf-8").toXML();
+			buildComponent = parser.loadFromString(buildComponent, "utf-8")
+					.toXML();
 			System.out.println(buildComponent);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -60,8 +64,8 @@ public class SourceGenManager {
 		// tmplConfig buildScreen
 	}
 
-	public String buildComponent(BuilderSession session,CompositeMap modelMap) {
-		buildContext(session,modelMap);
+	public String buildComponent(BuilderSession session, CompositeMap modelMap) {
+		buildContext(session, modelMap);
 		return bindTemplate(session);
 	}
 
@@ -71,14 +75,10 @@ public class SourceGenManager {
 	}
 
 	public ISourceTemplateProvider getTemplateProvider() {
-		if (debug)
-			return this.sourceTemplateProvider;
-		ISourceTemplateProvider tmplConfig = (ISourceTemplateProvider) registry
-				.getInstanceOfType(ISourceTemplateProvider.class);
-		return tmplConfig;
+		return this.sourceTemplateProvider;
 	}
 
-	private void buildContext(BuilderSession session,CompositeMap modelMap) {
+	private void buildContext(BuilderSession session, CompositeMap modelMap) {
 		// builder
 		ISourceBuilder builder = getBuilder(modelMap);
 		if (builder == null) {
@@ -129,10 +129,13 @@ public class SourceGenManager {
 			component_file = new File(
 					"/Users/shiliyan/Desktop/work/aurora/workspace/aurora_runtime/hap/WebContent/WEB-INF/aurora.plugin.source.gen/config/components.xml");
 		} else {
-			ComponentPackage package1 = getPackageManager().getPackage(
-					"aurora.plugin.source.gen");
-			component_file = new File(package1.getConfigPath(),
-					"components.xml");
+			// UncertainEngine
+			UncertainEngine engine = (UncertainEngine) registry
+					.getInstanceOfType(UncertainEngine.class);
+			File configDirectory = engine.getConfigDirectory();
+			File f = new File(configDirectory, "aurora.plugin.source.gen");
+			File config = new File(f,"config");
+			component_file = new File(config, "components.xml");
 		}
 		CompositeLoader loader = getCompositeLoader();
 		try {
@@ -144,13 +147,15 @@ public class SourceGenManager {
 					String component_type = map.getString("component_type", "");
 					String builder = map.getString("builder", "");
 					if ("".equals(component_type) == false) {
-						getBuilders().put(component_type.toLowerCase(), builder);
+						getBuilders()
+								.put(component_type.toLowerCase(), builder);
 					}
 					return IterationHandle.IT_CONTINUE;
 				}
 			}, false);
 		} catch (Exception ex) {
 			// load builders false
+			throw new RuntimeException(ex);
 		}
 	}
 
@@ -169,13 +174,14 @@ public class SourceGenManager {
 
 	}
 
-	
-
 	public void setTemplateProvider(
 			ISourceTemplateProvider sourceTemplateProvider) {
 		this.sourceTemplateProvider = sourceTemplateProvider;
+		if (sourceTemplateProvider instanceof SourceTemplateProvider) {
+			((SourceTemplateProvider) sourceTemplateProvider)
+					.setSourceGenManager(this);
+		}
 	}
-
 
 	private CompositeMap createScreenModel(CompositeMap bodyMap) {
 		CompositeMap screen = new CompositeMap("screen");
@@ -188,6 +194,8 @@ public class SourceGenManager {
 		view.put("component_type", "view");
 		view.put("markid", "view3310");
 		view.addChild(bodyMap);
+		screen.put("template_type",
+				bodyMap.getString("diagram_bind_template", ""));
 		return screen;
 	}
 

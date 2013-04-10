@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import uncertain.composite.CompositeMap;
+import uncertain.core.UncertainEngine;
 import uncertain.ocm.IObjectRegistry;
-import uncertain.pkg.ComponentPackage;
 import uncertain.pkg.IPackageManager;
 import uncertain.pkg.PackageManager;
 import freemarker.template.Configuration;
@@ -20,7 +20,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 public class SourceTemplateProvider implements ISourceTemplateProvider {
-	private String template;
+	private String template = "default";
 	private String packageName;
 	private Configuration freemarkerConfiguration;
 	private Map<String, Template> cache = new HashMap<String, Template>();
@@ -36,9 +36,9 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 
 	public SourceTemplateProvider(IObjectRegistry registry) {
 		this.registry = registry;
-		setSourceGenManager((SourceGenManager) registry
-				.getInstanceOfType(SourceGenManager.class));
-		registry.registerInstance(this);
+//		setSourceGenManager((SourceGenManager) registry
+//				.getInstanceOfType(SourceGenManager.class));
+//		registry.registerInstance(this);
 	}
 
 	public String getTemplate() {
@@ -111,13 +111,17 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 	private File getTemplateTheme() {
 		if (debug) {
 			return new File(
-					"/Users/shiliyan/Desktop/work/aurora/workspace/aurora_runtime/hap/WebContent/WEB-INF/aurora.plugin.source.gen/template/default");
+					"/Users/shiliyan/Desktop/work/aurora/workspace/aurora_runtime/hap/WebContent/WEB-INF/aurora.plugin.source.gen/template/workflow");
 		}
 		if (theme != null)
 			return theme;
-		ComponentPackage package1 = getPackageManager().getPackage(
-				getPackageName());
-		File tFolder = new File(package1.getConfigPath().getParent(),
+		UncertainEngine engine = (UncertainEngine) registry
+				.getInstanceOfType(UncertainEngine.class);
+		File configDirectory = engine.getConfigDirectory();
+		File f = new File(configDirectory, "aurora.plugin.source.gen");
+		// f.exists() TODO
+
+		File tFolder = new File(f,
 				"template");
 		theme = new File(tFolder, this.getTemplate());
 		return theme;
@@ -128,7 +132,7 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 				.getInstanceOfType(IPackageManager.class);
 	}
 
-	public Map<String, String> defineConfig() {
+	public Map<String, String> defineConfig(BuilderSession session) {
 		String property = System.getProperty("user.name");
 
 		String format = DateFormat.getDateInstance().format(
@@ -139,6 +143,7 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 		config.put("author", property);
 		config.put("revision", "1.0");
 		config.put("copyright", "add by aurora_ide team");
+		config.put("template_type",session.getModel().getString("template_type", ""));
 		return config;
 	}
 
@@ -150,7 +155,7 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 			StringWriter sw = new StringWriter();
 			Map<String, Object> p = new HashMap<String, Object>();
 			p.put("context", new TemplateModelWrapper(context));
-			p.put("config", defineConfig());
+			p.put("config", defineConfig(session));
 			p.put("action", new ActionMethod(session));
 			p.put("properties", new PropertiesMethod(session));
 			tplt.process(p, sw);
