@@ -97,7 +97,7 @@ public class GridBuilder extends DefaultSourceBuilder {
 					if (object instanceof CompositeMap) {
 						String result = session
 								.buildComponent((CompositeMap) object);
-						session.appendResult(result);
+						session.appendResultln(result);
 					}
 				}
 			}

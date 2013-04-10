@@ -107,11 +107,16 @@ public class BuilderSession {
 		return this.sourceGenManager.buildComponent(this, model);
 	}
 
-	public void appendResult(String result) {
+	public void appendResultln(String result) {
 		if ("".equals(result))
 			return;
 		getEventResult().append(result);
 		getEventResult().append("\n");
+	}
+	public void appendResult(String result) {
+		if ("".equals(result))
+			return;
+		getEventResult().append(result);
 	}
 
 	public void clearEventResult() {

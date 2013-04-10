@@ -27,7 +27,7 @@ public class LinkBuilder extends DefaultSourceBuilder {
 					}
 				}
 			}
-			session.appendResult(sb.toString());
+			session.appendResultln(sb.toString());
 		}
 	}
 	protected Map<String, String> getAttributeMapping() {

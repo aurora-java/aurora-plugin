@@ -107,7 +107,7 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 			}
 		}
 		String string = scripts.toString();
-		session.appendResult(format(string));
+		session.appendResultln(format(string));
 
 		// var renderers = parser.getComponents('renderer');
 		// for ( var i = 0; i < renderers.size(); i++) {

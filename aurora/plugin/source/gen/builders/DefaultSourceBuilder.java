@@ -42,7 +42,7 @@ public class DefaultSourceBuilder implements ISourceBuilder {
 					}
 					String buildComponent = session
 							.buildComponent((CompositeMap) object);
-					session.appendResult(buildComponent);
+					session.appendResultln(buildComponent);
 				}
 			}
 		}

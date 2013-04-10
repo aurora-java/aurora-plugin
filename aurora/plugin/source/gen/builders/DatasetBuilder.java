@@ -39,7 +39,7 @@ public class DatasetBuilder extends DefaultSourceBuilder {
 			
 				
 			}
-			session.appendResult(sb.toString());
+			session.appendResultln(sb.toString());
 		}
 		if("datasetfields".equals(event)){
 			CompositeMap currentContext = session.getCurrentContext();
@@ -49,7 +49,7 @@ public class DatasetBuilder extends DefaultSourceBuilder {
 					BuilderSession copy = session.getCopy();
 					copy.setCurrentContext((CompositeMap) object);
 					String bindTemplate = session.getSourceGenManager().bindTemplate(copy);
-					session.appendResult(bindTemplate);
+					session.appendResultln(bindTemplate);
 				}
 			}
 		}
