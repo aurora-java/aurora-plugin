@@ -16,16 +16,10 @@ public class Test {
 		SourceTemplateProvider stp = new SourceTemplateProvider();
 		sgm.setTemplateProvider(stp);
 		stp.setSourceGenManager(sgm);
+		stp.setTemplate("workflow");
 		stp.initialize();
-		try {
-			sgm.buildScreen(loadCompositeMap());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		sgm.buildTestScreen();
+		
 	}
 	public static CompositeMap loadCompositeMap() {
 		InputStream is = null;
