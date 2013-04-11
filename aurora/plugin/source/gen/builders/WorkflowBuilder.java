@@ -115,7 +115,7 @@ public class WorkflowBuilder extends DefaultSourceBuilder {
 		ModelMapParser mmp = session.createModelMapParser(model);
 		List<CompositeMap> components = mmp.getComponents("resultdataset");
 		for (CompositeMap d : components) {
-			if("".equals(d.getString("bindName", ""))==false){
+			if("".equals(d.getString("bindName", ""))){
 				return d;
 			}
 		}
