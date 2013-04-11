@@ -16,6 +16,9 @@ public class WorkflowBuilder extends DefaultSourceBuilder {
 	public void actionEvent(String event, BuilderSession session) {
 		if ("workflow_head_model_pk".equals(event)) {
 			CompositeMap headDS = getHeadDS(session);
+			if(headDS == null){
+				return;
+			}
 			String string = headDS.getString("model", "");
 			CompositeMap model = session.getModel();
 			ModelMapParser mmp = session.createModelMapParser(model);
@@ -66,26 +69,27 @@ public class WorkflowBuilder extends DefaultSourceBuilder {
 	}
 
 	private String getHeadDSID(BuilderSession session) {
-		CompositeMap model = session.getModel();
-		// ModelMapParser mmp = new ModelMapParser(model);
-		ModelMapParser mmp = session.createModelMapParser(model);
-		List<CompositeMap> components = mmp
-				.getComponents("inner_buttonclicker");
-		for (CompositeMap b : components) {
-			String string = b.getString("button_click_actionid", "");
-			if ("custom".equalsIgnoreCase(string)) {
-				String buttonTargetDatasetID = mmp.getButtonTargetDatasetID(b
-						.getParent());
-				return buttonTargetDatasetID;
-			}
-		}
+//		CompositeMap model = session.getModel();
+//		// ModelMapParser mmp = new ModelMapParser(model);
+//		ModelMapParser mmp = session.createModelMapParser(model);
+//		List<CompositeMap> components = mmp
+//				.getComponents("inner_buttonclicker");
+//		for (CompositeMap b : components) {
+//			String string = b.getString("button_click_actionid", "");
+//			if ("custom".equalsIgnoreCase(string)) {
+//				String buttonTargetDatasetID = mmp.getButtonTargetDatasetID(b
+//						.getParent());
+//				return buttonTargetDatasetID;
+//			}
+//		}
+		CompositeMap headDS = this.getHeadDS(session);
+		if(headDS!=null)
+			return headDS.getString("ds_id", "");
 		return "";
 	}
 
 	private CompositeMap getHeadDS(BuilderSession session) {
 		CompositeMap model = session.getModel();
-
-		// ModelMapParser mmp = new ModelMapParser(model);
 		ModelMapParser mmp = session.createModelMapParser(model);
 		List<CompositeMap> components = mmp
 				.getComponents("inner_buttonclicker");
@@ -101,6 +105,18 @@ public class WorkflowBuilder extends DefaultSourceBuilder {
 							"i_dataset_delegate");
 					return child;
 				}
+			}
+		}
+		return getFirstNoBindResultDataset(session);
+	}
+
+	private CompositeMap getFirstNoBindResultDataset(BuilderSession session) {
+		CompositeMap model = session.getModel();
+		ModelMapParser mmp = session.createModelMapParser(model);
+		List<CompositeMap> components = mmp.getComponents("resultdataset");
+		for (CompositeMap d : components) {
+			if("".equals(d.getString("bindName", ""))==false){
+				return d;
 			}
 		}
 		return null;
