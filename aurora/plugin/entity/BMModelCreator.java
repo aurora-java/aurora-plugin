@@ -73,7 +73,7 @@ public class BMModelCreator extends AbstractBMModelCreator {
 		}
 	}
 
-	private Record createRecordFromMap(CompositeMap map) {
+	private Record createRecordFromMap(CompositeMap map) throws Exception {
 		Record r = new Record();
 		// prompt
 		r.setPrompt(map.getString(IEntityConst.COLUMN_PROMPT));
@@ -87,11 +87,10 @@ public class BMModelCreator extends AbstractBMModelCreator {
 		String pattern = config.getEntityColumnNamePattern();
 		CompositeMap para = map;
 		if (r.getType().equals(IEntityConst.REFERENCE)) {
-			CompositeMap m_ = new CompositeMap();
-			m_.put("entity_id", map.get("source"));
+			CompositeMap m_ = getOptionParent(map.get("source"));
 			pattern = config.getPkRecordNamePattern();
 			para = m_;
-			if (ModelUtil.eq(map.get("source"),
+			if (ModelUtil.eq(m_.get("entity_id"),
 					parentEntityMap.get("entity_id"))) {
 				// reference to master table
 				r.setInsertExpression("${../../@"
@@ -119,7 +118,7 @@ public class BMModelCreator extends AbstractBMModelCreator {
 		Object options = map.get("source");
 		if (r.getType().equals(IEntityConst.REFERENCE)) {
 			r.put(IEntityConst.COLUMN_OPTIONS, config.getEntityPath() + "."
-					+ getEntityName(options));
+					+ getOptionName(options));
 		} else {
 			r.put(IEntityConst.COLUMN_OPTIONS, options);
 		}
@@ -128,18 +127,20 @@ public class BMModelCreator extends AbstractBMModelCreator {
 		return r;
 	}
 
-	private String getEntityName(Object entityId) {
+	private String getOptionName(Object entityId) {
 		try {
-			CompositeMap para = new CompositeMap();
-			para.put("entity_id", entityId);
-			CompositeMap map = PageGenerator.queryFirst(
-					getDatabaseServiceFactory(), getContext(),
-					config.getEntityModel(), para);
-			return getParsedPattern(config.getExtEntityNamePattern(), map);
+			CompositeMap map = getEntity(entityId);
+			return getExtEntityName(map);
 		} catch (Exception e) {
 
 		}
 		return "_exception_";
+	}
+
+	private CompositeMap getOptionParent(Object source) throws Exception {
+		CompositeMap entity = getEntity(source);
+		entity = getEntity(entity.get("parent_entity"));
+		return entity;
 	}
 
 	private String getParsedPattern(String pattern, CompositeMap para) {

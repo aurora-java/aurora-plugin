@@ -100,6 +100,7 @@ public class EntityGenerator extends AbstractEntry {
 	private void writeBmFile(CompositeMap data, String fileName)
 			throws Exception {
 		File f = new File(bmPath, fileName);
+		f.getParentFile().mkdirs();
 		BufferedWriter bw = null;
 		try {
 			bw = new BufferedWriter(new FileWriter(f));
