@@ -7,7 +7,7 @@ import aurora.plugin.source.gen.screen.model.asm.PageGeneratorConfig;
 public class PageGeneratorConfig {
 	private static PageGeneratorConfig instance;
 	String pagePath = "custom";// modules/custom
-	String pageNamePattern = "custom_page${@custom_page_id}";
+	String pageNamePattern = "custom_page${@custom_page_id}.screen";
 	String pageModel = "page.custom_page";
 	String pagePartModel = "page.custom_page_structure";
 	String formModel = "page.custom_form";

@@ -33,7 +33,8 @@ public class GridCreator extends AbstractModelCreator {
 			List<CompositeMap> columndList = columnMap.getChildsNotNull();
 			for (CompositeMap m : columndList) {
 				GridColumn gc = new GridColumn();
-				gc.setEditor(m.getString("editor"));
+				if (!isViewPage())
+					gc.setEditor(getNormalComponentType(m.getString("editor")));
 				gc.setSize(m.getInt("width"), gc.getSize().y);
 				gc.setPrompt(m.getString("prompt"));
 				gc.setName(m.getString("name"));

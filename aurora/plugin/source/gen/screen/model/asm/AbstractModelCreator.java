@@ -15,8 +15,10 @@ import aurora.plugin.source.gen.screen.model.TextField;
 public abstract class AbstractModelCreator {
 	private DatabaseServiceFactory svcFactory;
 	private CompositeMap context;
-	protected PageGeneratorConfig pgConfig=PageGeneratorConfig.getInstance();
-	protected EntityGeneratorConfig egConfig = EntityGeneratorConfig.getInstance();
+	protected PageGeneratorConfig pgConfig = PageGeneratorConfig.getInstance();
+	protected EntityGeneratorConfig egConfig = EntityGeneratorConfig
+			.getInstance();
+	private String template_type;
 
 	public AbstractModelCreator(DatabaseServiceFactory svcFactory,
 			CompositeMap context) {
@@ -24,16 +26,32 @@ public abstract class AbstractModelCreator {
 		this.svcFactory = svcFactory;
 		this.context = context;
 	}
+
 	public CompositeMap getContext() {
 		return context;
+	}
+	
+	public void setTemplateType(String type) {
+		this.template_type=type;
+	}
+	
+	public String getTemplateType() {
+		return template_type;
+	}
+	
+	public boolean isViewPage() {
+		return getTemplateType().endsWith("-view");
 	}
 
 	public DatabaseServiceFactory getDatabaseServiceFactory() {
 		return svcFactory;
 	}
 
-	public abstract AuroraComponent create(CompositeMap mainParaMap) throws Exception;
-	public abstract void decorateComponent(AuroraComponent com,CompositeMap mainPartMap) throws Exception;
+	public abstract AuroraComponent create(CompositeMap mainParaMap)
+			throws Exception;
+
+	public abstract void decorateComponent(AuroraComponent com,
+			CompositeMap mainPartMap) throws Exception;
 
 	public static Input createInput(String type) {
 		Input input = null;
@@ -52,6 +70,13 @@ public abstract class AbstractModelCreator {
 			input = new CheckBox();
 		}
 		return input;
+	}
+
+	protected String getNormalComponentType(String type) {
+		for (String s : Input.INPUT_TYPES)
+			if (s.equalsIgnoreCase(type))
+				return s;
+		return type;
 	}
 
 	public static Button createButton(String text) {

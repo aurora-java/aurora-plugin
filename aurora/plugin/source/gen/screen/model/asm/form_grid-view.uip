@@ -1,0 +1,13 @@
+<screenBody diagram_bind_template="workflow_view" component_type="screenBody" class_name="aurora.plugin.source.gen.screen.model.ScreenBody" markid="1ce95431">
+    <containmentList propertye_id="component_children">
+        <form labelWidth="80" width="600" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" container_section_type="SECTION_TYPE_RESULT" markid="13757596" title="Form" height="80">
+   			 <resultdataset propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="65b6011b98">
+            </resultdataset>
+        </form>
+        <grid width="750" component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" container_section_type="SECTION_TYPE_RESULT" markid="5b40c349" height="380">
+            <resultdataset propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="65b60b98">
+                <reference propertye_id="dataset_query_container" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="13757596"/>
+            </resultdataset>
+        </grid>
+    </containmentList>
+</screenBody>
