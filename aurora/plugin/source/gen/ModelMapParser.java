@@ -8,6 +8,10 @@ import java.util.Set;
 
 import org.xml.sax.SAXException;
 
+import aurora.bm.BusinessModel;
+import aurora.bm.IModelFactory;
+import aurora.bm.ModelFactory;
+
 import uncertain.composite.CompositeMap;
 import uncertain.composite.IterationHandle;
 import uncertain.core.UncertainEngine;
@@ -252,18 +256,30 @@ public class ModelMapParser {
 	public CompositeMap loadModelMap(String optionModel) {
 		// CompositeMap config = mCompositeLoader.loadFromClassPath(name, ext);
 		// File configFolder = getConfigFolder();
-		UncertainEngine engine = (UncertainEngine) registry
-				.getInstanceOfType(UncertainEngine.class);
+//		UncertainEngine engine = (UncertainEngine) registry
+//				.getInstanceOfType(UncertainEngine.class);
+		// ModelFactory mf = new ModelFactory();
+		IModelFactory instanceOfType = (IModelFactory) registry
+				.getInstanceOfType(IModelFactory.class);
 		try {
-			return engine.getCompositeLoader().loadFromClassPath(optionModel,
-					"bm");
+			BusinessModel model = instanceOfType.getModel(optionModel);
+			return model.getObjectContext();
 		} catch (IOException e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		} catch (SAXException e) {
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
+//		try {
+//			CompositeMap loadFromClassPath = engine.getCompositeLoader()
+//					.loadFromClassPath(optionModel, "bm");
+//			return BusinessModel.getInstance(loadFromClassPath)
+//					.getObjectContext();
+//			// return loadFromClassPath;
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			throw new RuntimeException(e);
+//		} catch (SAXException e) {
+//			e.printStackTrace();
+//			throw new RuntimeException(e);
+//		}
 		//
 
 		// CompositeLoader loader = new CompositeLoader();
@@ -439,7 +455,7 @@ public class ModelMapParser {
 						&& map.getString("name", "").equalsIgnoreCase(
 								field.getString("field_name", ""))) {
 					options[0] = map.getString("options", "");
-					options[1] = getStringIgnoreCase(map,"lookupcode");
+					options[1] = getStringIgnoreCase(map, "lookupcode");
 					return IterationHandle.IT_BREAK;
 				}
 				return IterationHandle.IT_CONTINUE;
@@ -469,7 +485,7 @@ public class ModelMapParser {
 		String model = models[0];
 		if ("".equals(model) == false) {
 			CompositeMap modelMap = loadModelMap(model);
-			return  getStringIgnoreCase(modelMap,"defaultdisplayfield");
+			return getStringIgnoreCase(modelMap, "defaultdisplayfield");
 		}
 		return "code_value_name";
 	}
