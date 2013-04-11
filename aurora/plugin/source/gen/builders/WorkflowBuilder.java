@@ -33,7 +33,7 @@ public class WorkflowBuilder extends DefaultSourceBuilder {
 			CompositeMap headDS = getHeadDS(session);
 			CompositeMap currentContext = session.getCurrentContext();
 			String string = currentContext.getString("markid", "");
-			if (string.equals(headDS.getString("markid", ""))) {
+			if (headDS != null && string.equals(headDS.getString("markid", ""))) {
 				currentContext.put("is_workflow_head_ds", true);
 				CompositeMap lineDS = getLineDS(session);
 				currentContext.put("need_submit_url", lineDS != null);
