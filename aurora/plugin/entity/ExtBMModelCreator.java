@@ -3,24 +3,34 @@ package aurora.plugin.entity;
 import java.util.List;
 
 import uncertain.composite.CompositeMap;
+import uncertain.composite.TextParser;
+import aurora.database.service.DatabaseServiceFactory;
 import aurora.plugin.entity.model.BMModel;
 import aurora.plugin.entity.model.IEntityConst;
 import aurora.plugin.entity.model.Record;
+import aurora.plugin.source.gen.screen.model.asm.PageGenerator;
 
-public class ExtBMModelCreator {
-	private EntityGeneratorConfig config;
+public class ExtBMModelCreator extends AbstractBMModelCreator {
 
-	public ExtBMModelCreator(EntityGeneratorConfig config) {
-		super();
-		this.config = config;
+	private CompositeMap viewFields;
+	private CompositeMap viewMap;
+
+	public ExtBMModelCreator(DatabaseServiceFactory svcFactory,
+			CompositeMap context) {
+		super(svcFactory, context);
 	}
 
-	public BMModel createFromBase(BMModel model, CompositeMap entityMap,
-			CompositeMap viewMap, CompositeMap viewFields) {
-		BMModel bmm = getCopy(model);
-		viewMap.put("name",
-				entityMap.get("name") + "_ext" + viewMap.get("entity_id"));
+	@Override
+	public BMModel create(CompositeMap viewMap) throws Exception {
+		this.viewMap = viewMap;
+		CompositeMap parentEntity = getEntity(viewMap.get("parent_entity"));
+		BMModel bmm = new BMModelCreator(getDatabaseServiceFactory(),
+				getContext()).create(parentEntity);
+		String name = getExtEntityName(viewMap);
+		// bmm.setName(name);
+		viewMap.put("name", name);
 		viewMap.put("status", "GEN");
+		this.viewFields = getViewFields(viewMap.get("entity_id"));
 		@SuppressWarnings("unchecked")
 		List<CompositeMap> list = viewFields.getChildsNotNull();
 		for (CompositeMap m : list) {
@@ -43,7 +53,16 @@ public class ExtBMModelCreator {
 		return bmm;
 	}
 
-	private BMModel getCopy(BMModel model) {
-		return model;
+	@Override
+	public void updateBack() throws Exception {
+		updateEntity(viewMap);
 	}
+
+	private CompositeMap getViewFields(Object viewId) throws Exception {
+		CompositeMap para = new CompositeMap();
+		para.put("entity_id", viewId);
+		return PageGenerator.query(getDatabaseServiceFactory(), getContext(),
+				config.entityViewFieldModel, para);
+	}
+
 }

@@ -4,8 +4,8 @@ import java.util.List;
 
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
-import aurora.plugin.entity.gen.BaseBmGenerator;
-import aurora.plugin.entity.gen.DuplicateException;
+import aurora.database.service.BusinessModelService;
+import aurora.database.service.DatabaseServiceFactory;
 import aurora.plugin.entity.model.BMModel;
 import aurora.plugin.entity.model.DataType;
 import aurora.plugin.entity.model.EditorType;
@@ -13,27 +13,28 @@ import aurora.plugin.entity.model.IEntityConst;
 import aurora.plugin.entity.model.ModelUtil;
 import aurora.plugin.entity.model.PkRecord;
 import aurora.plugin.entity.model.Record;
+import aurora.plugin.source.gen.screen.model.asm.PageGenerator;
 
-public class BMModelCreator {
+public class BMModelCreator extends AbstractBMModelCreator {
 
-	private EntityGeneratorConfig config;
 	private BMModel model;
-	private CompositeMap entityMap;
-	private CompositeMap fieldsMap;
 	private CompositeMap parentEntityMap;
+	private CompositeMap fieldsMap;
+	private CompositeMap entityMap;
 
-	public BMModelCreator(EntityGeneratorConfig config) {
-		this.config = config;
+	public BMModelCreator(DatabaseServiceFactory svcFactory,
+			CompositeMap context) {
+		super(svcFactory, context);
 	}
 
-	public BMModel createFromCompositeMap(CompositeMap parentEntityMap,
-			CompositeMap entityMap, CompositeMap fieldMap) {
-		this.parentEntityMap = parentEntityMap;
+	@Override
+	public BMModel create(CompositeMap entityMap) throws Exception {
 		this.entityMap = entityMap;
-		this.fieldsMap = fieldMap;
+		this.fieldsMap = getEntityFields(entityMap.get("entity_id"));
+		this.parentEntityMap = getEntity(entityMap.get("parent_entity"));
 		model = new BMModel();
 		@SuppressWarnings("unchecked")
-		List<CompositeMap> list = fieldMap.getChilds();
+		List<CompositeMap> list = fieldsMap.getChilds();
 		if (list == null)
 			list = java.util.Collections.emptyList();
 		PkRecord pkr = new PkRecord();
@@ -58,6 +59,18 @@ public class BMModelCreator {
 			}
 		}
 		return model;
+	}
+
+	public void updateBack() throws Exception {
+		updateEntity(entityMap);
+		//
+		BusinessModelService service = getDatabaseServiceFactory()
+				.getModelService(config.entityFieldModel, getContext());
+		@SuppressWarnings("unchecked")
+		List<CompositeMap> list = fieldsMap.getChildsNotNull();
+		for (CompositeMap m : list) {
+			service.updateByPK(m);
+		}
 	}
 
 	private Record createRecordFromMap(CompositeMap map) {
@@ -86,8 +99,8 @@ public class BMModelCreator {
 				r.put(IEntityConst.COLUMN_QUERYFIELD, true);
 				r.put(IEntityConst.COLUMN_QUERY_OP, IEntityConst.OP_EQ);
 				r.setForUpdate(false);
-			}else {
-				
+			} else {
+
 			}
 		}
 		r.setName(getParsedPattern(pattern, para));
@@ -102,13 +115,42 @@ public class BMModelCreator {
 			r.put(IEntityConst.COLUMN_QUERYFIELD, true);
 			r.put(IEntityConst.COLUMN_QUERY_OP, query_op);
 		}
-		//additions....
+		// options
+		Object options = map.get("source");
+		if (r.getType().equals(IEntityConst.REFERENCE)) {
+			r.put(IEntityConst.COLUMN_OPTIONS, config.getEntityPath() + "."
+					+ getEntityName(options));
+		} else {
+			r.put(IEntityConst.COLUMN_OPTIONS, options);
+		}
+		// additions....
 		r.put("field_id", map.getInt("field_id"));
 		return r;
 	}
 
+	private String getEntityName(Object entityId) {
+		try {
+			CompositeMap para = new CompositeMap();
+			para.put("entity_id", entityId);
+			CompositeMap map = PageGenerator.queryFirst(
+					getDatabaseServiceFactory(), getContext(),
+					config.getEntityModel(), para);
+			return getParsedPattern(config.getExtEntityNamePattern(), map);
+		} catch (Exception e) {
+
+		}
+		return "_exception_";
+	}
+
 	private String getParsedPattern(String pattern, CompositeMap para) {
 		return TextParser.parse(pattern, para);
+	}
+
+	private CompositeMap getEntityFields(Object entityId) throws Exception {
+		CompositeMap para = new CompositeMap();
+		para.put("entity_id", entityId);
+		return PageGenerator.query(getDatabaseServiceFactory(), getContext(),
+				config.entityFieldModel, para);
 	}
 
 }

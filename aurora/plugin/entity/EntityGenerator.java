@@ -12,19 +12,17 @@ import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 import aurora.application.sourcecode.SourceCodeUtil;
-import aurora.database.service.BusinessModelService;
 import aurora.database.service.DatabaseServiceFactory;
-import aurora.datasource.INamedDataSourceProvider;
 import aurora.plugin.entity.gen.BaseBmGenerator;
 import aurora.plugin.entity.gen.ExtendBmGenerator;
 import aurora.plugin.entity.gen.SqlGenerator;
 import aurora.plugin.entity.model.BMModel;
 import aurora.plugin.entity.model.IEntityConst;
+import aurora.plugin.source.gen.screen.model.asm.PageGenerator;
 
 public class EntityGenerator extends AbstractEntry {
 	private EntityGeneratorConfig config = EntityGeneratorConfig.getInstance();
 	private DatabaseServiceFactory svcFactory;
-	private IObjectRegistry registry;
 	private File bmPath;
 	private CompositeMap context;
 	String entityId;
@@ -33,7 +31,6 @@ public class EntityGenerator extends AbstractEntry {
 	public EntityGenerator(IObjectRegistry registry,
 			DatabaseServiceFactory svcFactory) {
 		super();
-		this.registry = registry;
 		this.svcFactory = svcFactory;
 		File webHome = SourceCodeUtil.getWebHome(registry);
 		bmPath = new File(webHome, "WEB-INF/classes/" + config.entityPath);
@@ -41,39 +38,33 @@ public class EntityGenerator extends AbstractEntry {
 
 	public CompositeMap gen() throws Exception {
 		CompositeMap entityMap = getEntity();
-		CompositeMap parentEntityMap = getParentEntity(entityMap, 2);
 		if (entityMap != null) {
-			CompositeMap entityFieldMap_ = getEntityFields();
-			if (entityFieldMap_ != null) {
-				BMModel model = new BMModelCreator(config)
-						.createFromCompositeMap(parentEntityMap, entityMap,
-								entityFieldMap_);
-				// create base bm
-				CompositeMap modelMap = new BaseBmGenerator(model).gen();
-				writeBmFile(modelMap, entityMap.getString("name") + ".bm");
-				// #writeback#
-				updateEntity(entityMap);
-				updateEntityFields(entityFieldMap_);
-				// create extention bm
-				CompositeMap viewsMap = getEntityViews();
-				@SuppressWarnings("unchecked")
-				List<CompositeMap> viewsList = viewsMap.getChildsNotNull();
-				for (CompositeMap vm : viewsList) {
-					CompositeMap viewFieldsMap = getEntityViewField(vm
-							.getLong("entity_id"));
-					// create ext model
-					BMModel extModel = new ExtBMModelCreator(config)
-							.createFromBase(model, entityMap, vm, viewFieldsMap);
-					CompositeMap extMap = new ExtendBmGenerator(extModel).gen();
-					// create ext bm
-					writeBmFile(extMap, vm.getString("name") + ".bm");
-					// writeback
-					updateEntity(vm);
-				}
-				// create table
-				String[] sqls = new SqlGenerator(model, model.getName()).gen();
-				createTable(sqls, model.getName());
+			AbstractBMModelCreator creator = new BMModelCreator(svcFactory,
+					context);
+			BMModel model = creator.create(entityMap);
+			// create base bm
+			CompositeMap modelMap = new BaseBmGenerator(model).gen();
+			writeBmFile(modelMap, model.getName() + ".bm");
+			// #writeback#
+			creator.updateBack();
+			// create extention bm
+			CompositeMap viewsMap = getEntityViews();
+			@SuppressWarnings("unchecked")
+			List<CompositeMap> viewsList = viewsMap.getChildsNotNull();
+			for (CompositeMap vm : viewsList) {
+				// create ext model
+				AbstractBMModelCreator extCreator = new ExtBMModelCreator(
+						svcFactory, context);
+				BMModel extModel = extCreator.create(vm);
+				CompositeMap extMap = new ExtendBmGenerator(extModel).gen();
+				// create ext bm
+				writeBmFile(extMap, vm.getString("name") + ".bm");
+				// writeback
+				extCreator.updateBack();
 			}
+			// create table
+			String[] sqls = new SqlGenerator(model, model.getName()).gen();
+			createTable(sqls, model.getName());
 		}
 		return entityMap;
 	}
@@ -138,84 +129,18 @@ public class EntityGenerator extends AbstractEntry {
 	}
 
 	private CompositeMap getEntity() throws Exception {
-		BusinessModelService service = svcFactory.getModelService(
-				config.entityModel, context);
 		CompositeMap para = new CompositeMap();
 		para.put("entity_id", entityId);
-		CompositeMap res = service.queryAsMap(para);
-		if (res == null)
-			return null;
-		if (res.getChilds() == null || res.getChilds().size() == 0)
-			return null;
-		return (CompositeMap) res.getChilds().get(0);
-	}
-
-	private CompositeMap getParentEntity(CompositeMap curEntity, int level)
-			throws Exception {
-		if (level == 0)
-			return curEntity;
-		long parentId = curEntity.getLong("parent", -1);
-		if (parentId == -1)
-			return null;
-		BusinessModelService service = svcFactory.getModelService(
-				config.entityModel, context);
-		CompositeMap para = new CompositeMap();
-		para.put("entity_id", parentId);
-		CompositeMap res = service.queryAsMap(para);
-		if (res == null)
-			return null;
-		if (res.getChilds() == null || res.getChilds().size() == 0)
-			return null;
-		return getParentEntity((CompositeMap) res.getChilds().get(0), --level);
-	}
-
-	public void updateEntity(CompositeMap entityMap) throws Exception {
-		BusinessModelService service = svcFactory.getModelService(
-				config.entityModel, context);
-		service.updateByPK(entityMap);
-	}
-
-	private CompositeMap getEntityFields() throws Exception {
-		BusinessModelService service = svcFactory.getModelService(
-				config.entityFieldModel, context);
-		CompositeMap para = new CompositeMap();
-		para.put("entity_id", entityId);
-		return service.queryAsMap(para);
-	}
-
-	public void updateEntityFields(CompositeMap entityFieldsMap)
-			throws Exception {
-		BusinessModelService service = svcFactory.getModelService(
-				config.entityFieldModel, context);
-		@SuppressWarnings("unchecked")
-		List<CompositeMap> list = entityFieldsMap.getChildsNotNull();
-		for (CompositeMap m : list) {
-			service.updateByPK(m);
-		}
+		return PageGenerator.queryFirst(svcFactory, context,
+				config.entityModel, para);
 	}
 
 	private CompositeMap getEntityViews() throws Exception {
-		BusinessModelService service = svcFactory.getModelService(
-				config.entityModel, context);
 		CompositeMap para = new CompositeMap();
-		para.put("parent", entityId);
-		CompositeMap res = service.queryAsMap(para);
-		if (res == null)
-			return null;
-		if (res.getChilds() == null || res.getChilds().size() == 0)
-			return null;
-		CompositeMap views_v = (CompositeMap) res.getChilds().get(0);
-		para.put("parent", views_v.get("entity_id"));
+		para.put("parent_entity", entityId);
 		para.put("type", IEntityConst.VIEW);
-		return service.queryAsMap(para);
-	}
-
-	private CompositeMap getEntityViewField(long viewId) throws Exception {
-		BusinessModelService service = svcFactory.getModelService(
-				config.entityViewFieldModel, context);
-		CompositeMap para = new CompositeMap();
-		para.put("entity_id", viewId);
-		return service.queryAsMap(para);
+		return PageGenerator.query(svcFactory, context, config.entityModel,
+				para);
 	}
 
 	public void setEntityId(String entityId) {

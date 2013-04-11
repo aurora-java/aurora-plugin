@@ -4,8 +4,9 @@ public class EntityGeneratorConfig {
 	String entityModel = "entity.entity";
 	String entityFieldModel = "entity.entity_field";
 	String entityViewFieldModel = "entity.entity_view_field";
-	String entityPath = "custom";//WEB-INF/classes/custom
+	String entityPath = "custom";// WEB-INF/classes/custom
 	String entityNamePattern = "custom_entity${@entity_id}";
+	String extEntityNamePattern = "custom_entity${@parent_entity}_ext${@entity_id}";
 	String pkRecordNamePattern = "entity${@entity_id}_id";
 	String entityColumnNamePattern = "field_${@entity_id}_${@field_id}";
 
@@ -77,5 +78,13 @@ public class EntityGeneratorConfig {
 
 	public void setEntityColumnNamePattern(String entityColumnNamePattern) {
 		this.entityColumnNamePattern = entityColumnNamePattern;
+	}
+
+	public String getExtEntityNamePattern() {
+		return extEntityNamePattern;
+	}
+
+	public void setExtEntityNamePattern(String extEntityNamePattern) {
+		this.extEntityNamePattern = extEntityNamePattern;
 	}
 }
