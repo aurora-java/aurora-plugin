@@ -35,12 +35,34 @@ public class WorkflowBuilder extends DefaultSourceBuilder {
 			String string = currentContext.getString("markid", "");
 			if (string.equals(headDS.getString("markid", ""))) {
 				currentContext.put("is_workflow_head_ds", true);
+				CompositeMap lineDS = getLineDS(session);
+				currentContext.put("need_submit_url", lineDS != null);
+				if (lineDS != null) {
+					currentContext.put("line_model",
+							lineDS.getString("model", ""));
+					currentContext.put("binded_name",
+							lineDS.getString("bindName", ""));
+				}
 			}
 		}
 		// workflow_head_model_pk
 		// workflow_head_ds_id
 		// ${action("is_workflow_head_ds")}
 		// <#if context.is_workflow_head_ds??>
+	}
+
+	private CompositeMap getLineDS(BuilderSession session) {
+		CompositeMap model = session.getModel();
+		ModelMapParser mmp = session.createModelMapParser(model);
+		List<CompositeMap> datasets = mmp.getDatasets();
+		CompositeMap currentContext = session.getCurrentContext();
+		String head_id = currentContext.getString("ds_id", "");
+		for (CompositeMap compositeMap : datasets) {
+			if (head_id.equals(compositeMap.getString("bindTarget", ""))) {
+				return compositeMap;
+			}
+		}
+		return null;
 	}
 
 	private String getHeadDSID(BuilderSession session) {
