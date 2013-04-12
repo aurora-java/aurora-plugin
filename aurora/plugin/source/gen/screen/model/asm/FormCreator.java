@@ -22,7 +22,7 @@ public class FormCreator extends AbstractModelCreator {
 		Form form = (Form) com;
 		try {
 			CompositeMap formMap = getFormMap(formPart.get("part_id"));
-			form.setTitle("编辑 - " + formMap.get("entity_name"));
+			form.setTitle(getFormTitle(formMap.getString("entity_name")));
 			Dataset ds = form.getDataset();
 			ds.setModel(getEntityModelPath(formMap.get("entity_id")));
 			form.setCol(formMap.getInt("col", form.getCol()));
@@ -50,6 +50,10 @@ public class FormCreator extends AbstractModelCreator {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private String getFormTitle(String entity_name) {
+		return (isViewPage()?"查看":"编辑")+" - "+entity_name;
 	}
 
 	@Override

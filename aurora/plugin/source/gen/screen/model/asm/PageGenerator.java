@@ -2,6 +2,7 @@ package aurora.plugin.source.gen.screen.model.asm;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 
 import uncertain.composite.CompositeMap;
@@ -41,7 +42,7 @@ public class PageGenerator extends AbstractEntry {
 			creator.setTemplateType(pageMap.getString("page_tpl"));
 			ScreenBody model = (ScreenBody) creator.create(pageMap);
 			Object2CompositeMap o2c = new Object2CompositeMap();
-//			 String xml = o2c.createXML(model);
+			// String xml = o2c.createXML(model);
 			// System.out.println(xml);
 			pageMap.put("status", "GEN");
 			String page_path = getPageFullPath(pageMap);
@@ -74,15 +75,15 @@ public class PageGenerator extends AbstractEntry {
 			throws Exception {
 		File f = new File(webHome, page_path);
 		f.getParentFile().mkdirs();
-		BufferedWriter bw = null;
+		FileOutputStream fos = null;
 		try {
-			bw = new BufferedWriter(new FileWriter(f));
-			bw.write(data.toXML());
+			fos = new FileOutputStream(f);
+			fos.write(data.toXML().getBytes("UTF-8"));
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			if (bw != null)
-				bw.close();
+			if (fos != null)
+				fos.close();
 		}
 	}
 
