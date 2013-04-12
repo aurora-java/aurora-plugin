@@ -80,14 +80,14 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 			String type = renderer.getString(
 					ComponentInnerProperties.RENDERER_TYPE, "");
 			if ("INNER_FUNCTION".equals(type)) {
-				renderer.put("renderer", renderer.getString("functionname", ""));
+				renderer.getParent().put("renderer", renderer.getString("renderer_function_name", ""));
 			}
 			if ("PAGE_REDIRECT".equals(type)) {
 				String functionName = session.getIDGenerator().genID(
 						"functionName", 0);
 				String[] parametersDetail = mmp.getParametersDetail(renderer,
 						"linkUrl");
-				renderer.put("renderer", functionName);
+				renderer.getParent().put("renderer", functionName);
 				String linkId = renderer.getString("link_id", "");
 				String openFunctionName = session.getIDGenerator().genID(
 						"functionName", 0);
@@ -105,7 +105,7 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 			if ("USER_FUNCTION".equals(type)) {
 				String s = renderer.getChild("function").getText();
 				String functionName = mmp.getFunctionName(s);
-				renderer.put("renderer", functionName);
+				renderer.getParent().put("renderer", functionName);
 				scripts.append(s);
 			}
 		}

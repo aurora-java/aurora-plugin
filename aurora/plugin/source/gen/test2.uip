@@ -73,6 +73,10 @@
                     <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="2f61728ec" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
                     <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="1dafb1644" renderer_type="NONE_RENDERER"/>
                 </gridcolumn>
+                <gridcolumn width="100" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="2e81d81e" editor="datePicker" height="60" prompt="prompt">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="9da77f5" lovGridHeight="350" lovWidth="500" lovHeight="500"/>
+                    <renderer renderer_function_name="Aurora.formatDate" propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="5e04563a" renderer_type="INNER_FUNCTION"/>
+                </gridcolumn>
             </containmentList>
         </grid>
         <hBox labelWidth="80" width="298" component_type="hBox" class_name="aurora.plugin.source.gen.screen.model.HBox" markid="214e6393" height="43">
