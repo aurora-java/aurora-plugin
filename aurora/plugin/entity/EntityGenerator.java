@@ -1,8 +1,7 @@
 package aurora.plugin.entity;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.sql.Connection;
 import java.util.List;
 
@@ -101,15 +100,15 @@ public class EntityGenerator extends AbstractEntry {
 			throws Exception {
 		File f = new File(bmPath, fileName);
 		f.getParentFile().mkdirs();
-		BufferedWriter bw = null;
+		FileOutputStream fos = null;
 		try {
-			bw = new BufferedWriter(new FileWriter(f));
-			bw.write(data.toXML());
+			fos = new FileOutputStream(f);
+			fos.write(data.toXML().getBytes("UTF-8"));
 		} catch (Exception e) {
 			throw e;
 		} finally {
-			if (bw != null)
-				bw.close();
+			if (fos != null)
+				fos.close();
 		}
 	}
 
