@@ -1,11 +1,18 @@
 package aurora.plugin.source.gen;
 
-import org.mozilla.javascript.Parser;
-import org.mozilla.javascript.ast.AstNode;
-import org.mozilla.javascript.ast.AstRoot;
-import org.mozilla.javascript.ast.FunctionNode;
-import org.mozilla.javascript.ast.NodeVisitor;
-import org.mozilla.javascript.ast.StringLiteral;
+import aurora.javascript.Parser;
+import aurora.javascript.ast.AstNode;
+import aurora.javascript.ast.AstRoot;
+import aurora.javascript.ast.FunctionNode;
+import aurora.javascript.ast.NodeVisitor;
+import aurora.javascript.ast.StringLiteral;
+
+//import org.mozilla.javascript.Parser;
+//import org.mozilla.javascript.ast.AstNode;
+//import org.mozilla.javascript.ast.AstRoot;
+//import org.mozilla.javascript.ast.FunctionNode;
+//import org.mozilla.javascript.ast.NodeVisitor;
+//import org.mozilla.javascript.ast.StringLiteral;
 
 public class JavascriptRhino {
 
