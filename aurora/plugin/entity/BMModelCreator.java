@@ -13,6 +13,7 @@ import aurora.plugin.entity.model.IEntityConst;
 import aurora.plugin.entity.model.ModelUtil;
 import aurora.plugin.entity.model.PkRecord;
 import aurora.plugin.entity.model.Record;
+import aurora.plugin.entity.model.Relation;
 import aurora.plugin.source.gen.screen.model.asm.PageGenerator;
 
 public class BMModelCreator extends AbstractBMModelCreator {
@@ -49,7 +50,7 @@ public class BMModelCreator extends AbstractBMModelCreator {
 		model.setName(entity_name);
 		boolean findFirstTextField = false;
 		for (CompositeMap m : list) {
-			Record r = createRecordFromMap(m);
+			Record r = createRecordFromMap(model,m);
 			model.add(r);
 			if (!findFirstTextField) {
 				if (r.getType().equals(DataType.TEXT.getDisplayType())) {
@@ -73,7 +74,7 @@ public class BMModelCreator extends AbstractBMModelCreator {
 		}
 	}
 
-	private Record createRecordFromMap(CompositeMap map) throws Exception {
+	private Record createRecordFromMap(BMModel model,CompositeMap map) throws Exception {
 		Record r = new Record();
 		// prompt
 		r.setPrompt(map.getString(IEntityConst.COLUMN_PROMPT));
@@ -99,7 +100,14 @@ public class BMModelCreator extends AbstractBMModelCreator {
 				r.put(IEntityConst.COLUMN_QUERY_OP, IEntityConst.OP_EQ);
 				r.setForUpdate(false);
 			} else {
-
+				//create relation
+				Relation rel = new Relation();
+				rel.setName("rel_"+getParsedPattern(pattern, para));
+				rel.setLocalField(r.getPrompt());
+				rel.setSrcField("");
+				rel.setJoinType("LEFT OUTER");
+				rel.setRefPrompts("");
+				model.add(rel);
 			}
 		}
 		r.setName(getParsedPattern(pattern, para));

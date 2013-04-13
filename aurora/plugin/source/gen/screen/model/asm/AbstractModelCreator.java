@@ -1,5 +1,7 @@
 package aurora.plugin.source.gen.screen.model.asm;
 
+import java.util.Arrays;
+
 import uncertain.composite.CompositeMap;
 import aurora.database.service.DatabaseServiceFactory;
 import aurora.plugin.entity.EntityGeneratorConfig;
@@ -7,9 +9,12 @@ import aurora.plugin.source.gen.screen.model.AuroraComponent;
 import aurora.plugin.source.gen.screen.model.Button;
 import aurora.plugin.source.gen.screen.model.CheckBox;
 import aurora.plugin.source.gen.screen.model.Combox;
+import aurora.plugin.source.gen.screen.model.DatePicker;
+import aurora.plugin.source.gen.screen.model.DateTimePicker;
 import aurora.plugin.source.gen.screen.model.Input;
 import aurora.plugin.source.gen.screen.model.LOV;
 import aurora.plugin.source.gen.screen.model.NumberField;
+import aurora.plugin.source.gen.screen.model.Renderer;
 import aurora.plugin.source.gen.screen.model.TextField;
 
 public abstract class AbstractModelCreator {
@@ -52,6 +57,16 @@ public abstract class AbstractModelCreator {
 
 	public abstract void decorateComponent(AuroraComponent com,
 			CompositeMap mainPartMap) throws Exception;
+	
+	protected Renderer getRenderer(String editor) {
+		Renderer r = new Renderer();
+		r.setRendererType(Renderer.INNER_FUNCTION);
+		if (Input.DATE_PICKER.endsWith(editor))
+			r.setFunctionName("Aurora.formatDate");
+		else if (Input.DATETIMEPICKER.equals(editor))
+			r.setFunctionName("Aurora.formatDateTime");
+		return r;
+	}
 
 	public static Input createInput(String type) {
 		Input input = null;
@@ -68,6 +83,10 @@ public abstract class AbstractModelCreator {
 			input = new LOV();
 		} else if ("checkbox".equals(type)) {
 			input = new CheckBox();
+		}else if("datepicker".equals(type)) {
+			input=new DatePicker();
+		}else if("datetimepicker".equals(type)) {
+			input=new DateTimePicker();
 		}
 		return input;
 	}
@@ -108,5 +127,15 @@ public abstract class AbstractModelCreator {
 		para.put("field_id", fieldId);
 		return PageGenerator.queryFirst(svcFactory, context,
 				egConfig.getEntityFieldModel(), para);
+	}
+	
+	public static boolean in(Object obj,Object...list){
+		return Arrays.asList(list).contains(obj);
+	}
+	
+	public static boolean eq(Object o1,Object o2){
+		if(o1==null)
+			return o2==null;
+		return o1.equals(o2);
 	}
 }
