@@ -9,6 +9,7 @@ public class LabelBuilder extends DefaultSourceBuilder {
 		attributeMapping.put("width", "width");
 		attributeMapping.put("bindTarget", "bindTarget");
 		attributeMapping.put("prompt", "prompt");
+		attributeMapping.put("renderer", "renderer");
 		return attributeMapping;
 	}
 }

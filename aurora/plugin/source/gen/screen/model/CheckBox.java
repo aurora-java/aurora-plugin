@@ -25,6 +25,11 @@ public class CheckBox extends Input {
 		setSize(120, 20);
 		this.setComponentType(CHECKBOX);
 		this.setText(TEXT);
+		DatasetField datasetField = getDatasetField();
+		datasetField.setCheckedValue("Y");
+		datasetField.setUncheckedValue("N");
+		datasetField.setDefaultValue("N");
+
 	}
 
 	public String getText() {
@@ -71,12 +76,12 @@ public class CheckBox extends Input {
 //					DataSetFieldUtil.findDataset(getParent()));
 	}
 
-	public void setDatasetField(DatasetField field) {
-		field.setName(getName());
-//		field.setDataset(DataSetFieldUtil.findDataset(getParent()));
-		field.setCheckedValue("Y");
-		field.setUncheckedValue("N");
-		field.setDefaultValue("N");
-		super.setDatasetField(field);
-	}
+//	public void setDatasetField(DatasetField field) {
+//		field.setName(getName());
+////		field.setDataset(DataSetFieldUtil.findDataset(getParent()));
+//		field.setCheckedValue("Y");
+//		field.setUncheckedValue("N");
+//		field.setDefaultValue("N");
+//		super.setDatasetField(field);
+//	}
 }
