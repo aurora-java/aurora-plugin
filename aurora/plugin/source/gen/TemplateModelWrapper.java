@@ -65,9 +65,7 @@ public class TemplateModelWrapper implements TemplateHashModel {
 		if (isInnerKey(key)) {
 			return getInnerValue(key);
 		}
-		if("type".equals(key)){
-			System.out.println();
-		}
+		
 		String compositeValue = getCompositeValue(key, cm);
 		if (compositeValue != null) {
 			return dow.wrap(compositeValue);
@@ -86,7 +84,9 @@ public class TemplateModelWrapper implements TemplateHashModel {
 				}
 			}
 		}
-
+		if("toolbar".equals(key)){
+			return null;
+		}
 		return dow.wrap("");
 	}
 
