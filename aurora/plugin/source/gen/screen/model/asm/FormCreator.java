@@ -5,6 +5,7 @@ import java.util.List;
 import uncertain.composite.CompositeMap;
 import aurora.database.service.DatabaseServiceFactory;
 import aurora.plugin.source.gen.screen.model.AuroraComponent;
+import aurora.plugin.source.gen.screen.model.Combox;
 import aurora.plugin.source.gen.screen.model.Dataset;
 import aurora.plugin.source.gen.screen.model.Form;
 import aurora.plugin.source.gen.screen.model.Input;
@@ -26,17 +27,30 @@ public class FormCreator extends AbstractModelCreator {
 			Dataset ds = form.getDataset();
 			ds.setModel(getEntityModelPath(formMap.get("entity_id")));
 			form.setCol(formMap.getInt("col", form.getCol()));
+			form.setSize(form.getCol() * 240, form.getSize().y);
 			CompositeMap itemsMap = getFormItems(formPart.get("part_id"));
 			if (itemsMap != null) {
 				@SuppressWarnings("unchecked")
 				List<CompositeMap> itemList = itemsMap.getChildsNotNull();
 				for (CompositeMap m : itemList) {
-					String editor = m.getString("editor");
+					String editor = getNormalComponentType(m.getString("editor"));
 					if (isViewPage() || "label".equals(editor)) {
+						if(in(editor,Input.LOV,Input.Combo)) {
+							Combox cb = new Combox();
+							cb.setName(m.getString("name"));
+							cb.setPrompt(m.getString("prompt"));
+							form.addChild(cb);
+							continue;
+						}
 						Label l = new Label();
 						l.setName(m.getString("name"));
 						l.setPrompt(m.getString("prompt"));
 						form.addChild(l);
+						if (Input.DATE_PICKER.equals(editor)) {
+							l.setRenderer("Aurora.formatDate");
+						} else if (Input.DATETIMEPICKER.equals(editor)) {
+							l.setRenderer("Aurora.formatDateTime");
+						}
 					} else {
 						Input input = createInput(editor);
 						if (input != null) {
@@ -51,9 +65,9 @@ public class FormCreator extends AbstractModelCreator {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private String getFormTitle(String entity_name) {
-		return (isViewPage()?"查看":"编辑")+" - "+entity_name;
+		return (isViewPage() ? "查看" : "编辑") + " - " + entity_name;
 	}
 
 	@Override
