@@ -16,9 +16,8 @@ public class Object2CompositeMap implements KEYS {
 		return object2xml.toXML();
 	}
 
-	private class MapHelper { 
+	private class MapHelper {
 
-		
 		CompositeMap map;
 
 		MapHelper(CompositeMap map) {
@@ -143,6 +142,8 @@ public class Object2CompositeMap implements KEYS {
 		}
 
 		public void cdataNode(IPropertyDescriptor pd, Object propertyValue) {
+			if (propertyValue == null || "".equals(propertyValue))
+				return;
 			CompositeMap compositeMap = new CompositeMap(CDATA_NODE);
 			compositeMap.put(PROPERTYE_ID,
 					((DefaultPropertyDescriptor) pd).getStringId());

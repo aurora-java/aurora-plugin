@@ -70,7 +70,8 @@ public class CompositeMap2Object implements KEYS {
 						PROPERTYE_ID, propId);
 				if (child != null) {
 					AuroraComponent value = createInstance(child);
-					setPropertyValue(propId, value);
+					if (value != null)
+						setPropertyValue(propId, value);
 				}
 			}
 		}
@@ -85,7 +86,8 @@ public class CompositeMap2Object implements KEYS {
 				for (Object m : childsNotNull) {
 					if (m instanceof CompositeMap) {
 						AuroraComponent c = createInstance((CompositeMap) m);
-						value.add(c);
+						if (c != null)
+							value.add(c);
 					}
 				}
 			}
@@ -104,7 +106,8 @@ public class CompositeMap2Object implements KEYS {
 				for (Object m : childsNotNull) {
 					if (m instanceof CompositeMap) {
 						AuroraComponent c = createInstance((CompositeMap) m);
-						value.add(c);
+						if (c != null)
+							value.add(c);
 					}
 				}
 			}
@@ -144,7 +147,8 @@ public class CompositeMap2Object implements KEYS {
 				for (Object m : childsNotNull) {
 					if (m instanceof CompositeMap) {
 						AuroraComponent c = xml2Object((CompositeMap) m);
-						value.add(c);
+						if (c != null)
+							value.add(c);
 					}
 				}
 			}
@@ -165,6 +169,7 @@ public class CompositeMap2Object implements KEYS {
 				for (Object m : childsNotNull) {
 					if (m instanceof CompositeMap) {
 						AuroraComponent c = xml2Object((CompositeMap) m);
+						if(c!=null)
 						value.add(c);
 					}
 				}
@@ -186,6 +191,8 @@ public class CompositeMap2Object implements KEYS {
 
 	private AuroraComponent xml2Object(CompositeMap map) {
 		AuroraComponent createInstance = createInstance(map);
+		if (createInstance == null)
+			return null;
 		ComponentHelper helper = new ComponentHelper(createInstance, map);
 		IPropertyDescriptor[] pds = getPropertyDescriptor(createInstance);
 		for (IPropertyDescriptor pd : pds) {

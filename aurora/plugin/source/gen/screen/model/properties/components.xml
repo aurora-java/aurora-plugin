@@ -18,10 +18,9 @@
 		<attribute id="component_type" style="simple,save,inner" />
 		<attribute id="button_click_target_component" style="reference,save,inner" />
 		<attribute id="button_click_actionid" style="simple,save,inner" />
-		<attribute id="button_click_openpath" style="simple,save,inner" />
+		<attribute id="openpath" style="simple,save,inner" />
 		<attribute id="button_click_closewindowid" style="simple,save,inner" />
 		<attribute id="button_click_function" style="save,inner,_cdata" />
-		<attribute id="button_click_openpath" style="simple,save,inner" />
 		<attribute id="button_click_parameters" style="containment,save,inner,list" />
 	</component>
 
@@ -118,7 +117,21 @@
 		<attribute id="height" style="simple,save,_int" />
 		<attribute id="name" style="simple,save" />
 		<attribute id="emptyText" style="simple,save" />
+		<attribute id="options" style="simple,save" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
+	</component>
+	<component type="innerLovService" category="aurora">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="lovservice_options" style="simple,save,inner" />
+		<attribute id="lovservice_for_return" style="simple,save,inner" />
+		<attribute id="lovservice_for_display" style="simple,save,inner" />
+		<attribute id="inner_datset_field_mappings" style="containment,save,inner,list" />
+	</component>
+	<component type="innerDatasetFieldMapping" category="aurora">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="mapping_from" style="simple,save,inner" />
+		<attribute id="mapping_to" style="simple,save,inner" />
+		<attribute id="inner_field_isdisplay" style="simple,save,inner,_boolean" />
 	</component>
 
 	<component type="checkbox" category="aurora">
@@ -157,7 +170,7 @@
 		<attribute id="returnField" style="simple,save" />
 		<attribute id="lovGridHeight" style="simple,save,_int" />
 		<attribute id="lovHeight" style="simple,save,_int" />
-		<attribute id="lovService" style="simple,save" />
+		<attribute id="inner_lov_service" style="containment,save,inner" />
 		<attribute id="lovWidth" style="simple,save,_int" />
 		<attribute id="lovUrl" style="simple,save" />
 		<attribute id="required" style="simple,save,_boolean" />
@@ -200,7 +213,7 @@
 		<attribute id="editor" style="simple,save" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 		<attribute id="renderer" style="containment,save" />
-		<attribute id="footrenderer" style="containment,save" />
+		<attribute id="footerRenderer" style="containment,save" />
 		<attribute id="component_children" style="containment,save,inner,list" />
 	</component>
 
@@ -214,16 +227,37 @@
 	<component type="footrenderer" category="inner">
 		<attribute id="component_type" style="simple,save,inner" />
 		<attribute id="foot_renderer_type" style="simple,save,inner" />
-		<attribute id="foot_renderer_funcrion" style="simple,save,inner" />
+		<attribute id="foot_renderer_funcrion" style="save,inner,_cdata" />
 	</component>
 
 	<component type="renderer" category="inner">
 		<attribute id="component_type" style="simple,save,inner" />
-		<attribute id="renderer_open_path" style="simple,save,inner" />
+		<attribute id="openpath" style="simple,save,inner" />
 		<attribute id="renderer_labeltext" style="simple,save,inner" />
 		<attribute id="renderer_function_name" style="simple,save,inner" />
-		<attribute id="renderer_function" style="simple,save,inner" />
+		<attribute id="renderer_function" style="save,inner,_cdata" />
 		<attribute id="renderer_type" style="simple,save,inner" />
 		<attribute id="renderer_parameters" style="containment,save,inner,list" />
+	</component>
+	<component type="queryForm" category="aurora">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="width" style="simple,save,_int" />
+		<attribute id="height" style="simple,save,_int" />
+		<attribute id="title" style="simple,save" />
+		<attribute id="container_section_type" style="simple,save,inner" />
+		<attribute id="column" style="simple,save,_int" />
+		<attribute id="i_dataset_delegate" style="containment,save,inner" />
+		<attribute id="queryFormBody" style="containment,save,inner" />
+		<attribute id="defaultQueryHint" style="simple,save" />
+		<attribute id="defaultQueryField" style="simple,save" />
+		<attribute id="resultTargetContainer" style="reference,save,inner" />
+	</component>
+	<component type="formBody" category="aurora">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="column" style="simple,save,_int" />
+		<attribute id="component_children" style="containment,save,inner,list" />
+	</component>
+	<component type="formToolbar" category="aurora">
+		<attribute id="component_type" style="simple,save,inner" />
 	</component>
 </components>
