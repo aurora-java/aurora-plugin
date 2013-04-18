@@ -147,5 +147,4 @@ public class ButtonClicker extends AuroraComponent implements
 	public String getDescripition() {
 		return getActionID();
 	}
-
 }

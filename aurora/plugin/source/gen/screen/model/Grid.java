@@ -215,8 +215,18 @@ public class Grid extends GridColumn implements DatasetBinder, IDatasetDelegate 
 	public void setPropertyValue(String propName, Object val) {
 		if (ComponentProperties.navBarType.equals(propName))
 			setNavbarType("" + val);
-		if (ComponentInnerProperties.TOOLBAR.equals(propName) && val instanceof Toolbar) {
+		if (ComponentInnerProperties.TOOLBAR.equals(propName)
+				&& val instanceof Toolbar) {
 			this.setToolbar((Toolbar) val);
+			// this.fireStructureChange(ComponentInnerProperties.CHILDREN, val);
+		}
+		if (ComponentInnerProperties.CHILDREN.equals(propName)
+				&& val instanceof List) {
+			for (AuroraComponent c : (List<AuroraComponent>) val) {
+				if (c instanceof GridColumn)
+					this.addCol((GridColumn) c);
+			}
+			return;
 		}
 		// getDataset().setPropertyValue(propName, val);
 		// if (ComponentProperties.selectionModel.equals(propName)) {

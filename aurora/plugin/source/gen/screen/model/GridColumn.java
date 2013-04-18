@@ -20,7 +20,7 @@ public class GridColumn extends RowCol implements IDatasetFieldDelegate {
 			Input.DATETIMEPICKER };
 	public static final String EDITOR = "editor";
 	public static final String RENDERER = "renderer";
-	public static final String FOOTRENDERER = "footRenderer";
+//	public static final String FOOTRENDERER = "footRenderer";
 
 	// private List<GridColumn> cols = new ArrayList<GridColumn>();
 	// default row height 25

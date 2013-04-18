@@ -4,7 +4,6 @@ import java.beans.PropertyChangeListener;
 
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
 import aurora.plugin.source.gen.screen.model.properties.ComponentProperties;
-import aurora.plugin.source.gen.screen.model.properties.IPropertyDescriptor;
 
 
 
@@ -22,7 +21,7 @@ abstract public class Input extends AuroraComponent implements IDatasetFieldDele
 	public static final String CASE_LOWER = "lower"; //$NON-NLS-1$
 	public static final String CASE_UPPER = "upper"; //$NON-NLS-1$
 	public static final String CASE_ANY = ""; //$NON-NLS-1$
-	private static final String[] CASE_TYPES = { CASE_ANY, CASE_UPPER,
+	public static final String[] CASE_TYPES = { CASE_ANY, CASE_UPPER,
 			CASE_LOWER };
 	private static final String[] CAL_ENABLES = { "pre", "next", "both", "none" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	public static final String[] INPUT_TYPES = { TEXT, NUMBER, Combo, LOV, DATE_PICKER,

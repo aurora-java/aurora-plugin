@@ -1,5 +1,6 @@
 package aurora.plugin.source.gen.screen.model;
 
+import aurora.plugin.source.gen.JavascriptRhino;
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
 
 
@@ -42,11 +43,11 @@ public class FootRenderer extends AuroraComponent implements IDialogEditableObje
 	}
 
 	public String getDescripition() {
-//		if (!DISABLE.equals(type)) {
-//			JavascriptRhino js = new JavascriptRhino(function);
-//			return js.getFirstFunctionName();
-//		}
-		return "Descripition";
+		if (!DISABLE.equals(this.getRendererType())) {
+			JavascriptRhino js = new JavascriptRhino(this.getFunction());
+			return js.getFirstFunctionName();
+		}
+		return "footRenderer";
 	}
 
 	public String getFunction() {

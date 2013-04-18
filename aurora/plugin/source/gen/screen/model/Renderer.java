@@ -3,6 +3,7 @@ package aurora.plugin.source.gen.screen.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import aurora.plugin.source.gen.JavascriptRhino;
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
 
 
@@ -57,17 +58,17 @@ public class Renderer extends AuroraComponent implements IDialogEditableObject {
 		return column;
 	}
 
-//	public String getDescripition() {
-//		if (PAGE_REDIRECT.equals(rendererType))
-//			return labelText;
-//		else if (INNER_FUNCTION.equals(rendererType))
-//			return functionName;
-//		else if (USER_FUNCTION.equals(rendererType)) {
-//			JavascriptRhino js = new JavascriptRhino(function);
-//			return "[ " + js.getFirstFunctionName() + " ]"; //$NON-NLS-1$ //$NON-NLS-2$
-//		}
-//		return ""; //$NON-NLS-1$
-//	}
+	public String getDescripition() {
+		if (PAGE_REDIRECT.equals(this.getRendererType()))
+			return this.getLabelText();
+		else if (INNER_FUNCTION.equals(this.getRendererType()))
+			return this.getFunctionName();
+		else if (USER_FUNCTION.equals(this.getRendererType())) {
+			JavascriptRhino js = new JavascriptRhino(this.getFunction());
+			return "[ " + js.getFirstFunctionName() + " ]"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return "function"; //$NON-NLS-1$
+	}
 
 	public Object getContextInfo() {
 		return column;
@@ -175,8 +176,4 @@ public class Renderer extends AuroraComponent implements IDialogEditableObject {
 		super.setPropertyValue(propId, val);
 	}
 
-	public String getDescripition() {
-		//TODO
-		return "description";
-	}
 }

@@ -156,6 +156,10 @@ public class Button extends AuroraComponent {
 		this.setPropertyValue(ComponentProperties.text, text);
 	}
 
+	public String getText() {
+		return this.getStringPropertyValue(ComponentProperties.text);
+	}
+
 	public void setTitle(String title) {
 		// if (eq(this.title, title))
 		// return;
@@ -217,6 +221,7 @@ public class Button extends AuroraComponent {
 			return;
 		}
 		if (ComponentProperties.type.equals(propId)) {
+			super.setPropertyValue(propId, val);
 			if (isStdButton()) {
 				super.setSize(48, 20);
 			}
