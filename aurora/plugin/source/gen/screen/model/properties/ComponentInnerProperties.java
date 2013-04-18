@@ -57,6 +57,7 @@ public interface ComponentInnerProperties {
 	String SIZE = "size";
 	String TAB_SCREEN_REF = "tab_screen_ref";
 	String TOOLBAR = "toolbar";
+	public static final String INNER_LOV_SERVICE = "inner_lov_service";
 	
 	
 	
