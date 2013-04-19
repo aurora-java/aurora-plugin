@@ -2,32 +2,24 @@ package aurora.plugin.source.gen;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.xml.sax.SAXException;
-
-import aurora.bm.BusinessModel;
-import aurora.bm.IModelFactory;
-import aurora.bm.ModelFactory;
-
 import uncertain.composite.CompositeMap;
 import uncertain.composite.IterationHandle;
-import uncertain.core.UncertainEngine;
 import uncertain.ocm.IObjectRegistry;
+import aurora.bm.BusinessModel;
+import aurora.bm.IModelFactory;
 
 public class ModelMapParser {
 	private CompositeMap modelMap;
 	private IObjectRegistry registry;
 
-	// public ModelMapParser(CompositeMap uipMap) {
-	// this.setUipMap(uipMap);
-	// // String path = uipMap.getString("file_path", "");
-	// // file = ResourcesPlugin.getWorkspace().getRoot().getFile(new
-	// // Path(path));
-	// }
-
+	protected ModelMapParser(CompositeMap uipMap) {
+		this.setUipMap(uipMap);
+	}
+	
+	
 	public ModelMapParser(IObjectRegistry registry, CompositeMap uipMap) {
 		this.setUipMap(uipMap);
 		this.registry = registry;
@@ -112,7 +104,6 @@ public class ModelMapParser {
 				datasets.add(r);
 			}
 		}
-		// List<CompositeMap> combobox = getComponents(uipMap, "combobox");
 		return datasets;
 	}
 
@@ -165,100 +156,9 @@ public class ModelMapParser {
 		return hasDSFieldChild(parent, _p);
 	}
 
-	public List<CompositeMap> getLovMaps(CompositeMap fieldMap) {
-		if (true)
-			return Collections.EMPTY_LIST;
-		// DataSetFieldUtil dataSetFieldUtil = new DataSetFieldUtil(
-		// file.getProject(), fieldMap.getString("field_name", ""),
-		// fieldMap.getString("options", ""));
-		// CompositeMap bmMap = dataSetFieldUtil.getBmMap();
-		// if (bmMap == null)
-		// return null;
-		// MapFinder mf = new MapFinder();
-		// CompositeMap relation = mf.lookupRelation(
-		// fieldMap.getString("field_name", ""), bmMap);
-		// if (relation != null) {
-		// String rName = relation.getString("name", "");
-		// List<CompositeMap> lovFields = mf.lookupLovFields(rName, bmMap);
-		// return lovFields;
-		// }
-		return null;
-	}
 
-	public void bindMapping(CompositeMap fieldMap, List<CompositeMap> lovMaps) {
-		if (true)
-			return;
-		//
-		// DataSetFieldUtil dataSetFieldUtil = new DataSetFieldUtil(
-		// file.getProject(), fieldMap.getString("field_name", ""),
-		// fieldMap.getString("options", ""));
-		// CompositeMap bmMap = dataSetFieldUtil.getBmMap();
-		// MapFinder mf = new MapFinder();
-		// CompositeMap relation = mf.lookupRelation(
-		// fieldMap.getString("field_name", ""), bmMap);
-		// CompositeMap refMap = relation.getChild("reference");
-		// CompositeMap mappingMap = AuroraComponent2CompositMap
-		// .createChild("mapping");
-		//
-		// String foreignField = Util.getCompositeValue("foreignField", refMap);
-		// String localField = Util.getCompositeValue("localField", refMap);
-		// if (localField != null && foreignField != null) {
-		// CompositeMap idMap = AuroraComponent2CompositMap.createChild("map");
-		// idMap.put("from", foreignField);
-		// idMap.put("to", localField);
-		// mappingMap.addChild(idMap);
-		// }
-		// CompositeMap optionsMap = dataSetFieldUtil.getOptionsMap();
-		// BMCompositeMap opb = null;
-		// if (optionsMap != null)
-		// opb = new BMCompositeMap(optionsMap);
-		//
-		// for (CompositeMap lovMap : lovMaps) {
-		// String source = Util.getCompositeValue("sourceField", lovMap);
-		// String name = Util.getCompositeValue("name", lovMap);
-		//
-		// if (opb == null || opb.getFieldByName(source) == null)
-		// continue;
-		// if (source != null && name != null) {
-		// CompositeMap m = AuroraComponent2CompositMap.createChild("map");
-		// m.put("from", source);
-		// m.put("to", name);
-		// mappingMap.addChild(m);
-		// }
-		// }
-		// fieldMap.addChild(mappingMap);
-	}
-
-	// public String getComboDisplayField(CompositeMap fieldMap) {
-	// if (true)
-	// return "getComboDisplayField";
-	// String optionModel = fieldMap.getString("options", "");
-	// CompositeMap modelMap = loadModelMap(optionModel);
-	// // defaultdisplayfield
-	// // <bm:primary-key>
-	// // <bm:pk-field name="job3310_pk"/>
-	// // </bm:primary-key>
-	// return modelMap.getString("defaultDisplayField", "");
-	//
-	// // DataSetFieldUtil dataSetFieldUtil = new DataSetFieldUtil(
-	// // file.getProject(), fieldMap.getString("field_name", ""),
-	// // fieldMap.getString("options", ""));
-	// // String value = "";
-	// // CompositeMap optionsMap = dataSetFieldUtil.getOptionsMap();
-	// // if (optionsMap != null) {
-	// // value = Util.getValueIgnoreCase(optionsMap, "defaultDisplayField");
-	// // } else if (dataSetFieldUtil.getLookupCode() != null) {
-	// // value = "code_value_name";
-	// // }
-	// // return value;
-	// }
 
 	public CompositeMap loadModelMap(String optionModel) {
-		// CompositeMap config = mCompositeLoader.loadFromClassPath(name, ext);
-		// File configFolder = getConfigFolder();
-//		UncertainEngine engine = (UncertainEngine) registry
-//				.getInstanceOfType(UncertainEngine.class);
-		// ModelFactory mf = new ModelFactory();
 		IModelFactory instanceOfType = (IModelFactory) registry
 				.getInstanceOfType(IModelFactory.class);
 		try {
@@ -267,63 +167,8 @@ public class ModelMapParser {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-//		try {
-//			CompositeMap loadFromClassPath = engine.getCompositeLoader()
-//					.loadFromClassPath(optionModel, "bm");
-//			return BusinessModel.getInstance(loadFromClassPath)
-//					.getObjectContext();
-//			// return loadFromClassPath;
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			throw new RuntimeException(e);
-//		} catch (SAXException e) {
-//			e.printStackTrace();
-//			throw new RuntimeException(e);
-//		}
-		//
-
-		// CompositeLoader loader = new CompositeLoader();
-		// try {
-		// return loader
-		// .loadByFullFilePath("/Users/shiliyan/Desktop/work/aurora/workspace/aurora_runtime/test_aurora/webRoot/WEB-INF/classes/aaa.bm");
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// } catch (SAXException e) {
-		// e.printStackTrace();
-		// }
-		// return null;
 	}
 
-	// private File getConfigFolder() {
-	// return new File(
-	// "/Users/shiliyan/Desktop/work/aurora/workspace/aurora_runtime/hap/WebContent/WEB-INF");
-	// }
-
-	// public String getComboValueField(CompositeMap fieldMap) {
-	// if (true)
-	// return "getComboValueField";
-	// String optionModel = fieldMap.getString("options", "");
-	// CompositeMap modelMap = loadModelMap(optionModel);
-	// // defaultdisplayfield
-	// // <bm:primary-key>
-	// // <bm:pk-field name="job3310_pk"/>
-	// // </bm:primary-key>
-	// CompositeMap child = modelMap.getChild("primary-key");
-	// CompositeMap child2 = child.getChild("pk-field");
-	// String r = child2.getString("name", "");
-	// return r;
-	// // DataSetFieldUtil dataSetFieldUtil = new DataSetFieldUtil(
-	// // file.getProject(), fieldMap.getString("field_name", ""),
-	// // fieldMap.getString("options", ""));
-	// // String value = "";
-	// // CompositeMap optionsMap = dataSetFieldUtil.getOptionsMap();
-	// // if (optionsMap != null) {
-	// // value = dataSetFieldUtil.getPK(optionsMap);
-	// // } else if (dataSetFieldUtil.getLookupCode() != null) {
-	// // value = "code_value";
-	// // }
-	// // return value;
-	// }
 
 	public String getButtonOpenParameters(CompositeMap buttonMap) {
 		// List<Parameter> parameters = link.getParameters();

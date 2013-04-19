@@ -87,6 +87,9 @@ public class TemplateModelWrapper implements TemplateHashModel {
 		if("toolbar".equals(key)){
 			return null;
 		}
+		if("mappings".equals(key)){
+			return null;
+		}
 		return dow.wrap("");
 	}
 
@@ -140,7 +143,7 @@ public class TemplateModelWrapper implements TemplateHashModel {
 		if (IS_BOX.equalsIgnoreCase(key)) {
 			return dow.wrap(false);
 		}
-		return dow.wrap("null");
+		return null;
 	}
 
 	private boolean isInnerKey(String key) {

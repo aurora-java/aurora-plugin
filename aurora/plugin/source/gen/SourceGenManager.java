@@ -23,16 +23,11 @@ public class SourceGenManager {
 	private Map<String, String> builders;
 	private ISourceTemplateProvider sourceTemplateProvider;
 
-	private String base_path = "/Users/shiliyan/Desktop/work/aurora/workspace/aurora/aurora-plugin/aurora_plugin_package/aurora.plugin.source.gen";
-	private boolean debug;
-
 	public SourceGenManager() {
-		debug = true;
 	}
 
 	public SourceGenManager(IObjectRegistry registry) {
 		this.registry = registry;
-		// registry.registerInstance(this);
 	}
 
 	public void buildTestScreen() {
@@ -40,15 +35,14 @@ public class SourceGenManager {
 			CompositeMap buildScreen = buildScreen(Test.loadCompositeMap());
 			System.out.println(buildScreen.toXML());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public CompositeMap buildScreen(CompositeMap modelMap) throws IOException, SAXException {
+	public CompositeMap buildScreen(CompositeMap modelMap) throws IOException,
+			SAXException {
 		// load package
 		loadBuilders();
 		BuilderSession session = new BuilderSession(this);
@@ -57,21 +51,9 @@ public class SourceGenManager {
 
 		String buildComponent = buildComponent(session, screenModel);
 		CompositeLoader parser = new CompositeLoader();
-//		try {
-			CompositeMap loadFromString = parser.loadFromString(buildComponent, "utf-8");
-			return loadFromString;
-//			buildComponent = loadFromString
-//					.toXML();
-//			System.out.println(buildComponent);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		} catch (SAXException e) {
-//			e.printStackTrace();
-//		}
-
-		// template.bindtemplate
-		// tmplConfig init
-		// tmplConfig buildScreen
+		CompositeMap loadFromString = parser.loadFromString(buildComponent,
+				"utf-8");
+		return loadFromString;
 	}
 
 	public String buildComponent(BuilderSession session, CompositeMap modelMap) {
@@ -129,24 +111,18 @@ public class SourceGenManager {
 		return newInstance;
 	}
 
-	private void loadBuilders() {
+	protected void loadBuilders() {
 		if (getBuilders() != null) {
 			return;
 		}
 		setBuilders(new HashMap<String, String>());
 		File component_file;
-		if (debug) {
-			component_file = new File(
-					"/Users/shiliyan/Desktop/work/aurora/workspace/aurora_runtime/hap/WebContent/WEB-INF/aurora.plugin.source.gen/config/components.xml");
-		} else {
-			// UncertainEngine
-			UncertainEngine engine = (UncertainEngine) registry
-					.getInstanceOfType(UncertainEngine.class);
-			File configDirectory = engine.getConfigDirectory();
-			File f = new File(configDirectory, "aurora.plugin.source.gen");
-			File config = new File(f,"config");
-			component_file = new File(config, "components.xml");
-		}
+		UncertainEngine engine = (UncertainEngine) registry
+				.getInstanceOfType(UncertainEngine.class);
+		File configDirectory = engine.getConfigDirectory();
+		File f = new File(configDirectory, "aurora.plugin.source.gen");
+		File config = new File(f, "config");
+		component_file = new File(config, "components.xml");
 		CompositeLoader loader = getCompositeLoader();
 		try {
 			CompositeMap components = loader.loadByFullFilePath(component_file
@@ -170,8 +146,6 @@ public class SourceGenManager {
 	}
 
 	private CompositeLoader getCompositeLoader() {
-		if (debug)
-			return new CompositeLoader();
 		return getPackageManager().getCompositeLoader();
 	}
 
@@ -218,7 +192,7 @@ public class SourceGenManager {
 	}
 
 	public ModelMapParser createModelMapParser(CompositeMap model) {
-		ModelMapParser mmp =new ModelMapParser(registry,model);
+		ModelMapParser mmp = new ModelMapParser(registry, model);
 		return mmp;
 	}
 

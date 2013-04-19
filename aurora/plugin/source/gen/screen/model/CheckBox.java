@@ -16,7 +16,6 @@ public class CheckBox extends Input {
 		datasetField.setCheckedValue("Y");
 		datasetField.setUncheckedValue("N");
 		datasetField.setDefaultValue("N");
-
 	}
 
 	public String getText() {

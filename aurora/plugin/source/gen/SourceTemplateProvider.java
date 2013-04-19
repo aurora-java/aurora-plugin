@@ -12,8 +12,6 @@ import java.util.Map;
 import uncertain.composite.CompositeMap;
 import uncertain.core.UncertainEngine;
 import uncertain.ocm.IObjectRegistry;
-import uncertain.pkg.IPackageManager;
-import uncertain.pkg.PackageManager;
 import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.Template;
@@ -28,17 +26,12 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 	private File theme;
 	private Template defaultTemplate;
 	private SourceGenManager sourceGenManager;
-	private boolean debug;
 
 	public SourceTemplateProvider() {
-		debug = true;
 	}
 
 	public SourceTemplateProvider(IObjectRegistry registry) {
 		this.registry = registry;
-//		setSourceGenManager((SourceGenManager) registry
-//				.getInstanceOfType(SourceGenManager.class));
-//		registry.registerInstance(this);
 	}
 
 	public String getTemplate() {
@@ -53,10 +46,7 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 		freemarkerConfiguration = new Configuration();
 		freemarkerConfiguration.setDefaultEncoding(getDefaultEncoding());
 		freemarkerConfiguration.setOutputEncoding(getDefaultEncoding());
-		// freemarkerConfiguration.setNumberFormat("#");
 		freemarkerConfiguration.setObjectWrapper(ObjectWrapper.BEANS_WRAPPER);
-		// freemarkerConfiguration.setDirectoryForTemplateLoading(null);
-
 	}
 
 	private String getDefaultEncoding() {
@@ -108,28 +98,18 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 		return null;
 	}
 
-	private File getTemplateTheme() {
-		if (debug) {
-			return new File(
-					"/Users/shiliyan/Desktop/work/aurora/workspace/aurora_runtime/hap/WebContent/WEB-INF/aurora.plugin.source.gen/template/workflow");
-		}
+	protected File getTemplateTheme() {
 		if (theme != null)
 			return theme;
 		UncertainEngine engine = (UncertainEngine) registry
 				.getInstanceOfType(UncertainEngine.class);
 		File configDirectory = engine.getConfigDirectory();
 		File f = new File(configDirectory, "aurora.plugin.source.gen");
-		// f.exists() TODO
 
 		File tFolder = new File(f,
 				"template");
 		theme = new File(tFolder, this.getTemplate());
 		return theme;
-	}
-
-	private PackageManager getPackageManager() {
-		return (PackageManager) registry
-				.getInstanceOfType(IPackageManager.class);
 	}
 
 	public Map<String, String> defineConfig(BuilderSession session) {
@@ -201,13 +181,5 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 
 	public void setSourceGenManager(SourceGenManager sourceGenManager) {
 		this.sourceGenManager = sourceGenManager;
-	}
-
-	public boolean isDebug() {
-		return debug;
-	}
-
-	public void setDebug(boolean debug) {
-		this.debug = debug;
 	}
 }

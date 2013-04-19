@@ -101,14 +101,24 @@ public class ViewBuilder extends DefaultSourceBuilder {
 		String[] models = mmp.findComboFieldOption(field);
 		field.put("displayField", mmp.getComboDisplayField(models, field));
 		field.put("valueField", mmp.getComboValueField(models, field));
-		field.put("lovService", models[0]);
+		CompositeMap lovservice =	getLovServiceMap(session,field);
+		String lovservice_options = lovservice.getString("lovservice_options", "");
+		field.put("lovService","".equals(lovservice_options)? models[0]:lovservice_options);
 	}
 
+	private CompositeMap getLovServiceMap(BuilderSession session, CompositeMap field){
+		CompositeMap innerLovService = field.getChildByAttrib("component_type", "innerLovService");
+		return innerLovService;
+	}
+	
+	
 	public void genComboDSField(BuilderSession session, CompositeMap field) {
 		ModelMapParser mmp = getModelMapParser(session);
 		// String model = field.getString("options", "");
 		String[] models = mmp.findComboFieldOption(field);
-		String model = models[0];
+		CompositeMap lovservice =	getLovServiceMap(session,field);
+		String lovservice_options = lovservice.getString("lovservice_options", "");
+		String model = "".equals(lovservice_options)? models[0]:lovservice_options;
 		String lookupCode = models[1];
 		// if ("".equals(model)) {
 		// lookupCode = field.getString("lookupCode", "");
