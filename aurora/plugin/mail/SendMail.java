@@ -19,37 +19,90 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
-public class SendMail {
+import uncertain.composite.CompositeMap;
+import uncertain.composite.TextParser;
+import uncertain.exception.BuiltinExceptionFactory;
+import uncertain.logging.ILogger;
+import uncertain.logging.LoggingContext;
+import uncertain.ocm.IConfigurable;
+import uncertain.ocm.IObjectRegistry;
+import uncertain.proc.AbstractEntry;
+import uncertain.proc.ProcedureRunner;
+import aurora.database.service.SqlServiceContext;
 
-	private String ttitle;
-	private String tcontent;
+public class SendMail extends AbstractEntry implements IConfigurable {
+
+	private IObjectRegistry registry;
+	private String title;
+	private String content;
 	private String smtpServer;
-	private String tto;
-	private String cto;
-	private String tfrom;
 	private String password;
 	private String userName;
+	private String to;
+	private String cc;
+	private String from;
 	private String port;
-	private Attachment[] attachments;
-	private boolean auth = false;
+	private Boolean auth = null;
 
-	public void check() {
-		if (smtpServer == null || "".equals(smtpServer)) {
-			throw new SendMailException("收件人地址不能为空");
-		} else if (tfrom == null || "".equals(tfrom)) {
-			throw new SendMailException("发件人不能为空不能为空");
-		} else if (password == null || "".equals(password)) {
-			throw new SendMailException("服务器密码不能为空");
-		} else if (tcontent == null || "".equals(tcontent)) {
-			throw new SendMailException("邮件内容不能为空");
-		} else if (tto == null || "".equals(tto)) {
-			throw new SendMailException("收件人地址不能为空");
+	private Attachment[] attachments;
+
+	public SendMail(IObjectRegistry registry) {
+		this.registry = registry;
+	}
+
+	@Override
+	public void run(ProcedureRunner runner) throws Exception {
+		IMailServerConfig mailConfig = (IMailServerConfig) registry.getInstanceOfType(IMailServerConfig.class);
+		if (mailConfig != null) {
+			smtpServer = smtpServer != null ? smtpServer : mailConfig.getSmtpServer();
+			userName = userName != null ? userName : mailConfig.getUserName();
+			password = password != null ? password : mailConfig.getPassword();
+			from = from != null ? from : mailConfig.getFrom();
+			port = port != null ? port : mailConfig.getPort();
+			auth = auth != null ? auth : mailConfig.getAuth();
 		}
+		if (port == null)
+			port = "25";
+		if (auth == null)
+			auth = false;
+		ILogger logger = LoggingContext.getLogger(runner.getContext(), this.getClass().getCanonicalName());
+		logger.config("Accept to E-mail message, began sendind mail operation");
+		CompositeMap map = runner.getContext();
+		SqlServiceContext svcContext = SqlServiceContext.createSqlServiceContext(map);
+		CompositeMap current_param = svcContext.getCurrentParameter();
+
+		password = TextParser.parse(password, current_param);
+		smtpServer = TextParser.parse(smtpServer, current_param);
+		content = TextParser.parse(content, current_param);
+		from = TextParser.parse(from, current_param);
+		title = TextParser.parse(title, current_param);
+		to = TextParser.parse(to, current_param);
+		port = TextParser.parse(port, current_param);
+		userName = TextParser.parse(userName, current_param);
+		cc = TextParser.parse(cc, current_param);
+
+		if (smtpServer == null || "".equals(smtpServer)) {
+			throw BuiltinExceptionFactory.createAttributeMissing(this, smtpServer);
+		}
+		if (from == null || "".equals(from)) {
+			throw BuiltinExceptionFactory.createAttributeMissing(this, from);
+		}
+		if (password == null || "".equals(password)) {
+			throw BuiltinExceptionFactory.createAttributeMissing(this, password);
+		}
+		if (to == null || "".equals(to)) {
+			throw BuiltinExceptionFactory.createAttributeMissing(this, to);
+		}
+		if (content == null || "".equals(content)) {
+			throw BuiltinExceptionFactory.createAttributeMissing(this, content);
+		}
+
+		parseAttachParameters(runner.getContext());
+		sendMail();
+		logger.config("Mail send successfully!");
 	}
 
 	public void sendMail() throws Exception {
-		// JavaMail需要Properties来创建一个session对象。它将寻找字符串"mail.smtp.host"，属性值就是发送邮件的主机.
-		// Properties对象获取诸如邮件服务器、用户名、密码等信息，以及其他可在整个应用程序中 共享的信息。
 
 		Properties props = new Properties();
 		props.put("mail.smtp.host", smtpServer);// 存储发送邮件服务器的信息
@@ -57,130 +110,103 @@ public class SendMail {
 		props.put("mail.smtp.port", port);
 
 		Session s = null;
-		if(auth){ //服务器需要身份认证   
-			props.put("mail.smtp.auth","true");
-			SmtpAuth smtpAuth=new SmtpAuth(userName,password);  
-            s=Session.getDefaultInstance(props, smtpAuth);    
-        }else{   
-            props.put("mail.smtp.auth","false");   
-            s=Session.getDefaultInstance(props, null);   
-        }   
-		
-		// s.setDebug(true);// 设置调试标志,要查看经过邮件服务器邮件命令，可以用该方法
-		// Message类表示单个邮件消息，它的属性包括类型，地址信息和所定义的目录结构。
-
-		Message message = new MimeMessage(s);// 由邮件会话新建一个消息对象
-		Address from = new InternetAddress(tfrom);// 发件人的邮件地址
-		message.setFrom(from);// 设置发件人
-
-		// Address to = new InternetAddress(tto);// 收件人的邮件地址
-		message.addRecipients(Message.RecipientType.TO, InternetAddress
-				.parse(tto));// 设置收件人,并设置其接收类型为TO,还有3种预定义类型如下：
-
-		if (cto != null && !"".equals(cto)) {
-			message.setRecipients(Message.RecipientType.CC, InternetAddress
-					.parse(cto));// 设置抄送
+		if (auth) { // 服务器需要身份认证
+			props.put("mail.smtp.auth", "true");
+			SmtpAuth smtpAuth = new SmtpAuth(userName, password);
+			s = Session.getDefaultInstance(props, smtpAuth);
+		} else {
+			props.put("mail.smtp.auth", "false");
+			s = Session.getDefaultInstance(props, null);
 		}
 
-		message.setSubject(ttitle);// 设置主题
+		Message message = new MimeMessage(s);// 由邮件会话新建一个消息对象
+		Address fromAddress = new InternetAddress(from);// 发件人的邮件地址
+		message.setFrom(fromAddress);// 设置发件人
+
+		message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(to));// 设置收件人,并设置其接收类型为TO,还有3种预定义类型如下：
+
+		if (cc != null && !"".equals(cc)) {
+			message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(cc));// 设置抄送
+		}
+		message.setSubject(title);// 设置主题
 		message.setSentDate(new Date());// 设置发信时间
-		/*
-		 * try { message.setDataHandler(new DataHandler(new String(message
-		 * .getBytes("utf-8"), "utf-8"), "text/html;charset=utf-8")); } catch
-		 * (UnsupportedEncodingException e) { e.printStackTrace(); }
-		 */
-		// message.setContent(tcontent, "text/html;charset=utf-8");
 
 		Multipart mp = new MimeMultipart();
 		MimeBodyPart mbp = new MimeBodyPart();
-		mbp.setContent(tcontent, "text/html;charset=utf-8");
+		mbp.setContent(content, "text/html;charset=utf-8");
 		mp.addBodyPart(mbp);
 		addAttachment(mp);
 		message.setContent(mp);
 		Transport.send(message, message.getAllRecipients());
-		
-//		message.saveChanges();// 存储邮件信息
-//		
-//		// Transport 是用来发送信息的，
-//		// 用于邮件的收发打操作。
-//		Transport transport = null;
-//		try {
-//			transport = s.getTransport("smtp");
-//			transport.connect(smtpServer, userName, password);// 以smtp方式登录邮箱
-//			transport.sendMessage(message, message.getAllRecipients());// 发送邮件,其中第二个参数是所有已设好的收件人地址
-//		} finally {
-//			if (transport != null && transport.isConnected()) {
-//				transport.close();
-//			}
-//		}
-	}
-	class SmtpAuth extends Authenticator {    
-	    private String username,password;    
-	   
-	    public SmtpAuth(String username,String password){    
-	        this.username = username;     
-	        this.password = password;     
-	    }    
-	    protected javax.mail.PasswordAuthentication getPasswordAuthentication() {    
-	        return new javax.mail.PasswordAuthentication(username,password);    
-	    }    
-	} 
-    protected void addAttachment(Multipart mp) throws MessagingException, UnsupportedEncodingException{
-    	if(attachments != null){
-    		MimeBodyPart mbp;
-    		FileDataSource fds;
-    		String fileName;
-    		for(int i=0;i<attachments.length;i++){
-    			 mbp=new MimeBodyPart();  
-    			 fileName=attachments[i].getPath(); //选择出每一个附件名   
-    			 fds =new FileDataSource(fileName); //得到数据源   
-                 mbp.setDataHandler(new DataHandler(fds)); //得到附件本身并至入BodyPart   
-                 //MimeUtility.encodeText(filename)
-                 String encodeFileName = MimeUtility.encodeText(attachments[i].getName()) ;
-                 mbp.setFileName(encodeFileName); //得到文件名同样至入BodyPart  
-                 mp.addBodyPart(mbp);   
-    		}
-        }    
-    }
 
-	public String getTtitle() {
-		return ttitle;
 	}
 
-	public void setTtitle(String ttitle) {
-		this.ttitle = ttitle;
+	class SmtpAuth extends Authenticator {
+		private String username, password;
+
+		public SmtpAuth(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
+			return new javax.mail.PasswordAuthentication(username, password);
+		}
 	}
 
-	public String getTcontent() {
-		return tcontent;
+	protected void addAttachment(Multipart mp) throws MessagingException, UnsupportedEncodingException {
+		if (attachments != null) {
+			MimeBodyPart mbp;
+			FileDataSource fds;
+			String fileName;
+			for (int i = 0; i < attachments.length; i++) {
+				mbp = new MimeBodyPart();
+				fileName = attachments[i].getPath(); // 选择出每一个附件名
+				fds = new FileDataSource(fileName); // 得到数据源
+				mbp.setDataHandler(new DataHandler(fds)); // 得到附件本身并至入BodyPart
+				// MimeUtility.encodeText(filename)
+				String encodeFileName = MimeUtility.encodeText(attachments[i].getName());
+				mbp.setFileName(encodeFileName); // 得到文件名同样至入BodyPart
+				mp.addBodyPart(mbp);
+			}
+		}
 	}
 
-	public void setTcontent(String tcontent) {
-		this.tcontent = tcontent;
+	protected void parseAttachParameters(CompositeMap context) throws MessagingException {
+		if (attachments != null) {
+			for (int i = 0; i < attachments.length; i++) {
+				attachments[i].setPath(TextParser.parse(attachments[i].getPath(), context));
+				attachments[i].setName(TextParser.parse(attachments[i].getName(), context));
+			}
+		}
 	}
 
-	public String getTfrom() {
-		return tfrom;
+	public void check() {
+
 	}
 
-	public void setTfrom(String tfrom) {
-		this.tfrom = tfrom;
+	public IObjectRegistry getRegistry() {
+		return registry;
 	}
 
-	public String getTto() {
-		return tto;
+	public void setRegistry(IObjectRegistry registry) {
+		this.registry = registry;
 	}
 
-	public void setTto(String tto) {
-		this.tto = tto;
+	public String getTitle() {
+		return title;
 	}
 
-	public String getPassword() {
-		return password;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 	public String getSmtpServer() {
@@ -191,12 +217,56 @@ public class SendMail {
 		this.smtpServer = smtpServer;
 	}
 
-	public String getCto() {
-		return cto;
+	public String getPassword() {
+		return password;
 	}
 
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@Deprecated
+	public String getTto() {
+		return to;
+	}
+
+	@Deprecated
+	public void setTto(String tto) {
+		this.to = tto;
+	}
+
+	@Deprecated
+	public String getCto() {
+		return cc;
+	}
+
+	@Deprecated
 	public void setCto(String cto) {
-		this.cto = cto;
+		this.cc = cto;
+	}
+	@Deprecated
+	public String getTo() {
+		return to;
+	}
+
+	public void setTo(String to) {
+		this.to = to;
+	}
+	
+	public String getCc() {
+		return cc;
+	}
+
+	public void setCc(String cc) {
+		this.cc = cc;
+	}
+
+	public String getFrom() {
+		return from;
+	}
+
+	public void setFrom(String from) {
+		this.from = from;
 	}
 
 	public String getPort() {
@@ -214,9 +284,15 @@ public class SendMail {
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
+
+	public Attachment[] getAttachments() {
+		return attachments;
+	}
+
 	public void setAttachments(Attachment[] attaches) {
 		this.attachments = attaches;
 	}
+
 	public boolean isAuth() {
 		return auth;
 	}
@@ -224,5 +300,5 @@ public class SendMail {
 	public void setAuth(boolean auth) {
 		this.auth = auth;
 	}
-	
+
 }
