@@ -1,11 +1,13 @@
 package aurora.plugin.source.gen.screen.model;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
+import aurora.plugin.source.gen.screen.model.properties.ComponentProperties;
 
 abstract public class Container extends AuroraComponent implements
 		IDatasetDelegate {
@@ -27,6 +29,24 @@ abstract public class Container extends AuroraComponent implements
 	public Container() {
 		this.setSize(600, 80);
 		this.setPrompt("");
+		this.addPropertyChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				if (ComponentInnerProperties.CONTAINER_SECTION_TYPE.equals(evt
+						.getPropertyName())) {
+					if (SECTION_TYPE_QUERY.equals(evt.getNewValue())) {
+						dataset.setComponentType(Dataset.QUERYDATASET);
+					}
+					if (SECTION_TYPE_RESULT.equals(evt.getNewValue())) {
+						dataset.setComponentType(Dataset.RESULTDATASET);
+					}
+					if (SECTION_TYPE_BUTTON.equals(evt.getNewValue())) {
+						dataset.setComponentType(Dataset.DATASET);
+					}
+				}
+			}
+		});
 	}
 
 	public void addChild(AuroraComponent child) {

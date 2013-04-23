@@ -12,11 +12,12 @@ public class RendererScriptGenerator {
 	}
 
 	public String hrefScript(String functionName, String labelText,
-			String newWindowName, String parameter) {
-		String s = "function #functionName#(value,record, name){return '<a href=\"javascript:#newWindowName#(#parameters#)\">#LabelText#</a>';}";
+			String newWindowName, String para_value) {
+		String s = "function #functionName#(value,record, name){return '<a href=\"javascript:#newWindowName#(' + record.get('#para_value#') + ')\">#LabelText#</a>';}";
 		s = s.replace("#functionName#", functionName);
 		s = s.replace("#newWindowName#", newWindowName);
 		s = s.replace("#LabelText#", labelText);
+		s = s.replace("#para_value#", para_value);
 		return s;
 	}
 
@@ -41,13 +42,13 @@ public class RendererScriptGenerator {
 		return s;
 	}
 
-	public String openScript(String functionName, String linkId) {
-		String s = " function #functionName#(#parameter_keys#) {var linkUrl = $('#linkId#'); #parameters# new Aurora.Window({id: '#windowId#',url:linkUrl.getUrl(),title: 'Title',height: 435,width: 620});}";
+	public String openScript(String functionName, String linkId,String para_name) {
+		String s = " function #functionName#(para) {var linkUrl = $('#linkId#'); linkUrl.set('#para_name#', para); new Aurora.Window({id: '#windowId#',url:linkUrl.getUrl(),title: 'Title',height: 435,width: 620});}";
 		s = s.replace("#functionName#", functionName);
 		String windowID = session.getIDGenerator().genWindowID(linkId);
 		s = s.replaceAll("#windowId#", windowID);
 		s = s.replaceAll("#linkId#", linkId);
-
+		s = s.replaceAll("#para_name#", para_name);
 		return s;
 	}
 

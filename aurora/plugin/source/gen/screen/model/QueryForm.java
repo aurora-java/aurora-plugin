@@ -26,7 +26,9 @@ public class QueryForm extends BOX  {
 
 	public QueryForm() {
 		this.setComponentType("queryForm");
-		this.setDataset(new QueryDataSet());
+		Dataset ds = new  Dataset();
+		ds.setComponentType(Dataset.QUERYDATASET);
+		this.setDataset(ds);
 		this.setSectionType(BOX.SECTION_TYPE_QUERY);
 		setCol(1);
 		 toolBar.setDataset(getDataset());
@@ -35,7 +37,7 @@ public class QueryForm extends BOX  {
 		// addChild(body);
 		resultTargetContainer = new ContainerHolder();
 		resultTargetContainer.setOwner(this);
-		resultTargetContainer.setContainerType(BOX.SECTION_TYPE_RESULT);
+		resultTargetContainer.addContainerType(BOX.SECTION_TYPE_RESULT);
 		setSize(600, 400);
 //		addPropertyChangeListener(this);
 	}

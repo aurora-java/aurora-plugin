@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -112,20 +111,20 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 		return theme;
 	}
 
-	public Map<String, String> defineConfig(BuilderSession session) {
-		String property = System.getProperty("user.name");
-
-		String format = DateFormat.getDateInstance().format(
-				new java.util.Date());
-		Map<String, String> config = new HashMap<String, String>();
-		config.put("encoding", "UTF-8");
-		config.put("date", format);
-		config.put("author", property);
-		config.put("revision", "1.0");
-		config.put("copyright", "add by aurora_ide team");
-		config.put("template_type",session.getModel().getString("template_type", ""));
-		return config;
-	}
+//	public Map<String, String> defineConfig(BuilderSession session) {
+//		String property = System.getProperty("user.name");
+//
+//		String format = DateFormat.getDateInstance().format(
+//				new java.util.Date());
+//		Map<String, String> config = new HashMap<String, String>();
+//		config.put("encoding", "UTF-8");
+//		config.put("date", format);
+//		config.put("author", property);
+//		config.put("revision", "1.0");
+//		config.put("copyright", "add by aurora_ide team");
+//		config.put("template_type",session.getModel().getString("template_type", ""));
+//		return config;
+//	}
 
 	public String bindTemplate(CompositeMap context, BuilderSession session) {
 		// gettemplate
@@ -135,7 +134,7 @@ public class SourceTemplateProvider implements ISourceTemplateProvider {
 			StringWriter sw = new StringWriter();
 			Map<String, Object> p = new HashMap<String, Object>();
 			p.put("context", new TemplateModelWrapper(context));
-			p.put("config", defineConfig(session));
+			p.put("config", session.defineConfig());
 			p.put("action", new ActionMethod(session));
 			p.put("properties", new PropertiesMethod(session));
 			tplt.process(p, sw);

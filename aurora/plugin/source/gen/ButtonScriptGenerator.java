@@ -42,7 +42,7 @@ public class ButtonScriptGenerator {
 	}
 
 	public String openScript(String functionName, String linkId) {
-		String s = " function #functionName#() {var linkUrl = $('#linkId#'); #parameters# new Aurora.Window({id: '#windowId#',url:linkUrl.getUrl(),title: 'Title',height: 435,width: 620});}";
+		String s = " function #functionName#() {var linkUrl = $('#linkId#');  new Aurora.Window({id: '#windowId#',url:linkUrl.getUrl(),title: 'Title',height: 435,width: 620});}";
 		s = s.replace("#functionName#", functionName);
 		String windowID = session.getIDGenerator().genWindowID(linkId);
 		s = s.replaceAll("#windowId#", windowID);

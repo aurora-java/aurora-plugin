@@ -155,6 +155,24 @@ public class ScreenBody extends Container {
 	public boolean isForUpdate() {
 		return TYPE_UPDATE.equals(getTemplateType());
 	}
+	
+
+	@Override
+	public Object getPropertyValue(String propId) {
+		if(ComponentInnerProperties.INNER_EDITOR_UN_BIND_MODELS.equals(propId)){
+			return this.getUnBindModels();
+		}
+		return super.getPropertyValue(propId);
+	}
+
+	@Override
+	public void setPropertyValue(String propId, Object val) {
+		if(ComponentInnerProperties.INNER_EDITOR_UN_BIND_MODELS.equals(propId) && val instanceof List){
+			this.unBindModels = (List<String>) val;
+			return;
+		}
+		super.setPropertyValue(propId, val);
+	}
 
 	public boolean isForSearch() {
 		return TYPE_SERACH.equals(getTemplateType());
@@ -168,7 +186,7 @@ public class ScreenBody extends Container {
 		if (model == null || "".equals(model))
 			return;
 		this.unBindModels.add(model);
-		this.firePropertyChange("unBindModels", "", model);
+		this.firePropertyChange(ComponentInnerProperties.INNER_EDITOR_UN_BIND_MODELS, "", model);
 	}
 
 }

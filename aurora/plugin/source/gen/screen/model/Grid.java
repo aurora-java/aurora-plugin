@@ -40,11 +40,10 @@ public class Grid extends GridColumn implements DatasetBinder, IDatasetDelegate 
 		super();
 		this.setSize(750, 380);
 		navBar = new Navbar();
-		ResultDataSet dataset = new ResultDataSet();
-		// dataset.setOwner(this);
-		// dataset.setUseParentBM(false);
-		this.setSectionType(BOX.SECTION_TYPE_RESULT);
+		Dataset dataset = new Dataset();
+		dataset.setComponentType(Dataset.RESULTDATASET);
 		setDataset(dataset);
+		this.setSectionType(BOX.SECTION_TYPE_RESULT);
 		this.setComponentType(GRID);
 		setPrompt("");
 	}
@@ -53,9 +52,9 @@ public class Grid extends GridColumn implements DatasetBinder, IDatasetDelegate 
 		return gsc.getSelectionMode();
 	}
 
-	public ResultDataSet getDataset() {
-		return (ResultDataSet) super.getDataset();
-	}
+//	public ResultDataSet getDataset() {
+//		return (ResultDataSet) super.getDataset();
+//	}
 
 	@Override
 	public void setDataset(Dataset dataset) {
@@ -70,7 +69,8 @@ public class Grid extends GridColumn implements DatasetBinder, IDatasetDelegate 
 				}
 			}
 		});
-		((ResultDataSet) dataset).setOwner(this);
+//		((ResultDataSet) dataset).setOwner(this);
+		dataset.setOwner(this);
 		setSelectionMode(getDataset().getSelectionMode());
 	}
 
@@ -80,7 +80,7 @@ public class Grid extends GridColumn implements DatasetBinder, IDatasetDelegate 
 		gsc.setSelectionMode(sm);
 		// getDataset().setSelectionMode(sm);
 		// getDataset().setSelectable(!sm.equals(ResultDataSet.SELECT_NONE));
-		if (gsc.getSelectionMode().equals(ResultDataSet.SELECT_NONE)) {
+		if (gsc.getSelectionMode().equals(Dataset.SELECT_NONE)) {
 			removeChild(gsc);
 		} else {
 			int idx = getChildren().indexOf(gsc);

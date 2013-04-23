@@ -57,8 +57,9 @@ public interface ComponentInnerProperties {
 	String SIZE = "size";
 	String TAB_SCREEN_REF = "tab_screen_ref";
 	String TOOLBAR = "toolbar";
+	public static final String INNER_EDITOR_UN_BIND_MODELS = "inner_editor_un_bind_models";
 	public static final String INNER_LOV_SERVICE = "inner_lov_service";
-	
+	String DATASET_QUERY_CONTAINER_HOLDER = "dataset_query_container_holder";
 	
 	
 }

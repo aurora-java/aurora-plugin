@@ -75,6 +75,7 @@
 		<attribute id="diagram_bind_template" style="simple,save,inner" />
 		<attribute id="diagram_bind_template_type" style="simple,save,inner" />
 		<attribute id="component_children" style="containment,save,inner,list" />
+		<attribute id="inner_editor_un_bind_models" style="containment,save,inner,list,_string" />
 	</component>
 
 	<component type="textfield" category="aurora">

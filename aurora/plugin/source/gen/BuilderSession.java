@@ -1,6 +1,10 @@
 package aurora.plugin.source.gen;
 
+import java.text.DateFormat;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import aurora.plugin.source.gen.builders.ISourceBuilder;
 import uncertain.composite.CompositeMap;
@@ -24,6 +28,8 @@ public class BuilderSession {
 	private CompositeMap current_context;
 
 	private CompositeMap current_model;
+
+	private Map<String, Object> configMap;
 
 	public SourceGenManager getSourceGenManager() {
 		return sourceGenManager;
@@ -113,6 +119,7 @@ public class BuilderSession {
 		getEventResult().append(result);
 		getEventResult().append("\n");
 	}
+
 	public void appendResult(String result) {
 		if ("".equals(result))
 			return;
@@ -138,6 +145,7 @@ public class BuilderSession {
 		bs.setCurrentModel(this.getCurrentModel());
 		bs.setModel(this.getModel());
 		bs.setIdg(idg);
+		bs.configMap = configMap;
 		return bs;
 	}
 
@@ -163,7 +171,40 @@ public class BuilderSession {
 		}
 		return sb.toString();
 	}
-	public ModelMapParser createModelMapParser(CompositeMap model){
+
+	public ModelMapParser createModelMapParser(CompositeMap model) {
 		return sourceGenManager.createModelMapParser(model);
+	}
+
+	public void addConfig(String key, Object value) {
+		if (configMap == null)
+			configMap = new HashMap<String, Object>();
+		configMap.put(key, value);
+	}
+
+	public Map<String, String> defineConfig() {
+		String property = System.getProperty("user.name");
+		String format = DateFormat.getDateInstance().format(
+				new java.util.Date());
+		Map<String, String> config = new HashMap<String, String>();
+		config.put("encoding", "UTF-8");
+		config.put("date", format);
+		config.put("author", property);
+		config.put("revision", "1.0");
+		config.put("copyright", "add by aurora_ide team");
+		config.put("template_type", getModel().getString("template_type", ""));
+		if (configMap != null) {
+			Set<String> keySet = configMap.keySet();
+			for (String k : keySet) {
+				config.put(k, ""+configMap.get(k));
+			}
+		}
+		return config;
+	}
+
+	public Object getConfig(String key) {
+		if (configMap != null)
+			return configMap.get(key);
+		return null;
 	}
 }

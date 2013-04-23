@@ -91,15 +91,17 @@ public class Object2CompositeMap implements KEYS {
 		private void containmentArray(IPropertyDescriptor pd,
 				Object propertyValue) {
 
-			if (propertyValue instanceof AuroraComponent[]) {
+			if (propertyValue instanceof Object[]) {
 				CompositeMap arrayMap = new CompositeMap(CONTAINMENT_ARRAY);
 				arrayMap.put(PROPERTYE_ID,
 						((DefaultPropertyDescriptor) pd).getStringId());
-				AuroraComponent[] acs = (AuroraComponent[]) propertyValue;
+				Object[] acs = (Object[]) propertyValue;
 				if (acs.length == 0)
 					return;
-				for (AuroraComponent auroraComponent : acs) {
-					arrayMap.addChild(object2XML(auroraComponent));
+				for (Object ac : acs) {
+					if (ac instanceof AuroraComponent) {
+						arrayMap.addChild(object2XML((AuroraComponent) ac));
+					}
 				}
 				map.addChild(arrayMap);
 			}
@@ -135,6 +137,18 @@ public class Object2CompositeMap implements KEYS {
 				for (Object ac : acs) {
 					if (ac instanceof AuroraComponent) {
 						arrayMap.addChild(object2XML((AuroraComponent) ac));
+					}
+					if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._boolean) != 0) {
+						arrayMap.createChild("node").setText("" + ac);
+					}
+					if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._float) != 0) {
+						arrayMap.createChild("node").setText("" + ac);
+					}
+					if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._int) != 0) {
+						arrayMap.createChild("node").setText("" + ac);
+					}
+					if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._string) != 0) {
+						arrayMap.createChild("node").setText("" + ac);
 					}
 				}
 				map.addChild(arrayMap);

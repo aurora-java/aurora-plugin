@@ -1,11 +1,17 @@
 package aurora.plugin.source.gen.screen.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class ContainerHolder extends AuroraComponent implements
 		IDialogEditableObject {
 	private Container target = null;
 	private AuroraComponent owner = null;
-	private String containerType = BOX.SECTION_TYPE_QUERY;
+//	private String containerType = BOX.SECTION_TYPE_QUERY;
+	private List<String> types = new ArrayList<String>();
+	
+	
 
 	public ContainerHolder() {
 		super();
@@ -48,7 +54,7 @@ public class ContainerHolder extends AuroraComponent implements
 		ContainerHolder qc = new ContainerHolder();
 		qc.target = target;
 		qc.owner = owner;
-		qc.containerType = containerType;
+		qc.types = types;
 		return qc;
 	}
 
@@ -58,12 +64,16 @@ public class ContainerHolder extends AuroraComponent implements
 //		return PropertySourceUtil.getImageOf(target);
 //	}
 
-	public String getContainerType() {
-		return containerType;
+	public List<String> getContainerTypes() {
+		return types;
 	}
 
-	public void setContainerType(String containerType) {
-		this.containerType = containerType;
+//	public void setContainerType(String containerType) {
+//		this.containerType = containerType;
+//	}
+
+	public void addContainerType(String sectionTypeResult) {
+		types.add(sectionTypeResult);
 	}
 
 }

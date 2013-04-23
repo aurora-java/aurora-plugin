@@ -50,8 +50,9 @@ public class DatasetBuilder extends DefaultSourceBuilder {
 			ModelMapParser mmp = session.getSourceGenManager()
 					.createModelMapParser(currentModel);
 			CompositeMap datasetModel = mmp.getComponentByID(markid);
-			List<CompositeMap> datasetFields = mmp.getDatasetFields(datasetModel);
-//			List<?> childsNotNull = datasetModel.getChildsNotNull();
+			List<CompositeMap> datasetFields = mmp
+					.getDatasetFields(datasetModel);
+			// List<?> childsNotNull = datasetModel.getChildsNotNull();
 			for (Object object : datasetFields) {
 				if (object instanceof CompositeMap) {
 					BuilderSession copy = session.getCopy();
@@ -63,6 +64,69 @@ public class DatasetBuilder extends DefaultSourceBuilder {
 				}
 			}
 		}
+		if ("build_head_ds".equals(event)
+				&& isDatasetType(session, "resultdataset")) {
+			CompositeMap context = session.getCurrentContext();
+			String bt = context.getString("bindTarget", "");
+			if ("".equals(bt)) {
+				context.put("is_head_ds", "".equals(bt));
+				context.put("autoCreate", isAutoCreate(session));
+				CompositeMap lineds = getLineDS(session);
+				if (lineds != null) {
+					context.put("need_master_detail_submit_url", lineds != null);
+					context.put("line_model", lineds.getString("model", ""));
+					context.put("binded_name", lineds.getString("bindName", ""));
+				}
+				if (session.getConfig("be_opened_from_another") != null) {
+					context.put("need_auto_query_url", true);
+				}
+			}
+		}
+	}
+
+	private boolean isAutoCreate(BuilderSession session) {
+		CompositeMap model = session.getModel();
+		ModelMapParser mmp = session.createModelMapParser(model);
+		String markid = session.getCurrentContext().getString("markid", "");
+		String type = mmp.getComponentByID(markid).getParent()
+				.getString("component_type", "");
+		return "grid".equals(type) == false;
+	}
+
+	private boolean isDatasetType(BuilderSession session, String type) {
+		return session.getCurrentContext().getString("ds_type", "")
+				.equals(type);
+	}
+
+	private CompositeMap getLineDS(BuilderSession session) {
+		CompositeMap model = session.getModel();
+		ModelMapParser mmp = session.createModelMapParser(model);
+		String ds_id = session.getCurrentContext().getString("ds_id", "");
+		List<CompositeMap> datasets = mmp.getDatasets();
+		for (CompositeMap ds : datasets) {
+			String bt = ds.getString("bindTarget", "");
+			if (ds_id.equals(bt)) {
+				return ds;
+			}
+		}
+		return null;
+	}
+
+	private boolean isMasterDetail(BuilderSession session) {
+		String sbt = session.getCurrentContext().getString("bindTarget", "");
+		if ("".equals(sbt) == false)
+			return false;
+		CompositeMap model = session.getModel();
+		ModelMapParser mmp = session.createModelMapParser(model);
+		String ds_id = session.getCurrentContext().getString("ds_id", "");
+		List<CompositeMap> datasets = mmp.getDatasets();
+		for (CompositeMap ds : datasets) {
+			String bt = ds.getString("bindTarget", "");
+			if (ds_id.equals(bt)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected Map<String, String> getAttributeMapping() {

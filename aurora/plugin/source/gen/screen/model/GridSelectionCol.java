@@ -1,7 +1,6 @@
 package aurora.plugin.source.gen.screen.model;
 
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
-import aurora.plugin.source.gen.screen.model.properties.IPropertyDescriptor;
 
 
 public class GridSelectionCol extends GridColumn {
@@ -12,7 +11,7 @@ public class GridSelectionCol extends GridColumn {
 		super();
 		this.setSize(25, 380);
 		this.setComponentType(GRIDSELECTIONCOL);
-		this.setSelectionMode(ResultDataSet.SELECT_NONE);
+		this.setSelectionMode(Dataset.SELECT_NONE);
 	}
 
 	@Override

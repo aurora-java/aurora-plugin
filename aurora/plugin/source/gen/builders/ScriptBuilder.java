@@ -26,7 +26,6 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 	public void genScripts(BuilderSession session) {
 		CompositeMap currentModel = session.getCurrentModel();
 		ModelMapParser mmp = session.createModelMapParser(currentModel);
-		// ModelMapParser mmp = new ModelMapParser(currentModel);
 		StringBuilder scripts = new StringBuilder();
 		List<CompositeMap> buttons = mmp.getComponents("button");
 		ButtonScriptGenerator bsg = new ButtonScriptGenerator(session);
@@ -80,25 +79,30 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 			String type = renderer.getString(
 					ComponentInnerProperties.RENDERER_TYPE, "");
 			if ("INNER_FUNCTION".equals(type)) {
-				renderer.getParent().put("renderer", renderer.getString("renderer_function_name", ""));
+				renderer.getParent().put("renderer",
+						renderer.getString("renderer_function_name", ""));
 			}
 			if ("PAGE_REDIRECT".equals(type)) {
 				String functionName = session.getIDGenerator().genID(
 						"functionName", 0);
-				String[] parametersDetail = mmp.getParametersDetail(renderer,
-						"linkUrl");
 				renderer.getParent().put("renderer", functionName);
 				String linkId = renderer.getString("link_id", "");
 				String openFunctionName = session.getIDGenerator().genID(
 						"functionName", 0);
 				RendererScriptGenerator rsg = new RendererScriptGenerator(
 						session);
-				String s1 = rsg.openScript(openFunctionName, linkId);
-				s1 = rsg.buildOpenScript(s1, parametersDetail);
-				String s = rsg.hrefScript(functionName,
-						renderer.getString("labelText", ""), openFunctionName,
+				CompositeMap inner_paramerter = renderer.getChildByAttrib(
+						"propertye_id", "renderer_parameters")
+						.getChildByAttrib("component_type", "inner_paramerter");
+				String para_value = inner_paramerter.getString(
+						"parameter_value", "");
+				String para_name = inner_paramerter.getString("parameter_name",
 						"");
-				s = rsg.buildHrefScript(s, parametersDetail);
+
+				String s1 = rsg.openScript(openFunctionName, linkId, para_name);
+				String s = rsg.hrefScript(functionName,
+						renderer.getString("renderer_labeltext", ""), openFunctionName,
+						para_value);
 				scripts.append(s);
 				scripts.append(s1);
 			}
@@ -111,12 +115,6 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 		}
 		String string = scripts.toString();
 		session.appendResultln(format(string));
-
-		// var renderers = parser.getComponents('renderer');
-		// for ( var i = 0; i < renderers.size(); i++) {
-		// var renderer = renderers.get(i);
-		//
-		// }
 	}
 
 	private String format(String s) {

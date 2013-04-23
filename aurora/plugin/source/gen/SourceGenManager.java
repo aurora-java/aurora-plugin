@@ -56,6 +56,38 @@ public class SourceGenManager {
 		return loadFromString;
 	}
 
+	public CompositeMap buildScreen(CompositeMap modelMap,BuilderSession session) throws IOException,
+			SAXException {
+		// load package
+		loadBuilders();
+		CompositeMap screenModel = createScreenModel(modelMap);
+		session.setModel(screenModel);
+
+		String buildComponent = buildComponent(session, screenModel);
+		CompositeLoader parser = new CompositeLoader();
+		CompositeMap loadFromString = parser.loadFromString(buildComponent,
+				"utf-8");
+		return loadFromString;
+	}
+
+//	public CompositeMap buildBeOpenedScreen(CompositeMap modelMap,
+//			String para_name, String para_value) throws IOException,
+//			SAXException {
+//		// load package
+//		loadBuilders();
+//		BuilderSession session = new BuilderSession(this);
+//		session.addConfig("be_opened_from_another", true);
+//		session.addConfig("para_name", para_name);
+//		session.addConfig("para_value", para_value);
+//		CompositeMap screenModel = createScreenModel(modelMap);
+//		session.setModel(screenModel);
+//		String buildComponent = buildComponent(session, screenModel);
+//		CompositeLoader parser = new CompositeLoader();
+//		CompositeMap loadFromString = parser.loadFromString(buildComponent,
+//				"utf-8");
+//		return loadFromString;
+//	}
+
 	public String buildComponent(BuilderSession session, CompositeMap modelMap) {
 		buildContext(session, modelMap);
 		return bindTemplate(session);

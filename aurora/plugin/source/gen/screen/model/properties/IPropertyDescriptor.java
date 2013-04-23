@@ -16,7 +16,7 @@ public interface IPropertyDescriptor {
 //	int none = 1<<62;
 	int none = 0;
 	int _cdata = 1<<12;
-	
+	int _string = 1<<13;
 	
 
 	/**

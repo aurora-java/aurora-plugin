@@ -159,23 +159,44 @@ public class CompositeMap2Object implements KEYS {
 		}
 
 		private void containmentList(IPropertyDescriptor pd) {
-
 			String propId = ((DefaultPropertyDescriptor) pd).getStringId();
-			List<AuroraComponent> value = new ArrayList<AuroraComponent>();
 			CompositeMap child = cmap.getChildByAttrib(CONTAINMENT_LIST,
 					PROPERTYE_ID, propId);
+			List<AuroraComponent> acs = new ArrayList<AuroraComponent>();
+			List<Boolean> bs = new ArrayList<Boolean>();
+			List<Float> fs = new ArrayList<Float>();
+			List<Integer> is = new ArrayList<Integer>();
+			List<String> ss = new ArrayList<String>();
 			if (child != null) {
 				List<?> childsNotNull = child.getChildsNotNull();
 				for (Object m : childsNotNull) {
 					if (m instanceof CompositeMap) {
-						AuroraComponent c = xml2Object((CompositeMap) m);
-						if(c!=null)
-						value.add(c);
+						if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._boolean) != 0) {
+							bs.add(Boolean.valueOf(((CompositeMap) m).getText()));
+						} else if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._float) != 0) {
+							fs.add(Float.valueOf(((CompositeMap) m).getText()));
+						} else if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._int) != 0) {
+							is.add(Integer.valueOf(((CompositeMap) m).getText()));
+						} else if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._string) != 0) {
+							ss.add(String.valueOf(((CompositeMap) m).getText()));
+						} else {
+							AuroraComponent c = xml2Object((CompositeMap) m);
+							if (c != null)
+								acs.add(c);
+						}
 					}
 				}
 			}
-			if (value.isEmpty() == false)
-				setPropertyValue(propId, value);
+			if (acs.isEmpty() == false)
+				setPropertyValue(propId, acs);
+			if (bs.isEmpty() == false)
+				setPropertyValue(propId, bs);
+			if (fs.isEmpty() == false)
+				setPropertyValue(propId, fs);
+			if (is.isEmpty() == false)
+				setPropertyValue(propId, is);
+			if (ss.isEmpty() == false)
+				setPropertyValue(propId, ss);
 
 		}
 
