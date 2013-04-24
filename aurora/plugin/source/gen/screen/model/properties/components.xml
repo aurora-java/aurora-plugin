@@ -88,6 +88,15 @@
 		<attribute id="typeCase" style="simple,save" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
+	
+	<component type="textArea" category="aurora">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="prompt" style="simple,save" />
+		<attribute id="width" style="simple,save,_int" />
+		<attribute id="height" style="simple,save,_int" />
+		<attribute id="name" style="simple,save" />
+		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
+	</component>
 
 	<component type="label" category="aurora">
 		<attribute id="component_type" style="simple,save,inner" />
