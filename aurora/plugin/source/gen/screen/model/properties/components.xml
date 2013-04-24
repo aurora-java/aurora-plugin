@@ -251,6 +251,7 @@
 		<attribute id="queryFormBody" style="containment,save,inner" />
 		<attribute id="defaultQueryHint" style="simple,save" />
 		<attribute id="defaultQueryField" style="simple,save" />
+		<attribute id="query_form_toolbar_children" style="containment,save,inner,list" />
 		<attribute id="resultTargetContainer" style="reference,save,inner" />
 	</component>
 	<component type="formBody" category="aurora">
@@ -260,5 +261,18 @@
 	</component>
 	<component type="formToolbar" category="aurora">
 		<attribute id="component_type" style="simple,save,inner" />
+	</component>
+	<component type="tabPanel" category="aurora">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="width" style="simple,save,_int" />
+		<attribute id="height" style="simple,save,_int" />
+		<attribute id="component_tabs" style="containment,save,inner,list" />
+	</component>
+	<component type="tab" category="aurora">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="width" style="simple,save,_int" />
+		<attribute id="prompt" style="simple,save" />
+		<attribute id="tab_item_current" style="simple,save,inner,_boolean" />
+		<attribute id="component_children" style="containment,save,inner,list" />
 	</component>
 </components>

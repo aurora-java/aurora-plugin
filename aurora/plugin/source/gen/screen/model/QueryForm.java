@@ -1,6 +1,9 @@
 package aurora.plugin.source.gen.screen.model;
 
+import java.util.ArrayList;
+import java.util.List;
 
+import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
 
 //import org.eclipse.draw2d.geometry.Dimension;
 //import org.eclipse.ui.views.properties.IPropertyDescriptor;
@@ -9,7 +12,7 @@ package aurora.plugin.source.gen.screen.model;
 //import aurora.ide.meta.gef.editors.property.DialogPropertyDescriptor;
 //import aurora.ide.meta.gef.editors.property.StringPropertyDescriptor;
 
-public class QueryForm extends BOX  {
+public class QueryForm extends BOX {
 	/**
 	 * 
 	 */
@@ -26,12 +29,12 @@ public class QueryForm extends BOX  {
 
 	public QueryForm() {
 		this.setComponentType("queryForm");
-		Dataset ds = new  Dataset();
+		Dataset ds = new Dataset();
 		ds.setComponentType(Dataset.QUERYDATASET);
 		this.setDataset(ds);
 		this.setSectionType(BOX.SECTION_TYPE_QUERY);
 		setCol(1);
-		 toolBar.setDataset(getDataset());
+		toolBar.setDataset(getDataset());
 		addChild(toolBar);
 		this.addPropertyChangeListener(toolBar);
 		// addChild(body);
@@ -39,7 +42,7 @@ public class QueryForm extends BOX  {
 		resultTargetContainer.setOwner(this);
 		resultTargetContainer.addContainerType(BOX.SECTION_TYPE_RESULT);
 		setSize(600, 400);
-//		addPropertyChangeListener(this);
+		// addPropertyChangeListener(this);
 	}
 
 	public int getHeadHight() {
@@ -88,6 +91,9 @@ public class QueryForm extends BOX  {
 			return getResultTargetContainer().getTarget();
 		else if ("queryFormBody".equals(propName))
 			return this.getBody();
+		else if ("query_form_toolbar_children".equals(propName))
+			return this.toolBar.getHBox().getPropertyValue(
+					ComponentInnerProperties.CHILDREN);
 		return super.getPropertyValue(propName);
 	}
 
@@ -102,10 +108,18 @@ public class QueryForm extends BOX  {
 		else if ("resultTargetContainer".equals(propName)
 				&& val instanceof Container)
 			this.getResultTargetContainer().setTarget((Container) val);
-		else if ("queryFormBody".equals(propName)&& val instanceof QueryFormBody){
+		else if ("queryFormBody".equals(propName)
+				&& val instanceof QueryFormBody) {
 			this.addChild((AuroraComponent) val);
-		}
-		else
+		} else if ("query_form_toolbar_children".equals(propName)
+				&& val instanceof List) {
+			this.toolBar.getHBox().setPropertyValue(
+					ComponentInnerProperties.CHILDREN, val);
+			// for (AuroraComponent c : (List<AuroraComponent>) val) {
+			// this.addChild(c);
+			// }
+			// return this.toolBar.getHBox().getChildren();
+		} else
 			super.setPropertyValue(propName, val);
 	}
 
@@ -124,10 +138,9 @@ public class QueryForm extends BOX  {
 	public void setDefaultQueryHint(String defaultQueryHint) {
 		String old = this.defaultQueryField;
 		this.defaultQueryHint = defaultQueryHint;
-		this.firePropertyChange(DEFAULT_QUERY_HINT_KEY, old,
-				defaultQueryHint);
-//		toolBar.propertyChange(DEFAULT_QUERY_HINT_KEY, old,
-//				defaultQueryHint);
+		this.firePropertyChange(DEFAULT_QUERY_HINT_KEY, old, defaultQueryHint);
+		// toolBar.propertyChange(DEFAULT_QUERY_HINT_KEY, old,
+		// defaultQueryHint);
 	}
 
 	public ContainerHolder getResultTargetContainer() {
@@ -148,12 +161,12 @@ public class QueryForm extends BOX  {
 		return false;
 	}
 
-//	public void propertyChange(PropertyChangeEvent evt) {
-//		if (evt.getPropertyName().equals(ComponentInnerProperties.CHILDREN)) {
-//			Object newVal = evt.getNewValue();
-//			if (newVal instanceof QueryFormBody) {
-//				toolBar.setHasMore(getChildren().contains(newVal));
-//			}
-//		}
-//	}
+	// public void propertyChange(PropertyChangeEvent evt) {
+	// if (evt.getPropertyName().equals(ComponentInnerProperties.CHILDREN)) {
+	// Object newVal = evt.getNewValue();
+	// if (newVal instanceof QueryFormBody) {
+	// toolBar.setHasMore(getChildren().contains(newVal));
+	// }
+	// }
+	// }
 }

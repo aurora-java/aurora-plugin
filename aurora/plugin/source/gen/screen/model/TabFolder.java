@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
-import aurora.plugin.source.gen.screen.model.properties.IPropertyDescriptor;
 
 
 public class TabFolder extends Container {
@@ -45,6 +44,22 @@ public class TabFolder extends Container {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public Object getPropertyValue(String propId) {
+		if("component_tabs".equals(propId)){
+			return this.getTabItems();
+		}
+		return super.getPropertyValue(propId);
+	}
+
+	@Override
+	public void setPropertyValue(String propId, Object val) {
+		if("component_tabs".equals(propId) && val instanceof List){
+			super.setPropertyValue(ComponentInnerProperties.CHILDREN, val);
+		}
+		super.setPropertyValue(propId, val);
 	}
 
 	@Override

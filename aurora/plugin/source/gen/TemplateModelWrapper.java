@@ -90,6 +90,9 @@ public class TemplateModelWrapper implements TemplateHashModel {
 		if("mappings".equals(key)){
 			return null;
 		}
+		if("formBody".equals(key)){
+			return null;
+		}
 		return dow.wrap("");
 	}
 

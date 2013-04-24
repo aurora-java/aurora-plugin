@@ -62,7 +62,7 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 				}
 				if ("open".equalsIgnoreCase(id)) {
 					String link_id = clicker.getString("link_id", "");
-					String parameters = mmp.getButtonOpenParameters(button);
+					// String parameters = mmp.getButtonOpenParameters(button);
 					String s = bsg.openScript(functionName, link_id);
 					scripts.append(s);
 				}
@@ -101,8 +101,8 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 
 				String s1 = rsg.openScript(openFunctionName, linkId, para_name);
 				String s = rsg.hrefScript(functionName,
-						renderer.getString("renderer_labeltext", ""), openFunctionName,
-						para_value);
+						renderer.getString("renderer_labeltext", ""),
+						openFunctionName, para_value);
 				scripts.append(s);
 				scripts.append(s1);
 			}
@@ -110,6 +110,16 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 				String s = renderer.getChild("function").getText();
 				String functionName = mmp.getFunctionName(s);
 				renderer.getParent().put("renderer", functionName);
+				scripts.append(s);
+			}
+		}
+		List<CompositeMap> footrenderers = mmp.getComponents("footrenderer");
+		for (CompositeMap footrenderer : footrenderers) {
+			CompositeMap child = footrenderer.getChild("cdataNode");
+			if (child != null) {
+				String s = child.getText();
+				String functionName = mmp.getFunctionName(s);
+				footrenderer.getParent().put("footerRenderer", functionName);
 				scripts.append(s);
 			}
 		}
