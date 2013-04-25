@@ -12,6 +12,7 @@ import aurora.plugin.source.gen.screen.model.Form;
 import aurora.plugin.source.gen.screen.model.Input;
 import aurora.plugin.source.gen.screen.model.Label;
 import aurora.plugin.source.gen.screen.model.NumberField;
+import aurora.plugin.source.gen.screen.model.TextArea;
 
 public class FormCreator extends AbstractModelCreator {
 
@@ -45,8 +46,8 @@ public class FormCreator extends AbstractModelCreator {
 							form.addChild(cb);
 							continue;
 						}
-						//查看类页面,非必读的编辑器,保持原样(生成的页面仍然可以继续输入数据)
-						if (eq(m.getString("readonly","false"), "false")) {
+						// 查看类页面,非必读的编辑器,保持原样(生成的页面仍然可以继续输入数据)
+						if (eq(m.getString("readonly", "false"), "false")) {
 							Input input = createInputExt(m);
 							if (input != null) {
 								form.addChild(input);
@@ -88,6 +89,10 @@ public class FormCreator extends AbstractModelCreator {
 					nf.setAllowDecimals(false);
 				}
 			}
+		}
+		if (input instanceof TextArea) {
+			TextArea ta = (TextArea) input;
+			ta.setSize(ta.getSize().x, data.getInt("height", ta.getSize().y));
 		}
 		return input;
 	}

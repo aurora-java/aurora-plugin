@@ -1,9 +1,7 @@
 package aurora.plugin.source.gen.screen.model.asm;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
@@ -24,6 +22,7 @@ public class PageGenerator extends AbstractEntry {
 	private PageGeneratorConfig config = PageGeneratorConfig.getInstance();
 	private CompositeMap context;
 	String pageId;
+	boolean saveUip=false;
 	private IObjectRegistry registry;
 	private File webHome;
 
@@ -48,7 +47,10 @@ public class PageGenerator extends AbstractEntry {
 			String page_path = getPageFullPath(pageMap);
 			pageMap.put("page_path", page_path);
 			// create screen
-			createScreen(o2c.createCompositeMap(model), page_path);
+			CompositeMap uipModel=o2c.createCompositeMap(model);
+			if(isSaveUip())
+			writeScreenFile(uipModel,page_path+".uip");
+			createScreen(uipModel, page_path);
 			// write back
 			updatePageMap(pageMap);
 		}
@@ -108,6 +110,14 @@ public class PageGenerator extends AbstractEntry {
 	public void setPageId(String pageId) {
 		this.pageId = pageId;
 	}
+	
+	public boolean isSaveUip() {
+		return saveUip;
+	}
+
+	public void setSaveUip(boolean saveUip) {
+		this.saveUip = saveUip;
+	}
 
 	@Override
 	public void run(ProcedureRunner runner) throws Exception {
@@ -136,5 +146,7 @@ public class PageGenerator extends AbstractEntry {
 		para.put("custom_page_id", pageId);
 		return queryFirst(svcFactory, context, config.pageModel, para);
 	}
+
+	
 
 }

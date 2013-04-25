@@ -15,6 +15,7 @@ import aurora.plugin.source.gen.screen.model.Input;
 import aurora.plugin.source.gen.screen.model.LOV;
 import aurora.plugin.source.gen.screen.model.NumberField;
 import aurora.plugin.source.gen.screen.model.Renderer;
+import aurora.plugin.source.gen.screen.model.TextArea;
 import aurora.plugin.source.gen.screen.model.TextField;
 
 public abstract class AbstractModelCreator {
@@ -87,11 +88,13 @@ public abstract class AbstractModelCreator {
 			input=new DatePicker();
 		}else if("datetimepicker".equals(type)) {
 			input=new DateTimePicker();
+		}else if("textarea".equalsIgnoreCase(type)) {
+			input=new TextArea();
 		}
 		return input;
 	}
 
-	protected String getNormalComponentType(String type) {
+	public static String getNormalComponentType(String type) {
 		for (String s : Input.INPUT_TYPES)
 			if (s.equalsIgnoreCase(type))
 				return s;
