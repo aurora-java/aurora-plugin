@@ -2,16 +2,18 @@ package aurora.plugin.source.gen.builders;
 
 import java.util.Map;
 
+import aurora.plugin.source.gen.screen.model.properties.IProperties;
+
 
 public class DateTimePickerBuilder extends DefaultSourceBuilder {
 	protected Map<String, String> getAttributeMapping() {
 		Map<String, String> attributeMapping = super.getAttributeMapping();
-		attributeMapping.put("emptyText", "emptyText");
-		attributeMapping.put("bindTarget", "bindTarget");
-		attributeMapping.put("prompt", "prompt");
-		attributeMapping.put("width", "width");
-		attributeMapping.put("enableBesideDays", "enableBesideDays");
-		attributeMapping.put("enableMonthBtn", "enableMonthBtn");
+		attributeMapping.put(IProperties.emptyText, IProperties.emptyText);
+		attributeMapping.put(IProperties.bindTarget, IProperties.bindTarget);
+		attributeMapping.put(IProperties.prompt, IProperties.prompt);
+		attributeMapping.put(IProperties.width, IProperties.width);
+		attributeMapping.put(IProperties.enableBesideDays, IProperties.enableBesideDays);
+		attributeMapping.put(IProperties.enableMonthBtn, IProperties.enableMonthBtn);
 		return attributeMapping;
 	}
 }

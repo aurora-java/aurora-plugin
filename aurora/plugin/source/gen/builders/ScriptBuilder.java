@@ -9,6 +9,7 @@ import aurora.plugin.source.gen.ButtonScriptGenerator;
 import aurora.plugin.source.gen.ModelMapParser;
 import aurora.plugin.source.gen.RendererScriptGenerator;
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
+import aurora.plugin.source.gen.screen.model.properties.IProperties;
 
 public class ScriptBuilder extends DefaultSourceBuilder {
 
@@ -18,7 +19,7 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 	}
 
 	public void actionEvent(String event, BuilderSession session) {
-		if ("javascript".equals(event)) {
+		if (IProperties.JAVASCRIPT.equals(event)) {
 			genScripts(session);
 		}
 	}
@@ -27,99 +28,108 @@ public class ScriptBuilder extends DefaultSourceBuilder {
 		CompositeMap currentModel = session.getCurrentModel();
 		ModelMapParser mmp = session.createModelMapParser(currentModel);
 		StringBuilder scripts = new StringBuilder();
-		List<CompositeMap> buttons = mmp.getComponents("button");
+		List<CompositeMap> buttons = mmp.getComponents(IProperties.BUTTON);
 		ButtonScriptGenerator bsg = new ButtonScriptGenerator(session);
 		for (CompositeMap button : buttons) {
-			CompositeMap clicker = button.getChild("inner_buttonclicker");
+			CompositeMap clicker = button
+					.getChild(IProperties.INNER_BUTTONCLICKER);
 			String functionName = session.getIDGenerator().genID(
-					"functionName", 0);
-			button.put("click", functionName);
+					IProperties.FUNCTION_NAME, 0);
+			button.put(IProperties.click, functionName);
 			String datasetID = mmp.getButtonTargetDatasetID(button);
 			if (clicker != null) {
 				String id = clicker.getString(
 						ComponentInnerProperties.BUTTON_CLICK_ACTIONID, "");
-				if ("custom".equalsIgnoreCase(id)) {
+				if (IProperties.CUSTOM.equalsIgnoreCase(id)) {
 					CompositeMap child = clicker.getChildByAttrib(
-							"propertye_id", "button_click_function");
+							IProperties.PROPERTYE_ID,
+							IProperties.BUTTON_CLICK_FUNCTION);
 					if (child != null) {
 						String s = child.getText();
 						functionName = mmp.getFunctionName(s);
-						button.put("click", functionName);
+						button.put(IProperties.click, functionName);
 						scripts.append(s);
 					}
 				}
-				if ("query".equalsIgnoreCase(id)) {
+				if (IProperties.QUERY.equalsIgnoreCase(id)) {
 					String s = bsg.searchScript(functionName, datasetID);
 					scripts.append(s);
 				}
-				if ("save".equalsIgnoreCase(id)) {
+				if (IProperties.SAVE.equalsIgnoreCase(id)) {
 					String s = bsg.saveScript(functionName, datasetID);
 					scripts.append(s);
 				}
-				if ("reset".equalsIgnoreCase(id)) {
+				if (IProperties.RESET.equalsIgnoreCase(id)) {
 					String s = bsg.resetScript(functionName, datasetID);
 					scripts.append(s);
 				}
-				if ("open".equalsIgnoreCase(id)) {
-					String link_id = clicker.getString("link_id", "");
+				if (IProperties.OPEN.equalsIgnoreCase(id)) {
+					String link_id = clicker.getString(IProperties.LINK_ID, "");
 					// String parameters = mmp.getButtonOpenParameters(button);
 					String s = bsg.openScript(functionName, link_id);
 					scripts.append(s);
 				}
-				if ("close".equalsIgnoreCase(id)) {
-					String windowID = clicker.getString("closeWindowID", "");
+				if (IProperties.CLOSE.equalsIgnoreCase(id)) {
+					String windowID = clicker.getString(
+							IProperties.CLOSE_WINDOW_ID, "");
 					String s = bsg.closeScript(functionName, windowID);
 					scripts.append(s);
 				}
 			}
 		}
 
-		List<CompositeMap> renderers = mmp.getComponents("renderer");
+		List<CompositeMap> renderers = mmp.getComponents(IProperties.renderer);
 		for (CompositeMap renderer : renderers) {
 			String type = renderer.getString(
 					ComponentInnerProperties.RENDERER_TYPE, "");
-			if ("INNER_FUNCTION".equals(type)) {
-				renderer.getParent().put("renderer",
-						renderer.getString("renderer_function_name", ""));
+			if (IProperties.INNER_FUNCTION.equals(type)) {
+				renderer.getParent().put(
+						IProperties.renderer,
+						renderer.getString(IProperties.RENDERER_FUNCTION_NAME,
+								""));
 			}
-			if ("PAGE_REDIRECT".equals(type)) {
+			if (IProperties.PAGE_REDIRECT.equals(type)) {
 				String functionName = session.getIDGenerator().genID(
-						"functionName", 0);
-				renderer.getParent().put("renderer", functionName);
-				String linkId = renderer.getString("link_id", "");
+						IProperties.FUNCTION_NAME, 0);
+				renderer.getParent().put(IProperties.renderer, functionName);
+				String linkId = renderer.getString(IProperties.LINK_ID, "");
 				String openFunctionName = session.getIDGenerator().genID(
-						"functionName", 0);
+						IProperties.FUNCTION_NAME, 0);
 				RendererScriptGenerator rsg = new RendererScriptGenerator(
 						session);
 				CompositeMap inner_paramerter = renderer.getChildByAttrib(
-						"propertye_id", "renderer_parameters")
-						.getChildByAttrib("component_type", "inner_paramerter");
+						IProperties.PROPERTYE_ID,
+						IProperties.RENDERER_PARAMETERS).getChildByAttrib(
+						IProperties.COMPONENT_TYPE,
+						IProperties.INNER_PARAMERTER);
 				String para_value = inner_paramerter.getString(
-						"parameter_value", "");
-				String para_name = inner_paramerter.getString("parameter_name",
-						"");
+						IProperties.PARAMETER_VALUE, "");
+				String para_name = inner_paramerter.getString(
+						IProperties.PARAMETER_NAME, "");
 
 				String s1 = rsg.openScript(openFunctionName, linkId, para_name);
 				String s = rsg.hrefScript(functionName,
-						renderer.getString("renderer_labeltext", ""),
+						renderer.getString(IProperties.RENDERER_LABELTEXT, ""),
 						openFunctionName, para_value);
 				scripts.append(s);
 				scripts.append(s1);
 			}
-			if ("USER_FUNCTION".equals(type)) {
-				String s = renderer.getChild("function").getText();
+			if (IProperties.USER_FUNCTION.equals(type)) {
+				String s = renderer.getChild(IProperties.FUNCTION).getText();
 				String functionName = mmp.getFunctionName(s);
-				renderer.getParent().put("renderer", functionName);
+				renderer.getParent().put(IProperties.renderer, functionName);
 				scripts.append(s);
 			}
 		}
-		List<CompositeMap> footrenderers = mmp.getComponents("footrenderer");
+		List<CompositeMap> footrenderers = mmp
+				.getComponents(IProperties.FOOTRENDERER);
 		for (CompositeMap footrenderer : footrenderers) {
-			CompositeMap child = footrenderer.getChild("cdataNode");
+			CompositeMap child = footrenderer.getChild(IProperties.CDATA_NODE);
 			if (child != null) {
 				String s = child.getText();
 				String functionName = mmp.getFunctionName(s);
-				footrenderer.getParent().put("footerRenderer", functionName);
+				footrenderer.getParent().put(IProperties.footerRenderer,
+						functionName);
 				scripts.append(s);
 			}
 		}

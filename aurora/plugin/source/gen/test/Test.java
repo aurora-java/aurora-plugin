@@ -24,7 +24,7 @@ public class Test {
 	public static CompositeMap loadCompositeMap() {
 		InputStream is = null;
 		try {
-			is = SourceTemplateProvider.class.getResourceAsStream("test2.uip");
+			is = SourceTemplateProvider.class.getResourceAsStream("submit.uip");
 			CompositeLoader parser = new CompositeLoader();
 			CompositeMap rootMap = parser.loadFromStream(is);
 			rootMap.put("file_path", "a/b/c/d.uip");

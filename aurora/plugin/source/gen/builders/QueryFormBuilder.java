@@ -6,6 +6,8 @@ import java.util.Map;
 import uncertain.composite.CompositeMap;
 import aurora.plugin.source.gen.BuilderSession;
 import aurora.plugin.source.gen.ModelMapParser;
+import aurora.plugin.source.gen.screen.model.io.KEYS;
+import aurora.plugin.source.gen.screen.model.properties.IProperties;
 
 public class QueryFormBuilder extends DefaultSourceBuilder {
 
@@ -13,20 +15,22 @@ public class QueryFormBuilder extends DefaultSourceBuilder {
 	public void buildContext(BuilderSession session) {
 		super.buildContext(session);
 		CompositeMap currentModel = session.getCurrentModel();
-		CompositeMap childByAttrib = currentModel.getChildByAttrib("reference",
-				"propertye_id", "resultTargetContainer");
-		String ds_id = currentModel.getChildByAttrib("propertye_id",
-				"i_dataset_delegate").getString("ds_id", "");
-		session.getCurrentContext().put("bindTarget", ds_id);
+		CompositeMap childByAttrib = currentModel.getChildByAttrib(
+				KEYS.REFERENCE, IProperties.PROPERTYE_ID,
+				IProperties.RESULT_TARGET_CONTAINER);
+		String ds_id = currentModel.getChildByAttrib(IProperties.PROPERTYE_ID,
+				IProperties.I_DATASET_DELEGATE)
+				.getString(IProperties.DS_ID, "");
+		session.getCurrentContext().put(IProperties.bindTarget, ds_id);
 
 		if (childByAttrib != null) {
 			CompositeMap currentContext = session.getCurrentContext();
 			ModelMapParser mmp = session.createModelMapParser(session
 					.getModel());
 			String string = mmp.getComponentByID(
-					childByAttrib.getString("markid", "")).getString(
-					"bindTarget", "");
-			currentContext.put("resultTarget", string);
+					childByAttrib.getString(IProperties.MARKID, "")).getString(
+					IProperties.bindTarget, "");
+			currentContext.put(IProperties.resultTarget, string);
 		}
 	}
 
@@ -49,9 +53,11 @@ public class QueryFormBuilder extends DefaultSourceBuilder {
 
 	protected Map<String, String> getAttributeMapping() {
 		Map<String, String> attributeMapping = super.getAttributeMapping();
-		attributeMapping.put("defaultQueryField", "defaultQueryField");
-		attributeMapping.put("defaultQueryHint", "defaultQueryHint");
-		attributeMapping.put("bindTarget", "bindTarget");
+		attributeMapping.put(IProperties.defaultQueryField,
+				IProperties.defaultQueryField);
+		attributeMapping.put(IProperties.defaultQueryHint,
+				IProperties.defaultQueryHint);
+		attributeMapping.put(IProperties.bindTarget, IProperties.bindTarget);
 
 		return attributeMapping;
 	}
@@ -62,11 +68,11 @@ public class QueryFormBuilder extends DefaultSourceBuilder {
 	}
 
 	public void actionEvent(String event, BuilderSession session) {
-		if ("form_toolbar_children".equals(event)) {
+		if (IProperties.FORM_TOOLBAR_CHILDREN.equals(event)) {
 			CompositeMap currentModel = session.getCurrentModel();
 			CompositeMap childByAttrib = currentModel.getChildByAttrib(
-					"containmentList", "propertye_id",
-					"query_form_toolbar_children");
+					KEYS.CONTAINMENT_LIST, IProperties.PROPERTYE_ID,
+					IProperties.QUERY_FORM_TOOLBAR_CHILDREN);
 			List<?> childs = childByAttrib.getChildsNotNull();
 			for (Object object : childs) {
 				if (object instanceof CompositeMap) {
@@ -76,12 +82,13 @@ public class QueryFormBuilder extends DefaultSourceBuilder {
 				}
 			}
 		}
-		if ("form_body_children".equals(event)) {
+		if (IProperties.FORM_BODY_CHILDREN.equals(event)) {
 			CompositeMap currentModel = session.getCurrentModel();
-			CompositeMap formBody = currentModel.getChildByAttrib("formBody",
-					"propertye_id", "queryFormBody");
+			CompositeMap formBody = currentModel.getChildByAttrib(
+					IProperties.FORM_BODY, IProperties.PROPERTYE_ID,
+					IProperties.QUERY_FORM_BODY);
 			CompositeMap childByAttrib = formBody.getChildByAttrib(
-					"propertye_id", "component_children");
+					IProperties.PROPERTYE_ID, IProperties.COMPONENT_CHILDREN);
 			List<?> childs = childByAttrib.getChildsNotNull();
 			for (Object object : childs) {
 				if (object instanceof CompositeMap) {

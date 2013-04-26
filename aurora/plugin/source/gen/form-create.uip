@@ -1,7 +1,7 @@
 <screenBody diagram_bind_template="workflow_submit" component_type="screenBody" class_name="aurora.plugin.source.gen.screen.model.ScreenBody" markid="1ce95431">
     <containmentList propertye_id="component_children">
         <form labelWidth="80" width="600" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" container_section_type="SECTION_TYPE_RESULT" markid="13757596" title="Form" height="80">
-   			 <resultdataset propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.ResultDataSet" markid="65b6011b98">
+   			 <resultdataset propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.Dataset" markid="65b6011b98">
             </resultdataset>
         </form>
         <hBox labelWidth="80" width="200" component_type="hBox" class_name="aurora.plugin.source.gen.screen.model.HBox" markid="6416298a" height="43">
@@ -16,6 +16,11 @@
         		]]></cdataNode>
                     </inner_buttonclicker>
                 </button>
+           <button text="button" width="80" component_type="button" class_name="aurora.plugin.source.gen.screen.model.Button" markid="e414142" height="20">
+            <inner_buttonclicker button_click_actionid="save" propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="5bdfeace">
+                <reference propertye_id="button_click_target_component" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="13757596"/>
+            </inner_buttonclicker>
+        </button>
             </containmentList>
         </hBox>
     </containmentList>

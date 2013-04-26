@@ -139,16 +139,16 @@ public class Object2CompositeMap implements KEYS {
 						arrayMap.addChild(object2XML((AuroraComponent) ac));
 					}
 					if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._boolean) != 0) {
-						arrayMap.createChild("node").setText("" + ac);
+						arrayMap.createChild(NODE).setText("" + ac);
 					}
 					if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._float) != 0) {
-						arrayMap.createChild("node").setText("" + ac);
+						arrayMap.createChild(NODE).setText("" + ac);
 					}
 					if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._int) != 0) {
-						arrayMap.createChild("node").setText("" + ac);
+						arrayMap.createChild(NODE).setText("" + ac);
 					}
 					if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._string) != 0) {
-						arrayMap.createChild("node").setText("" + ac);
+						arrayMap.createChild(NODE).setText("" + ac);
 					}
 				}
 				map.addChild(arrayMap);

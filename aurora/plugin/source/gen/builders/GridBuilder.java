@@ -5,6 +5,7 @@ import java.util.Map;
 
 import uncertain.composite.CompositeMap;
 import aurora.plugin.source.gen.BuilderSession;
+import aurora.plugin.source.gen.screen.model.properties.IProperties;
 
 public class GridBuilder extends DefaultSourceBuilder {
 
@@ -13,38 +14,41 @@ public class GridBuilder extends DefaultSourceBuilder {
 		super.buildContext(session);
 		CompositeMap gridContext = session.getCurrentContext();
 
-		gridContext.put("navBar",
-				!"".equals(gridContext.getString("navBarType", "")));
+		gridContext.put(IProperties.navBar,
+				!"".equals(gridContext.getString(IProperties.navBarType, "")));
 
 		CompositeMap gridModel = session.getCurrentModel();
-		CompositeMap toolbar = gridModel.getChildByAttrib("component_type","toolbar");
+		CompositeMap toolbar = gridModel.getChildByAttrib(
+				IProperties.COMPONENT_TYPE, IProperties.TOOLBAR);
 		if (toolbar != null) {
 			toolbar = (CompositeMap) toolbar.clone();
 			gridContext.addChild(toolbar);
 		}
-		CompositeMap editors = gridContext.createChild("editors");
-		CompositeMap child_list = gridModel.getChildByAttrib("propertye_id",
-				"component_children");
+		CompositeMap editors = gridContext.createChild(IProperties.EDITORS);
+		CompositeMap child_list = gridModel.getChildByAttrib(
+				IProperties.PROPERTYE_ID, IProperties.COMPONENT_CHILDREN);
 		if (child_list != null) {
 			List childsNotNull = child_list.getChildsNotNull();
 			for (Object object : childsNotNull) {
 				if (object instanceof CompositeMap) {
-					String editor = ((CompositeMap) object).getString("editor",
-							"");
+					String editor = ((CompositeMap) object).getString(
+							IProperties.editor, "");
 					if ("".equals(editor) == false) {
 						CompositeMap editorMap = editors.getChild(editor);
 						if (editorMap != null) {
-							String id = editorMap.getString("id", "");
-							((CompositeMap) object).put("editor", id);
+							String id = editorMap.getString(IProperties.id, "");
+							((CompositeMap) object).put(IProperties.editor, id);
 						} else {
 							editorMap = editors.createChild(editor);
 							String genEditorID = session.getIDGenerator()
 									.genEditorID(editor);
-							editorMap.put("id", genEditorID);
-							editorMap.put("editor_type",editor);
-							((CompositeMap) object).put("editor", genEditorID);
+							editorMap.put(IProperties.id, genEditorID);
+							editorMap.put(IProperties.EDITOR_TYPE, editor);
+							((CompositeMap) object).put(IProperties.editor,
+									genEditorID);
 						}
-						((CompositeMap) object).put("editor_type", editor);
+						((CompositeMap) object).put(IProperties.EDITOR_TYPE,
+								editor);
 					}
 				}
 			}
@@ -70,12 +74,12 @@ public class GridBuilder extends DefaultSourceBuilder {
 
 	protected Map<String, String> getAttributeMapping() {
 		Map<String, String> attributeMapping = super.getAttributeMapping();
-		attributeMapping.put("width", "width");
-		attributeMapping.put("bindTarget", "bindTarget");
-		attributeMapping.put("prompt", "prompt");
-		attributeMapping.put("height", "height");
-		attributeMapping.put("navBar", "navBar");
-		attributeMapping.put("navBarType", "navBarType");
+		attributeMapping.put(IProperties.width, IProperties.width);
+		attributeMapping.put(IProperties.bindTarget, IProperties.bindTarget);
+		attributeMapping.put(IProperties.prompt, IProperties.prompt);
+		attributeMapping.put(IProperties.height, IProperties.height);
+		attributeMapping.put(IProperties.navBar, IProperties.navBar);
+		attributeMapping.put(IProperties.navBarType, IProperties.navBarType);
 		return attributeMapping;
 	}
 
@@ -85,12 +89,12 @@ public class GridBuilder extends DefaultSourceBuilder {
 	}
 
 	public void actionEvent(String event, BuilderSession session) {
-		if ("columns".equals(event)
-				&& "grid".equalsIgnoreCase(session.getCurrentModel().getString(
-						"component_type", ""))) {
+		if (IProperties.EVENT_COLUMNS.equals(event)
+				&& IProperties.GRID.equalsIgnoreCase(session.getCurrentModel()
+						.getString(IProperties.COMPONENT_TYPE, ""))) {
 			CompositeMap gridModel = session.getCurrentModel();
-			CompositeMap child_list = gridModel.getChildByAttrib("propertye_id",
-					"component_children");
+			CompositeMap child_list = gridModel.getChildByAttrib(
+					IProperties.PROPERTYE_ID, IProperties.COMPONENT_CHILDREN);
 			if (child_list != null) {
 				List childsNotNull = child_list.getChildsNotNull();
 				for (Object object : childsNotNull) {

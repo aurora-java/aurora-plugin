@@ -1,0 +1,38 @@
+<screenBody component_type="screenBody" diagram_bind_template="workflow_submit" class_name="aurora.plugin.source.gen.screen.model.ScreenBody" markid="79ddd026">
+    <containmentList propertye_id="component_children">
+        <form labelWidth="80" width="600" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" container_section_type="SECTION_TYPE_RESULT" markid="518cad4b" title="Form" height="80">
+            <resultdataset model="aaa" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.Dataset" markid="3c1e3403"/>
+            <containmentList propertye_id="component_children">
+                <textField width="120" component_type="textField" class_name="aurora.plugin.source.gen.screen.model.TextField" markid="62e8cfca" height="20" name="a" prompt="a">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="3c1e05ea" lovGridHeight="350" name="a" lovWidth="500" lovHeight="500">
+                        <innerLovService propertye_id="inner_lov_service" component_type="innerLovService" class_name="aurora.plugin.source.gen.screen.model.LovService" markid="5716647b"/>
+                    </datasetfield>
+                </textField>
+                <textField width="120" component_type="textField" class_name="aurora.plugin.source.gen.screen.model.TextField" markid="7f1ef3e7" height="20" name="b" prompt="b">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="1338933d" lovGridHeight="350" name="b" lovWidth="500" lovHeight="500">
+                        <innerLovService propertye_id="inner_lov_service" component_type="innerLovService" class_name="aurora.plugin.source.gen.screen.model.LovService" markid="674a93a6"/>
+                    </datasetfield>
+                </textField>
+            </containmentList>
+        </form>
+        <grid width="750" component_type="grid" class_name="aurora.plugin.source.gen.screen.model.Grid" container_section_type="SECTION_TYPE_RESULT" markid="5123ac44" height="380">
+            <resultdataset model="aaa" propertye_id="i_dataset_delegate" pageSize="10" component_type="resultdataset" class_name="aurora.plugin.source.gen.screen.model.Dataset" markid="655a5ee5">
+                <reference propertye_id="dataset_query_container" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="518cad4b"/>
+            </resultdataset>
+            <containmentList propertye_id="component_children">
+                <gridcolumn width="100" component_type="gridcolumn" class_name="aurora.plugin.source.gen.screen.model.GridColumn" markid="100c405f" height="60" name="c" prompt="prompt">
+                    <datasetfield propertye_id="i_dataset_field_delegate" component_type="datasetfield" class_name="aurora.plugin.source.gen.screen.model.DatasetField" markid="6220ba4d" lovGridHeight="350" name="c" lovWidth="500" lovHeight="500">
+                        <innerLovService propertye_id="inner_lov_service" component_type="innerLovService" class_name="aurora.plugin.source.gen.screen.model.LovService" markid="52a7478f"/>
+                    </datasetfield>
+                    <renderer propertye_id="renderer" component_type="renderer" class_name="aurora.plugin.source.gen.screen.model.Renderer" markid="644b27ad" renderer_type="NONE_RENDERER"/>
+                    <footrenderer propertye_id="footerRenderer" component_type="footrenderer" class_name="aurora.plugin.source.gen.screen.model.FootRenderer" markid="21a024c" foot_renderer_type="disable"/>
+                </gridcolumn>
+            </containmentList>
+        </grid>
+        <button text="button" width="80" component_type="button" class_name="aurora.plugin.source.gen.screen.model.Button" markid="e414142" height="20">
+            <inner_buttonclicker button_click_actionid="custom" propertye_id="button_clicker" component_type="inner_buttonclicker" class_name="aurora.plugin.source.gen.screen.model.ButtonClicker" markid="5bdfeace">
+                <reference propertye_id="button_click_target_component" component_type="form" class_name="aurora.plugin.source.gen.screen.model.Form" markid="518cad4b"/>
+            </inner_buttonclicker>
+        </button>
+    </containmentList>
+</screenBody>

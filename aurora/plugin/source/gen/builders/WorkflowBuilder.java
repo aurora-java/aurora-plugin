@@ -5,6 +5,7 @@ import java.util.List;
 import uncertain.composite.CompositeMap;
 import aurora.plugin.source.gen.BuilderSession;
 import aurora.plugin.source.gen.ModelMapParser;
+import aurora.plugin.source.gen.screen.model.properties.IProperties;
 
 public class WorkflowBuilder extends DefaultSourceBuilder {
 
@@ -14,44 +15,40 @@ public class WorkflowBuilder extends DefaultSourceBuilder {
 	}
 
 	public void actionEvent(String event, BuilderSession session) {
-		if ("workflow_head_model_pk".equals(event)) {
+		if (IProperties.WORKFLOW_HEAD_MODEL_PK.equals(event)) {
 			CompositeMap headDS = getHeadDS(session);
 			if(headDS == null){
 				return;
 			}
-			String string = headDS.getString("model", "");
+			String string = headDS.getString(IProperties.model, "");
 			CompositeMap model = session.getModel();
 			ModelMapParser mmp = session.createModelMapParser(model);
 			// ModelMapParser mmp = new ModelMapParser(model);
 			CompositeMap modelMap = mmp.loadModelMap(string);
-			CompositeMap child = modelMap.getChild("primary-key");
-			CompositeMap child2 = child.getChild("pk-field");
-			String r = child2.getString("name", "");
+			CompositeMap child = modelMap.getChild(IProperties.PRIMARY_KEY);
+			CompositeMap child2 = child.getChild(IProperties.PK_FIELD);
+			String r = child2.getString(IProperties.name, "");
 			session.appendResult(r);
 		}
-		if ("workflow_head_ds_id".equals(event)) {
+		if (IProperties.WORKFLOW_HEAD_DS_ID.equals(event)) {
 			session.appendResult(getHeadDSID(session));
 		}
-		if ("is_workflow_head_ds".equals(event)) {
+		if (IProperties.IS_WORKFLOW_HEAD_DS.equals(event)) {
 			CompositeMap headDS = getHeadDS(session);
 			CompositeMap currentContext = session.getCurrentContext();
-			String string = currentContext.getString("markid", "");
-			if (headDS != null && string.equals(headDS.getString("markid", ""))) {
-				currentContext.put("is_workflow_head_ds", true);
+			String string = currentContext.getString(IProperties.MARKID, "");
+			if (headDS != null && string.equals(headDS.getString(IProperties.MARKID, ""))) {
+				currentContext.put(IProperties.IS_WORKFLOW_HEAD_DS, true);
 				CompositeMap lineDS = getLineDS(session);
-				currentContext.put("need_submit_url", lineDS != null);
+				currentContext.put(IProperties.NEED_SUBMIT_URL, lineDS != null);
 				if (lineDS != null) {
-					currentContext.put("line_model",
-							lineDS.getString("model", ""));
-					currentContext.put("binded_name",
-							lineDS.getString("bindName", ""));
+					currentContext.put(IProperties.LINE_MODEL,
+							lineDS.getString(IProperties.model, ""));
+					currentContext.put(IProperties.BINDED_NAME,
+							lineDS.getString(IProperties.bindName, ""));
 				}
 			}
 		}
-		// workflow_head_model_pk
-		// workflow_head_ds_id
-		// ${action("is_workflow_head_ds")}
-		// <#if context.is_workflow_head_ds??>
 	}
 
 	private CompositeMap getLineDS(BuilderSession session) {
@@ -59,9 +56,9 @@ public class WorkflowBuilder extends DefaultSourceBuilder {
 		ModelMapParser mmp = session.createModelMapParser(model);
 		List<CompositeMap> datasets = mmp.getDatasets();
 		CompositeMap currentContext = session.getCurrentContext();
-		String head_id = currentContext.getString("ds_id", "");
+		String head_id = currentContext.getString(IProperties.DS_ID, "");
 		for (CompositeMap compositeMap : datasets) {
-			if (head_id.equals(compositeMap.getString("bindTarget", ""))) {
+			if (head_id.equals(compositeMap.getString(IProperties.bindTarget, ""))) {
 				return compositeMap;
 			}
 		}
@@ -84,7 +81,7 @@ public class WorkflowBuilder extends DefaultSourceBuilder {
 //		}
 		CompositeMap headDS = this.getHeadDS(session);
 		if(headDS!=null)
-			return headDS.getString("ds_id", "");
+			return headDS.getString(IProperties.DS_ID, "");
 		return "";
 	}
 
@@ -92,17 +89,17 @@ public class WorkflowBuilder extends DefaultSourceBuilder {
 		CompositeMap model = session.getModel();
 		ModelMapParser mmp = session.createModelMapParser(model);
 		List<CompositeMap> components = mmp
-				.getComponents("inner_buttonclicker");
+				.getComponents(IProperties.INNER_BUTTONCLICKER);
 		for (CompositeMap b : components) {
-			String string = b.getString("button_click_actionid", "");
-			if ("custom".equalsIgnoreCase(string)) {
-				CompositeMap childByAttrib = b.getChildByAttrib("propertye_id",
-						"button_click_target_component");
+			String string = b.getString(IProperties.BUTTON_CLICK_ACTIONID, "");
+			if (IProperties.CUSTOM.equalsIgnoreCase(string)) {
+				CompositeMap childByAttrib = b.getChildByAttrib(IProperties.PROPERTYE_ID,
+						IProperties.BUTTON_CLICK_TARGET_COMPONENT);
 				if (childByAttrib != null) {
-					String refID = childByAttrib.getString("markid", "");
+					String refID = childByAttrib.getString(IProperties.MARKID, "");
 					CompositeMap map = mmp.getComponentByID(refID);
-					CompositeMap child = map.getChildByAttrib("propertye_id",
-							"i_dataset_delegate");
+					CompositeMap child = map.getChildByAttrib(IProperties.PROPERTYE_ID,
+							IProperties.I_DATASET_DELEGATE);
 					return child;
 				}
 			}
@@ -113,9 +110,9 @@ public class WorkflowBuilder extends DefaultSourceBuilder {
 	private CompositeMap getFirstNoBindResultDataset(BuilderSession session) {
 		CompositeMap model = session.getModel();
 		ModelMapParser mmp = session.createModelMapParser(model);
-		List<CompositeMap> components = mmp.getComponents("resultdataset");
+		List<CompositeMap> components = mmp.getComponents(IProperties.RESULTDATASET);
 		for (CompositeMap d : components) {
-			if("".equals(d.getString("bindName", ""))){
+			if("".equals(d.getString(IProperties.bindName, ""))){
 				return d;
 			}
 		}

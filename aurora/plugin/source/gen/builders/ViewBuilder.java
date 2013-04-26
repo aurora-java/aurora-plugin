@@ -7,8 +7,12 @@ import uncertain.composite.CompositeMap;
 import aurora.plugin.source.gen.BuilderSession;
 import aurora.plugin.source.gen.ModelMapParser;
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
+import aurora.plugin.source.gen.screen.model.properties.IProperties;
 
 public class ViewBuilder extends DefaultSourceBuilder {
+
+	private static final String A = "a";
+
 
 	@Override
 	public void buildContext(BuilderSession session) {
@@ -24,33 +28,37 @@ public class ViewBuilder extends DefaultSourceBuilder {
 		List<CompositeMap> datasets = mmp.getDatasets();
 		for (CompositeMap ds : datasets) {
 			String ds_id = genDatasetID(ds, session);
-			ds.put("ds_id", ds_id);
+			ds.put(IProperties.DS_ID, ds_id);
 		}
 		for (CompositeMap ds : datasets) {
-			String type = ds.getString("component_type", "");
-			if ("querydataset".equalsIgnoreCase(type)) {
-				ds.put("autoCreate", true);
+			String type = ds.getString(IProperties.COMPONENT_TYPE, "");
+			if (IProperties.QUERYDATASET.equalsIgnoreCase(type)) {
+				ds.put(IProperties.autoCreate, true);
 			}
-			if ("resultdataset".equalsIgnoreCase(type)) {
-				CompositeMap query = ds.getChildByAttrib("propertye_id",
-						"dataset_query_container");
+			if (IProperties.RESULTDATASET.equalsIgnoreCase(type)) {
+				CompositeMap query = ds.getChildByAttrib(
+						IProperties.PROPERTYE_ID,
+						IProperties.DATASET_QUERY_CONTAINER);
 				if (query != null) {
 					CompositeMap container = mmp.getComponentByID(query
-							.getString("markid", ""));
+							.getString(IProperties.MARKID, ""));
 					if (container == null)
 						return;
 					CompositeMap cds = container.getChildByAttrib(
-							"propertye_id", "i_dataset_delegate");
-					String fds_type = cds.getString("component_type", "");
-					if ("querydataset".equalsIgnoreCase(fds_type)) {
-						ds.put("query_ds", cds.getString("ds_id", ""));
-					} else if ("resultdataset".equalsIgnoreCase(fds_type)) {
-						ds.put("bindName", ds.getString("ds_id", ""));
-						ds.put("bindTarget", cds.getString("ds_id", ""));
+							IProperties.PROPERTYE_ID,
+							IProperties.I_DATASET_DELEGATE);
+					String fds_type = cds.getString(IProperties.COMPONENT_TYPE,
+							"");
+					if (IProperties.QUERYDATASET.equalsIgnoreCase(fds_type)) {
+						ds.put(IProperties.QUERY_DS, cds.getString(IProperties.DS_ID, ""));
+					} else if (IProperties.RESULTDATASET
+							.equalsIgnoreCase(fds_type)) {
+						ds.put(IProperties.bindName, ds.getString(IProperties.DS_ID, ""));
+						ds.put(IProperties.bindTarget, cds.getString(IProperties.DS_ID, ""));
 					}
 				} else {
-					ds.put("autoQuery", true);
-					ds.put("pageSize", null);
+					ds.put(IProperties.autoQuery, true);
+					ds.put(IProperties.pageSize, null);
 				}
 			}
 		}
@@ -58,16 +66,18 @@ public class ViewBuilder extends DefaultSourceBuilder {
 			List<CompositeMap> datasetFields = mmp.getDatasetFields(ds);
 			CompositeMap newDS = (CompositeMap) ds.clone();
 			newDS.getChildsNotNull().clear();
-			newDS.setPrefix("a");
-			newDS.setName("dataset");
+			newDS.setPrefix(A);
+			newDS.setName(IProperties.DATASET);
 			for (CompositeMap field : datasetFields) {
-				field.put("field_name", field.getParent().getString("name", ""));
+				field.put(IProperties.FIELD_NAME,
+						field.getParent().getString(IProperties.name, ""));
 				String fieldType = field.getParent().getString(
-						"component_type", "");
-				if ("gridcolumn".equals(fieldType)) {
-					fieldType = field.getParent().getString("editor", "");
+						IProperties.COMPONENT_TYPE, "");
+				if (IProperties.GRIDCOLUMN.equals(fieldType)) {
+					fieldType = field.getParent().getString(IProperties.editor,
+							"");
 				}
-				field.put("field_type", fieldType);
+				field.put(IProperties.FIELD_TYPE, fieldType);
 				if (isLov(field)) {
 					genLovDSField(session, field);
 				}
@@ -76,8 +86,8 @@ public class ViewBuilder extends DefaultSourceBuilder {
 				}
 
 				CompositeMap clone = (CompositeMap) field.clone();
-				clone.setName("field");
-				clone.setPrefix("a");
+				clone.setName(IProperties.FIELD);
+				clone.setPrefix(A);
 				newDS.addChild((CompositeMap) clone);
 			}
 			currentContext.addChild(newDS);
@@ -100,19 +110,20 @@ public class ViewBuilder extends DefaultSourceBuilder {
 		// mmp.bindMapping(field, lovMaps);
 		// }
 		String[] models = mmp.findComboFieldOption(field);
-		field.put("displayField", mmp.getComboDisplayField(models, field));
-		field.put("valueField", mmp.getComboValueField(models, field));
+		field.put(IProperties.displayField,
+				mmp.getComboDisplayField(models, field));
+		field.put(IProperties.valueField, mmp.getComboValueField(models, field));
 		CompositeMap lovservice = getLovServiceMap(session, field);
-		String lovservice_options = lovservice.getString("lovservice_options",
-				"");
-		field.put("lovService", "".equals(lovservice_options) ? models[0]
-				: lovservice_options);
+		String lovservice_options = lovservice.getString(
+				IProperties.LOVSERVICE_OPTIONS, "");
+		field.put(IProperties.lovService,
+				"".equals(lovservice_options) ? models[0] : lovservice_options);
 	}
 
 	private CompositeMap getLovServiceMap(BuilderSession session,
 			CompositeMap field) {
-		CompositeMap innerLovService = field.getChildByAttrib("component_type",
-				"innerLovService");
+		CompositeMap innerLovService = field.getChildByAttrib(
+				IProperties.COMPONENT_TYPE, IProperties.INNER_TYPE_LOV_SERVICE);
 		return innerLovService;
 	}
 
@@ -121,8 +132,8 @@ public class ViewBuilder extends DefaultSourceBuilder {
 		// String model = field.getString("options", "");
 		String[] models = mmp.findComboFieldOption(field);
 		CompositeMap lovservice = getLovServiceMap(session, field);
-		String lovservice_options = lovservice.getString("lovservice_options",
-				"");
+		String lovservice_options = lovservice.getString(
+				IProperties.LOVSERVICE_OPTIONS, "");
 		String model = "".equals(lovservice_options) ? models[0]
 				: lovservice_options;
 		String lookupCode = models[1];
@@ -133,39 +144,45 @@ public class ViewBuilder extends DefaultSourceBuilder {
 			CompositeMap createComboDatasetMap = createComboDatasetMap(model,
 					lookupCode, session);
 			session.getCurrentContext().addChild(createComboDatasetMap);
-			field.put("options", createComboDatasetMap.getString("ds_id", ""));
+			field.put(IProperties.options,
+					createComboDatasetMap.getString(IProperties.DS_ID, ""));
 		}
-		field.put("displayField", mmp.getComboDisplayField(models, field));
-		field.put("valueField", mmp.getComboValueField(models, field));
+		field.put(IProperties.displayField,
+				mmp.getComboDisplayField(models, field));
+		field.put(IProperties.valueField, mmp.getComboValueField(models, field));
 	}
 
 	public boolean isLov(CompositeMap field) {
-		String type = field.getParent().getString("component_type", "");
-		if ("gridcolumn".equalsIgnoreCase(type)) {
-			type = field.getParent().getString("editor", "");
+		String type = field.getParent().getString(IProperties.COMPONENT_TYPE,
+				"");
+		if (IProperties.GRIDCOLUMN.equalsIgnoreCase(type)) {
+			type = field.getParent().getString(IProperties.editor, "");
 		}
-		return "lov".equalsIgnoreCase(type);
+		return IProperties.LOV.equalsIgnoreCase(type);
 	}
 
 	public boolean isCombo(CompositeMap field) {
-		String type = field.getParent().getString("component_type", "");
-		if ("gridcolumn".equalsIgnoreCase(type)) {
-			type = field.getParent().getString("editor", "");
+		String type = field.getParent().getString(IProperties.COMPONENT_TYPE,
+				"");
+		if (IProperties.GRIDCOLUMN.equalsIgnoreCase(type)) {
+			type = field.getParent().getString(IProperties.editor, "");
 		}
-		return "comboBox".equalsIgnoreCase(type);
+		return IProperties.COMBO_BOX.equalsIgnoreCase(type);
 	}
 
 	private void calBindTarget(BuilderSession session) {
 		ModelMapParser mmp = getModelMapParser(session);
 		List<CompositeMap> datasets = mmp.getDatasets();
 		for (CompositeMap ds : datasets) {
-			if (ds.getParent().getString("component_type", "").equals("grid")) {
-				ds.getParent().put("bindTarget", ds.getString("ds_id", ""));
+			if (ds.getParent().getString(IProperties.COMPONENT_TYPE, "")
+					.equals(IProperties.GRID)) {
+				ds.getParent().put(IProperties.bindTarget,
+						ds.getString(IProperties.DS_ID, ""));
 			}
 			List<CompositeMap> datasetFields = mmp.getDatasetFields(ds);
 			for (CompositeMap field : datasetFields) {
-				String ds_id = ds.getString("ds_id", "");
-				field.getParent().put("bindTarget", ds_id);
+				String ds_id = ds.getString(IProperties.DS_ID, "");
+				field.getParent().put(IProperties.bindTarget, ds_id);
 				// parser.debug(field.getParent().getParent().toXML());
 			}
 		}
@@ -174,17 +191,17 @@ public class ViewBuilder extends DefaultSourceBuilder {
 
 	private CompositeMap createComboDatasetMap(String model, String lookupCode,
 			BuilderSession session) {
-		CompositeMap ds = new CompositeMap("dataset");
-		ds.setPrefix("a");
+		CompositeMap ds = new CompositeMap(IProperties.DATASET);
+		ds.setPrefix(A);
 		String id = genDatasetID(ds, session);
-		ds.put("ds_id", id);
-		ds.put("autoCreate", true);
-		ds.put("component_type", "combodataset");
+		ds.put(IProperties.DS_ID, id);
+		ds.put(IProperties.autoCreate, true);
+		ds.put(IProperties.COMPONENT_TYPE, IProperties.COMBODATASET);
 		if ("".equals(model) == false)
-			ds.put("model", model);
-		ds.put("loadData", true);
+			ds.put(IProperties.model, model);
+		ds.put(IProperties.loadData, true);
 		if ("".equals(lookupCode) == false)
-			ds.put("lookupCode", lookupCode);
+			ds.put(IProperties.lookupCode, lookupCode);
 		return ds;
 	}
 
@@ -196,57 +213,61 @@ public class ViewBuilder extends DefaultSourceBuilder {
 		String openpath = map.getString(ComponentInnerProperties.OPEN_PATH, "");
 		if ("".equals(openpath))
 			return null;
-		CompositeMap link = new CompositeMap("link");
+		CompositeMap link = new CompositeMap(IProperties.LINK);
 		String id = genLinkID(link, session);
 		if (openpath.endsWith(".uip")) {
 			openpath = "${/request/@context_path}/"
-					+ session.getConfig("link_base_path")
+					+ session.getConfig(IProperties.LINK_BASE_PATH)
 					+ "_"
 					+ new File(openpath).getName()
 							.replaceAll(".uip", ".screen");
 		}
-		link.put("url", openpath);
-		link.put("component_type", "link");
-		link.put("id", id);
+		link.put(IProperties.url, openpath);
+		link.put(IProperties.COMPONENT_TYPE, IProperties.LINK);
+		link.put(IProperties.id, id);
 		return link;
 	}
 
 	private String genLinkID(CompositeMap link, BuilderSession session) {
-		return session.getIDGenerator().genLinkID("link");
+		return session.getIDGenerator().genLinkID(IProperties.LINK);
 	}
 
 	private void buildLinkContext(BuilderSession session) {
 		ModelMapParser mmp = getModelMapParser(session);
 		CompositeMap currentContext = session.getCurrentContext();
-		List<CompositeMap> buttons = mmp.getComponents("button");
+		List<CompositeMap> buttons = mmp.getComponents(IProperties.BUTTON);
 		for (CompositeMap button : buttons) {
-			CompositeMap clicker = button.getChild("inner_buttonclicker");
+			CompositeMap clicker = button
+					.getChild(IProperties.INNER_BUTTONCLICKER);
 			if (clicker != null) {
 				String id = clicker
 						.getString(ComponentInnerProperties.BUTTON_CLICK_ACTIONID);
-				if ("open".equals(id)) {
+				if (IProperties.OPEN.equals(id)) {
 					CompositeMap link = genLinkContext(clicker, session);
 					currentContext.addChild(link);
-					clicker.put("link_id", link.getString("id", ""));
+					clicker.put(IProperties.LINK_ID,
+							link.getString(IProperties.id, ""));
 				}
 			}
 		}
-		List<CompositeMap> renderers = mmp.getComponents("renderer");
+		List<CompositeMap> renderers = mmp.getComponents(IProperties.renderer);
 		for (CompositeMap renderer : renderers) {
 			String type = renderer.getString(
 					ComponentInnerProperties.RENDERER_TYPE, "");
-			if ("PAGE_REDIRECT".equals(type)) {
+			if (IProperties.PAGE_REDIRECT.equals(type)) {
 				CompositeMap link = genLinkContext(renderer, session);
 				currentContext.addChild(link);
-				renderer.put("link_id", link.getString("id", ""));
+				renderer.put(IProperties.LINK_ID,
+						link.getString(IProperties.id, ""));
 			}
 		}
 	}
 
 	public void actionEvent(String event, BuilderSession session) {
-		if ("children".equals(event)
-				&& "view".equalsIgnoreCase(session.getCurrentModel().getString(
-						ComponentInnerProperties.COMPONENT_TYPE, ""))) {
+		if (IProperties.EVENT_CHILDREN.equals(event)
+				&& IProperties.VIEW
+						.equalsIgnoreCase(session.getCurrentModel().getString(
+								ComponentInnerProperties.COMPONENT_TYPE, ""))) {
 			buildChildComponent(session);
 		}
 	}

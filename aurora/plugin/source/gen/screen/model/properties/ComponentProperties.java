@@ -439,4 +439,9 @@ public interface ComponentProperties {
 			cellPadding, column, row, id, prompt, hidden, width, height,
 			marginWidth, marginHeight, name, style, className, bindTarget,
 			editable };
+	String resultTarget = "resultTarget";
+	String defaultQueryField = "defaultQueryField";
+	String defaultQueryHint = "defaultQueryHint";
+	String action = "action";
+
 }

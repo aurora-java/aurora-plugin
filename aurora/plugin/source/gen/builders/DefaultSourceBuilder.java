@@ -7,6 +7,7 @@ import java.util.Set;
 
 import uncertain.composite.CompositeMap;
 import aurora.plugin.source.gen.BuilderSession;
+import aurora.plugin.source.gen.screen.model.properties.IProperties;
 
 public class DefaultSourceBuilder implements ISourceBuilder {
 
@@ -23,8 +24,8 @@ public class DefaultSourceBuilder implements ISourceBuilder {
 	protected void buildChildComponent(BuilderSession session) {
 		CompositeMap currentModel = session.getCurrentModel();
 		buildChildComponent(session, currentModel);
-		CompositeMap child = currentModel.getChildByAttrib("propertye_id",
-				"component_children");
+		CompositeMap child = currentModel.getChildByAttrib(IProperties.PROPERTYE_ID,
+				IProperties.COMPONENT_CHILDREN);
 		if (child != null)
 			buildChildComponent(session, child);
 	}
@@ -35,9 +36,9 @@ public class DefaultSourceBuilder implements ISourceBuilder {
 		if (childs != null) {
 			for (Object object : childs) {
 				if (object instanceof CompositeMap) {
-					if ("component_children"
+					if (IProperties.COMPONENT_CHILDREN
 							.equalsIgnoreCase(((CompositeMap) object)
-									.getString("propertye_id", ""))) {
+									.getString(IProperties.PROPERTYE_ID, ""))) {
 						continue;
 					}
 					String buildComponent = session
@@ -62,9 +63,9 @@ public class DefaultSourceBuilder implements ISourceBuilder {
 
 	protected Map<String, String> getAttributeMapping() {
 		Map<String, String> map = new HashMap<String, String>();
-		map.put("markid", "markid");
-		map.put("component_type", "component_type");
-		map.put("name", "name");
+		map.put(IProperties.MARKID, IProperties.MARKID);
+		map.put(IProperties.COMPONENT_TYPE, IProperties.COMPONENT_TYPE);
+		map.put(IProperties.name, IProperties.name);
 		return map;
 	}
 
@@ -72,7 +73,7 @@ public class DefaultSourceBuilder implements ISourceBuilder {
 		CompositeMap map = new CompositeMap();
 		map.setNameSpace(Default_prefix, Default_Namespace);
 		CompositeMap currentModel = session.getCurrentModel();
-		String name = currentModel.getString("component_type", "");
+		String name = currentModel.getString(IProperties.COMPONENT_TYPE, "");
 		map.setName(name);
 		return map;
 	}

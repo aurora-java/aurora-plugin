@@ -6,10 +6,11 @@ import java.util.Map;
 import uncertain.composite.CompositeMap;
 import aurora.plugin.source.gen.BuilderSession;
 import aurora.plugin.source.gen.SourceGenManager;
+import aurora.plugin.source.gen.screen.model.properties.IProperties;
 
 public class LinkBuilder extends DefaultSourceBuilder {
 	public void actionEvent(String event, BuilderSession session) {
-		if ("link".equals(event)) {
+		if (IProperties.LINK.equals(event)) {
 			CompositeMap currentContext = session.getCurrentContext();
 			List<?> childs = currentContext.getChilds();
 			if(childs==null)
@@ -17,7 +18,7 @@ public class LinkBuilder extends DefaultSourceBuilder {
 			StringBuilder sb = new StringBuilder();
 			for (Object c : childs) {
 				if (c instanceof CompositeMap) {
-					if ("link".equalsIgnoreCase(((CompositeMap) c).getName())) {
+					if (IProperties.LINK.equalsIgnoreCase(((CompositeMap) c).getName())) {
 						SourceGenManager sourceGenManager = session
 								.getSourceGenManager();
 						BuilderSession copy = session.getCopy();
@@ -32,10 +33,10 @@ public class LinkBuilder extends DefaultSourceBuilder {
 	}
 	protected Map<String, String> getAttributeMapping() {
 		Map<String, String> attributeMapping = super.getAttributeMapping();
-		attributeMapping.put("id", "id");
-		attributeMapping.put("url", "url");
-		attributeMapping.put("model", "model");
-		attributeMapping.put("action", "action");
+		attributeMapping.put(IProperties.id, IProperties.id);
+		attributeMapping.put(IProperties.url, IProperties.url);
+		attributeMapping.put(IProperties.model, IProperties.model);
+		attributeMapping.put(IProperties.action, IProperties.action);
 		return attributeMapping;
 	}
 }

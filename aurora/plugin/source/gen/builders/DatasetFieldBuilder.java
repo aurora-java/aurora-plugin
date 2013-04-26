@@ -4,36 +4,45 @@ import java.util.Map;
 
 import uncertain.composite.CompositeMap;
 import aurora.plugin.source.gen.BuilderSession;
+import aurora.plugin.source.gen.screen.model.properties.IProperties;
 
 public class DatasetFieldBuilder extends DefaultSourceBuilder {
+	private static final String _DISPLAY = "_display";
+
 	public void buildContext(BuilderSession session) {
 		super.buildContext(session);
 		CompositeMap currentContext = session.getCurrentContext();
 		CompositeMap currentModel = session.getCurrentModel();
-   
-		String type = currentContext.getString("field_type", "");
-		if ("comboBox".equalsIgnoreCase(type) || "lov".equalsIgnoreCase(type)) {
-			currentContext.put("for_return_field",
-					currentContext.getString("field_name", ""));
-			currentContext.put("for_display_field",
-					currentContext.getString("field_name", "") + "_display");
+
+		String type = currentContext.getString(IProperties.FIELD_TYPE, "");
+		if (IProperties.COMBO_BOX.equalsIgnoreCase(type)
+				|| IProperties.LOV.equalsIgnoreCase(type)) {
+			currentContext.put(IProperties.FOR_RETURN_FIELD,
+					currentContext.getString(IProperties.FIELD_NAME, ""));
+			currentContext.put(IProperties.FOR_DISPLAY_FIELD,
+					currentContext.getString(IProperties.FIELD_NAME, "")
+							+ _DISPLAY);
 			CompositeMap innerLovService = currentModel.getChildByAttrib(
-					"component_type", "innerLovService");
+					IProperties.COMPONENT_TYPE,
+					IProperties.INNER_TYPE_LOV_SERVICE);
 			String lovservice_for_return = innerLovService.getString(
-					"lovservice_for_return", "");
+					IProperties.LOVSERVICE_FOR_RETURN, "");
 			if ("".equals(lovservice_for_return) == false) {
-				currentContext.put("for_return_field", lovservice_for_return);
+				currentContext.put(IProperties.FOR_RETURN_FIELD,
+						lovservice_for_return);
 			}
 			String lovservice_for_display = innerLovService.getString(
-					"lovservice_for_display", "");
+					IProperties.LOVSERVICE_FOR_DISPLAY, "");
 			if ("".equals(lovservice_for_display) == false) {
-				currentContext.put("for_display_field", lovservice_for_display);
+				currentContext.put(IProperties.FOR_DISPLAY_FIELD,
+						lovservice_for_display);
 			}
 			CompositeMap mappings = innerLovService.getChildByAttrib(
-					"propertye_id", "inner_datset_field_mappings");
+					IProperties.PROPERTYE_ID,
+					IProperties.INNER_DATSET_FIELD_MAPPINGS);
 			if (mappings != null) {
 				CompositeMap clone = (CompositeMap) mappings.clone();
-				clone.setName("mappings");
+				clone.setName(IProperties.MAPPINGS);
 				currentContext.addChild(clone);
 			}
 		}
@@ -63,23 +72,30 @@ public class DatasetFieldBuilder extends DefaultSourceBuilder {
 
 	protected Map<String, String> getAttributeMapping() {
 		Map<String, String> attributeMapping = super.getAttributeMapping();
-		attributeMapping.put("required", "required");
-		attributeMapping.put("readOnly", "readOnly");
-		attributeMapping.put("options", "options");
-		attributeMapping.put("displayField", "displayField");
-		attributeMapping.put("prompt", "prompt");
-		attributeMapping.put("valueField", "valueField");
-		attributeMapping.put("field_name", "field_name");
-		attributeMapping.put("lovService", "lovService");
-		attributeMapping.put("lovWidth", "lovWidth");
-		attributeMapping.put("lovLabelWidth", "lovLabelWidth");
-		attributeMapping.put("lovHeight", "lovHeight");
-		attributeMapping.put("lovGridHeight", "lovGridHeight");
-		attributeMapping.put("lovAutoQuery", "lovAutoQuery");
-		attributeMapping.put("defaultValue", "defaultValue");
-		attributeMapping.put("checkedValue", "checkedValue");
-		attributeMapping.put("uncheckedValue", "uncheckedValue");
-		attributeMapping.put("field_type", "field_type");
+		attributeMapping.put(IProperties.required, IProperties.required);
+		attributeMapping.put(IProperties.readOnly, IProperties.readOnly);
+		attributeMapping.put(IProperties.options, IProperties.options);
+		attributeMapping
+				.put(IProperties.displayField, IProperties.displayField);
+		attributeMapping.put(IProperties.prompt, IProperties.prompt);
+		attributeMapping.put(IProperties.valueField, IProperties.valueField);
+		attributeMapping.put(IProperties.FIELD_NAME, IProperties.FIELD_NAME);
+		attributeMapping.put(IProperties.lovService, IProperties.lovService);
+		attributeMapping.put(IProperties.lovWidth, IProperties.lovWidth);
+		attributeMapping.put(IProperties.lovLabelWidth,
+				IProperties.lovLabelWidth);
+		attributeMapping.put(IProperties.lovHeight, IProperties.lovHeight);
+		attributeMapping.put(IProperties.lovGridHeight,
+				IProperties.lovGridHeight);
+		attributeMapping
+				.put(IProperties.lovAutoQuery, IProperties.lovAutoQuery);
+		attributeMapping
+				.put(IProperties.defaultValue, IProperties.defaultValue);
+		attributeMapping
+				.put(IProperties.checkedValue, IProperties.checkedValue);
+		attributeMapping.put(IProperties.uncheckedValue,
+				IProperties.uncheckedValue);
+		attributeMapping.put(IProperties.FIELD_TYPE, IProperties.FIELD_TYPE);
 		return attributeMapping;
 	}
 }

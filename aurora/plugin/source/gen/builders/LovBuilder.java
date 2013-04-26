@@ -2,15 +2,17 @@ package aurora.plugin.source.gen.builders;
 
 import java.util.Map;
 
+import aurora.plugin.source.gen.screen.model.properties.IProperties;
+
 
 public class LovBuilder extends DefaultSourceBuilder {
 	protected Map<String, String> getAttributeMapping() {
 		Map<String, String> attributeMapping = super.getAttributeMapping();
-		attributeMapping.put("width", "width");
-		attributeMapping.put("bindTarget", "bindTarget");
-		attributeMapping.put("prompt", "prompt");
-		attributeMapping.put("emptyText", "emptyText");
-		attributeMapping.put("typeCase", "typeCase");
+		attributeMapping.put(IProperties.width, IProperties.width);
+		attributeMapping.put(IProperties.bindTarget, IProperties.bindTarget);
+		attributeMapping.put(IProperties.prompt, IProperties.prompt);
+		attributeMapping.put(IProperties.emptyText, IProperties.emptyText);
+		attributeMapping.put(IProperties.typeCase, IProperties.typeCase);
 		return attributeMapping;
 	}
 }
