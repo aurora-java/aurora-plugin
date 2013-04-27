@@ -70,6 +70,9 @@ public class TemplateModelWrapper implements TemplateHashModel {
 			return getInnerValue(key);
 		}
 
+//		if("formBody".equals(key)){
+//			System.out.println();
+//		}
 		String compositeValue = getCompositeValue(key, cm);
 		if (compositeValue != null) {
 			return dow.wrap(compositeValue);

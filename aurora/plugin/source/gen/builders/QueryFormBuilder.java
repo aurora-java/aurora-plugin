@@ -22,7 +22,9 @@ public class QueryFormBuilder extends DefaultSourceBuilder {
 				IProperties.I_DATASET_DELEGATE)
 				.getString(IProperties.DS_ID, "");
 		session.getCurrentContext().put(IProperties.bindTarget, ds_id);
-
+		CompositeMap body = currentModel.getChildByAttrib(
+				IProperties.COMPONENT_TYPE, "formBody");
+		session.getCurrentContext().put("hasBody", body != null);
 		if (childByAttrib != null) {
 			CompositeMap currentContext = session.getCurrentContext();
 			ModelMapParser mmp = session.createModelMapParser(session
@@ -73,6 +75,8 @@ public class QueryFormBuilder extends DefaultSourceBuilder {
 			CompositeMap childByAttrib = currentModel.getChildByAttrib(
 					KEYS.CONTAINMENT_LIST, IProperties.PROPERTYE_ID,
 					IProperties.QUERY_FORM_TOOLBAR_CHILDREN);
+			if (childByAttrib == null)
+				return;
 			List<?> childs = childByAttrib.getChildsNotNull();
 			for (Object object : childs) {
 				if (object instanceof CompositeMap) {
