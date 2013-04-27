@@ -64,6 +64,7 @@ public interface ComponentInnerProperties {
 	String LINK_ID = "link_id";
 	String INNER_BUTTONCLICKER = "inner_buttonclicker";
 	String LINK_BASE_PATH = "link_base_path";
+	String LINK_FILE_PATH = "link_file_path";
 	String LOVSERVICE_OPTIONS = "lovservice_options";
 	String FIELD_TYPE = "field_type";
 	String FIELD_NAME = "field_name";
@@ -104,5 +105,7 @@ public interface ComponentInnerProperties {
 	String LOVSERVICE_FOR_RETURN = "lovservice_for_return";
 	String FOR_DISPLAY_FIELD = "for_display_field";
 	String FOR_RETURN_FIELD = "for_return_field";
-	 String MAPPINGS = "mappings";
+	String MAPPINGS = "mappings";
+	String FILE_NAME = "file_name";
+
 }

@@ -13,6 +13,8 @@ public class ComboBoxBuilder extends DefaultSourceBuilder {
 		attributeMapping.put(IProperties.width, IProperties.width);
 		attributeMapping.put(IProperties.emptyText, IProperties.emptyText);
 		attributeMapping.put(IProperties.typeCase, IProperties.typeCase);
+		attributeMapping.put(IProperties.FOR_DISPLAY_FIELD,
+				IProperties.FOR_DISPLAY_FIELD);
 		return attributeMapping;
 	}
 }

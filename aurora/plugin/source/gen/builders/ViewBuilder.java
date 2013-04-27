@@ -1,18 +1,17 @@
 package aurora.plugin.source.gen.builders;
 
-import java.io.File;
 import java.util.List;
 
 import uncertain.composite.CompositeMap;
 import aurora.plugin.source.gen.BuilderSession;
 import aurora.plugin.source.gen.ModelMapParser;
+import aurora.plugin.source.gen.Util;
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
 import aurora.plugin.source.gen.screen.model.properties.IProperties;
 
 public class ViewBuilder extends DefaultSourceBuilder {
 
 	private static final String A = "a";
-
 
 	@Override
 	public void buildContext(BuilderSession session) {
@@ -50,11 +49,14 @@ public class ViewBuilder extends DefaultSourceBuilder {
 					String fds_type = cds.getString(IProperties.COMPONENT_TYPE,
 							"");
 					if (IProperties.QUERYDATASET.equalsIgnoreCase(fds_type)) {
-						ds.put(IProperties.QUERY_DS, cds.getString(IProperties.DS_ID, ""));
+						ds.put(IProperties.QUERY_DS,
+								cds.getString(IProperties.DS_ID, ""));
 					} else if (IProperties.RESULTDATASET
 							.equalsIgnoreCase(fds_type)) {
-						ds.put(IProperties.bindName, ds.getString(IProperties.DS_ID, ""));
-						ds.put(IProperties.bindTarget, cds.getString(IProperties.DS_ID, ""));
+						ds.put(IProperties.bindName,
+								ds.getString(IProperties.DS_ID, ""));
+						ds.put(IProperties.bindTarget,
+								cds.getString(IProperties.DS_ID, ""));
 					}
 				} else {
 					ds.put(IProperties.autoQuery, true);
@@ -110,14 +112,16 @@ public class ViewBuilder extends DefaultSourceBuilder {
 		// mmp.bindMapping(field, lovMaps);
 		// }
 		String[] models = mmp.findComboFieldOption(field);
-		field.put(IProperties.displayField,
-				mmp.getComboDisplayField(models, field));
-		field.put(IProperties.valueField, mmp.getComboValueField(models, field));
 		CompositeMap lovservice = getLovServiceMap(session, field);
 		String lovservice_options = lovservice.getString(
 				IProperties.LOVSERVICE_OPTIONS, "");
-		field.put(IProperties.lovService,
-				"".equals(lovservice_options) ? models[0] : lovservice_options);
+		String model = "".equals(lovservice_options) ? models[0]
+				: lovservice_options;
+		models[0] = model;
+		field.put(IProperties.displayField,
+				mmp.getComboDisplayField(models, field));
+		field.put(IProperties.valueField, mmp.getComboValueField(models, field));
+		field.put(IProperties.lovService, model);
 	}
 
 	private CompositeMap getLovServiceMap(BuilderSession session,
@@ -147,6 +151,7 @@ public class ViewBuilder extends DefaultSourceBuilder {
 			field.put(IProperties.options,
 					createComboDatasetMap.getString(IProperties.DS_ID, ""));
 		}
+		models[0] = model;
 		field.put(IProperties.displayField,
 				mmp.getComboDisplayField(models, field));
 		field.put(IProperties.valueField, mmp.getComboValueField(models, field));
@@ -209,20 +214,11 @@ public class ViewBuilder extends DefaultSourceBuilder {
 		return session.getIDGenerator().genDatasetID(ds);
 	}
 
-	private CompositeMap genLinkContext(CompositeMap map, BuilderSession session) {
-		String openpath = map.getString(ComponentInnerProperties.OPEN_PATH, "");
-		if ("".equals(openpath))
-			return null;
+	private CompositeMap genLinkContext(CompositeMap map,
+			BuilderSession session, String openpath) {
 		CompositeMap link = new CompositeMap(IProperties.LINK);
 		String id = genLinkID(link, session);
-		if (openpath.endsWith(".uip")) {
-			openpath = "${/request/@context_path}/"
-					+ session.getConfig(IProperties.LINK_BASE_PATH)
-					+ "_"
-					+ new File(openpath).getName()
-							.replaceAll(".uip", ".screen");
-		}
-		link.put(IProperties.url, openpath);
+		link.put(IProperties.url, "${/request/@context_path}/" + openpath);
 		link.put(IProperties.COMPONENT_TYPE, IProperties.LINK);
 		link.put(IProperties.id, id);
 		return link;
@@ -243,7 +239,13 @@ public class ViewBuilder extends DefaultSourceBuilder {
 				String id = clicker
 						.getString(ComponentInnerProperties.BUTTON_CLICK_ACTIONID);
 				if (IProperties.OPEN.equals(id)) {
-					CompositeMap link = genLinkContext(clicker, session);
+					String openpath = clicker.getString(
+							ComponentInnerProperties.OPEN_PATH, "");
+					if (openpath.endsWith(".uip")) {
+						openpath = openpath.replaceAll(".uip", ".screen");
+					}
+					CompositeMap link = genLinkContext(clicker, session,
+							openpath);
 					currentContext.addChild(link);
 					clicker.put(IProperties.LINK_ID,
 							link.getString(IProperties.id, ""));
@@ -255,7 +257,13 @@ public class ViewBuilder extends DefaultSourceBuilder {
 			String type = renderer.getString(
 					ComponentInnerProperties.RENDERER_TYPE, "");
 			if (IProperties.PAGE_REDIRECT.equals(type)) {
-				CompositeMap link = genLinkContext(renderer, session);
+				String openpath = renderer.getString(
+						ComponentInnerProperties.OPEN_PATH, "");
+				if (openpath.endsWith(".uip")) {
+					openpath = Util.getNewLinkFilePath(openpath,
+							"" + session.getConfig(IProperties.FILE_NAME));
+				}
+				CompositeMap link = genLinkContext(renderer, session, openpath);
 				currentContext.addChild(link);
 				renderer.put(IProperties.LINK_ID,
 						link.getString(IProperties.id, ""));

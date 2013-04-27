@@ -8,6 +8,7 @@ public class Mapping extends AuroraComponent {
 
 	public Mapping(String from, String to) {
 		super();
+		this.setComponentType("innerDatasetFieldMapping");
 		this.setFrom(from);
 		this.setTo(to);
 	}

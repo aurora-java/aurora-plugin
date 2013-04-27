@@ -22,7 +22,7 @@ public class SourceGenManager {
 	private IObjectRegistry registry;
 	private Map<String, String> builders;
 	private ISourceTemplateProvider sourceTemplateProvider;
-
+	private IDGenerator idg = new IDGenerator();
 	public SourceGenManager() {
 	}
 
@@ -226,6 +226,13 @@ public class SourceGenManager {
 	public ModelMapParser createModelMapParser(CompositeMap model) {
 		ModelMapParser mmp = new ModelMapParser(registry, model);
 		return mmp;
+	}
+	public IDGenerator getIDGenerator() {
+		return idg;
+	}
+
+	public void setIdg(IDGenerator idg) {
+		this.idg = idg;
 	}
 
 }

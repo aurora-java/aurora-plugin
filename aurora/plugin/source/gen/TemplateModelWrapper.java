@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import aurora.plugin.source.gen.screen.model.properties.IProperties;
+
 import uncertain.composite.CompositeMap;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleObjectWrapper;
@@ -24,6 +26,7 @@ public class TemplateModelWrapper implements TemplateHashModel {
 	private static final String IS_LAYOUT = "islayout";
 
 	private static final String HAS_CHILD = "haschild";
+//	private static final String HAS_COMPONENT_CHILDREN = "haschildren";
 
 	private static final String NAME = "name";
 
@@ -41,7 +44,8 @@ public class TemplateModelWrapper implements TemplateHashModel {
 	private String name;
 
 	private static final String[] INNER_KEYS = { CDATA, COMPONENTS, RAWNAME,
-			IS_LAYOUT, IS_BOX, HAS_CHILD, INIT_PROCEDURE ,COMPONENT_CHILDREN};
+			IS_LAYOUT, IS_BOX, HAS_CHILD, INIT_PROCEDURE, COMPONENT_CHILDREN
+			 };
 
 	public TemplateModelWrapper(CompositeMap cm) {
 		this(cm.getName(), cm);
@@ -65,12 +69,12 @@ public class TemplateModelWrapper implements TemplateHashModel {
 		if (isInnerKey(key)) {
 			return getInnerValue(key);
 		}
-		
+
 		String compositeValue = getCompositeValue(key, cm);
 		if (compositeValue != null) {
 			return dow.wrap(compositeValue);
 		}
-		
+
 		@SuppressWarnings("rawtypes")
 		List childsNotNull = cm.getChildsNotNull();
 		for (Object object : childsNotNull) {
@@ -84,13 +88,13 @@ public class TemplateModelWrapper implements TemplateHashModel {
 				}
 			}
 		}
-		if("toolbar".equals(key)){
+		if ("toolbar".equals(key)) {
 			return null;
 		}
-		if("mappings".equals(key)){
+		if ("mappings".equals(key)) {
 			return null;
 		}
-		if("formBody".equals(key)){
+		if ("formBody".equals(key)) {
 			return null;
 		}
 		return dow.wrap("");
@@ -103,10 +107,10 @@ public class TemplateModelWrapper implements TemplateHashModel {
 			return dow.wrap(text == null ? "" : text);
 		}
 		if (COMPONENT_CHILDREN.equalsIgnoreCase(key)) {
-			CompositeMap childrenMap = cm.getChildByAttrib("propertye_id",
-					COMPONENT_CHILDREN);
+			CompositeMap childrenMap = cm.getChildByAttrib(
+					IProperties.PROPERTYE_ID, COMPONENT_CHILDREN);
 			List<TemplateModel> models = new ArrayList<TemplateModel>();
-			if(childrenMap==null){
+			if (childrenMap == null) {
 				return dow.wrap(models);
 			}
 			@SuppressWarnings("rawtypes")
@@ -143,6 +147,13 @@ public class TemplateModelWrapper implements TemplateHashModel {
 			List childs = cm.getChildsNotNull();
 			return dow.wrap(childs.size() > 0);
 		}
+//		if (HAS_COMPONENT_CHILDREN.equalsIgnoreCase(key)) {
+//			CompositeMap childrenMap = cm.getChildByAttrib(
+//					IProperties.PROPERTYE_ID, COMPONENT_CHILDREN);
+//			return dow.wrap(""+(childrenMap == null ? false : childrenMap
+//					.getChildsNotNull().size() > 0));
+//		}
+
 		if (IS_BOX.equalsIgnoreCase(key)) {
 			return dow.wrap(false);
 		}
@@ -150,7 +161,12 @@ public class TemplateModelWrapper implements TemplateHashModel {
 	}
 
 	private boolean isInnerKey(String key) {
-		return Arrays.asList(INNER_KEYS).contains(key.toLowerCase());
+		for (String k : INNER_KEYS) {
+			if (k.equalsIgnoreCase(key))
+				return true;
+		}
+		return false;
+		// return Arrays.asList(INNER_KEYS).contains(key.toLowerCase());
 	}
 
 	public boolean isEmpty() throws TemplateModelException {

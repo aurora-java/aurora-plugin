@@ -29,6 +29,8 @@ public class BOX extends RowCol {
 		dataset.setComponentType(Dataset.QUERYDATASET);
 		this.setDataset(dataset);
 		this.setLabelWidth(80);
+		this.setCol(3);
+		this.setRow(3);
 	}
 
 	public String getTitle() {

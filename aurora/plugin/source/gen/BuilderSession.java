@@ -14,7 +14,7 @@ public class BuilderSession {
 	private SourceGenManager sourceGenManager;
 
 	private StringBuilder eventResult = new StringBuilder();
-	private IDGenerator idg = new IDGenerator();
+	
 
 	public BuilderSession(SourceGenManager sourceGenManager) {
 		super();
@@ -144,17 +144,12 @@ public class BuilderSession {
 		bs.setCurrentContext(this.getCurrentContext());
 		bs.setCurrentModel(this.getCurrentModel());
 		bs.setModel(this.getModel());
-		bs.setIdg(idg);
 		bs.configMap = configMap;
 		return bs;
 	}
 
 	public IDGenerator getIDGenerator() {
-		return idg;
-	}
-
-	public void setIdg(IDGenerator idg) {
-		this.idg = idg;
+		return sourceGenManager.getIDGenerator();
 	}
 
 	public Object execActionEvent(String event, CompositeMap context) {

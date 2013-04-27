@@ -37,6 +37,12 @@ public class DatasetFieldBuilder extends DefaultSourceBuilder {
 				currentContext.put(IProperties.FOR_DISPLAY_FIELD,
 						lovservice_for_display);
 			}
+			currentContext.getString(IProperties.FOR_DISPLAY_FIELD, "");
+			session.getCurrentModel()
+					.getParent()
+					.put(IProperties.FOR_DISPLAY_FIELD,
+							currentContext.getString(
+									IProperties.FOR_DISPLAY_FIELD, ""));
 			CompositeMap mappings = innerLovService.getChildByAttrib(
 					IProperties.PROPERTYE_ID,
 					IProperties.INNER_DATSET_FIELD_MAPPINGS);
