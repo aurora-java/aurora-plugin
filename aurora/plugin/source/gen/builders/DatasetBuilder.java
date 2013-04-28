@@ -36,6 +36,9 @@ public class DatasetBuilder extends DefaultSourceBuilder {
 						((CompositeMap) c).put(IProperties.DS_TYPE, type);
 						((CompositeMap) c).put(IProperties.COMPONENT_TYPE,
 								IProperties.DATASET);
+						((CompositeMap) c).put(IProperties.queryDataSet,
+								((CompositeMap) c).getString(
+										IProperties.QUERY_DS, ""));
 						copy.setCurrentContext((CompositeMap) c);
 						String s = sourceGenManager.bindTemplate(copy);
 						sb.append(s);
