@@ -70,7 +70,7 @@ public class FontWrap {
 	}
 
 	public short colorConvert(String color) {
-		return IndexedColors.valueOf("RED").getIndex();
+		return IndexedColors.valueOf(color).getIndex();
 	}
 
 	public Font createFont(Workbook wb) {
