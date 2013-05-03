@@ -146,9 +146,9 @@ public class Grid extends GridColumn implements DatasetBinder, IDatasetDelegate 
 	}
 
 	public Toolbar getToolbar() {
-		if (toolbar != null)
-			return toolbar;
-		else
+//		if (toolbar != null)
+//			return toolbar;
+//		else
 			return (Toolbar) getFirstChild(Toolbar.class);
 	}
 

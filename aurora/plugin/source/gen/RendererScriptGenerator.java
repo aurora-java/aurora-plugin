@@ -43,7 +43,7 @@ public class RendererScriptGenerator {
 	}
 
 	public String openScript(String functionName, String linkId,String para_name) {
-		String s = " function #functionName#(para) {var linkUrl = $('#linkId#'); linkUrl.set('#para_name#', para); new Aurora.Window({id: '#windowId#',url:linkUrl.getUrl(),title: 'Title',height: 435,width: 620});}";
+		String s = " function #functionName#(para) {var linkUrl = $('#linkId#'); linkUrl.set('#para_name#', para); new Aurora.Window({id: '#windowId#',url:linkUrl.getUrl(),title: 'Title',height: 735,width: 720});}";
 		s = s.replace("#functionName#", functionName);
 		String windowID = session.getIDGenerator().genWindowID(linkId);
 		s = s.replaceAll("#windowId#", windowID);

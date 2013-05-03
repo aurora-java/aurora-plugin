@@ -59,6 +59,7 @@
 		<attribute id="model" style="simple,save" />
 		<attribute id="pageSize" style="simple,save,_int" />
 		<attribute id="selectionModel" style="simple,save" />
+		<attribute id="selectable" style="simple,save,_boolean" />
 		<attribute id="dataset_query_container" style="reference,save,inner" />
 	</component>
 

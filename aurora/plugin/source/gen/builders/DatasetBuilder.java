@@ -84,9 +84,9 @@ public class DatasetBuilder extends DefaultSourceBuilder {
 					context.put(IProperties.BINDED_NAME,
 							lineds.getString(IProperties.bindName, ""));
 				}
-				if (session.getConfig(IProperties.BE_OPENED_FROM_ANOTHER) != null) {
-					context.put(IProperties.NEED_AUTO_QUERY_URL, true);
-				}
+				context.put(
+						IProperties.NEED_AUTO_QUERY_URL,
+						session.getConfig(IProperties.BE_OPENED_FROM_ANOTHER) != null);
 			}
 		}
 	}
@@ -148,6 +148,7 @@ public class DatasetBuilder extends DefaultSourceBuilder {
 		attributeMapping.put(IProperties.bindName, IProperties.bindName);
 		attributeMapping.put(IProperties.bindTarget, IProperties.bindTarget);
 		attributeMapping.put(IProperties.queryUrl, IProperties.queryUrl);
+		attributeMapping.put(IProperties.selectable, IProperties.selectable);
 		return attributeMapping;
 	}
 }
