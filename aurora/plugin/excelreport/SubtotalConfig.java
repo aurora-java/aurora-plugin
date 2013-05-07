@@ -8,6 +8,24 @@ public class SubtotalConfig {
 	String columnField;
 	String groupColumnFild;
 	String groupStyle;
+	String formulaStyle;
+	String lineStyle;
+
+	public String getLineStyle() {
+		return lineStyle;
+	}
+
+	public void setLineStyle(String lineStyle) {
+		this.lineStyle = lineStyle;
+	}
+
+	public String getFormulaStyle() {
+		return formulaStyle;
+	}
+
+	public void setFormulaStyle(String formulaStyle) {
+		this.formulaStyle = formulaStyle;
+	}
 
 	public String getGroupStyle() {
 		return groupStyle;

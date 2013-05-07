@@ -64,6 +64,8 @@ public class DynamicContent {
 						configClone.setGroupStyle(config.getGroupStyle());
 						configClone.setColumnField(column.getField());
 						configClone.setGroupColumnFild(groupColumn.getField());
+						configClone.setFormulaStyle(config.getFormulaStyle());
+						configClone.setLineStyle(config.getLineStyle());
 						list = (LinkedList<SubtotalConfig>) record.get("list");
 						if (list == null)
 							list = new LinkedList<SubtotalConfig>();
@@ -203,8 +205,9 @@ public class DynamicContent {
 		boolean is_group = false;
 		while (colIt.hasNext()) {
 			stConfig = colIt.next();
+			column = this.getColumnsMap().get(stConfig.getColumnField());
 			if (stConfig.getColumnField().equals(curField)
-					|| !stConfig.getGroupFormula().equals(curGroupFormula)) {
+					|| !stConfig.getGroupFormula().equals(curGroupFormula)||stConfig.getColumnField().equals(column.getField())) {
 				curGroupFormula = stConfig.getGroupFormula();
 				curField = stConfig.getColumnField();
 				row = ExcelFactory.createRow(this.excelSheet, ++this.rowIndex);
@@ -214,8 +217,7 @@ public class DynamicContent {
 					totalCount++;
 			}
 
-			if (stConfig.getGroupFormula() != null) {
-				column = this.getColumnsMap().get(stConfig.getColumnField());
+			if (stConfig.getGroupFormula() != null) {				
 				Cell cell = row.createCell(column.getIndex());
 				StringBuffer colBuffer = new StringBuffer("SUBTOTAL(");
 				colBuffer.append(stConfig.getGroupFormula());
@@ -252,7 +254,10 @@ public class DynamicContent {
 				if (is_flag) {
 					String field = stConfig.getGroupColumnFild();
 					TableColumn groupColumn = columnMap.get(field);
-					Cell groupCell = row.createCell(groupColumn.getIndex());
+					int groupColumnFildIndex=groupColumn.getIndex();
+					if(field!=null&&field.equals(column.getField()))
+						groupColumnFildIndex--;
+					Cell groupCell = row.createCell(groupColumnFildIndex);
 					if (is_total)
 						groupCell.setCellValue(stConfig.getTotalDesc());
 					else
@@ -263,6 +268,24 @@ public class DynamicContent {
 							.getGroupStyle()))) {
 						groupCell.setCellStyle(excelFactory.styles.get(stConfig
 								.getGroupStyle()));
+					}
+					if (ExcelFactory.isNotNull(excelFactory.styles.get(stConfig
+							.getFormulaStyle()))) {
+						cell.setCellStyle(excelFactory.styles.get(stConfig
+								.getFormulaStyle()));
+					}
+					int cellnum = CellReference.convertColStringToIndex(getCell());
+					int tIndex=tableColumns.length+cellnum;
+					for(int i=0+cellnum;i<tIndex;i++){
+						Cell blankCell=row.getCell(i);
+						if(blankCell==null){
+							blankCell=row.createCell(i);
+							if (ExcelFactory.isNotNull(excelFactory.styles.get(stConfig
+									.getLineStyle()))) {
+								blankCell.setCellStyle(excelFactory.styles.get(stConfig
+										.getLineStyle()));
+							}
+						}						
 					}
 
 				}
@@ -309,10 +332,9 @@ public class DynamicContent {
 					}
 				} else {
 					CompositeMap m = null;
-					Iterator iterator = groupMap.getChildIterator();
-
-					while (iterator.hasNext()) {
-						CompositeMap record = (CompositeMap) iterator.next();
+					List a=groupMap.getChildsNotNull();
+					for(int i=0,l=a.size();i<l;l--){
+						CompositeMap record =(CompositeMap)a.get(l-1);						
 						String levelName = record.getName();
 						List<SubtotalConfig> list1 = (List<SubtotalConfig>) record
 								.get("list");
