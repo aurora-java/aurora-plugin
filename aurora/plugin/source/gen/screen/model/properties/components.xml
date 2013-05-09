@@ -87,6 +87,7 @@
 		<attribute id="name" style="simple,save" />
 		<attribute id="emptyText" style="simple,save" />
 		<attribute id="typeCase" style="simple,save" />
+		<attribute id="input_simple_data" style="save,inner,_cdata" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 	
@@ -96,6 +97,7 @@
 		<attribute id="width" style="simple,save,_int" />
 		<attribute id="height" style="simple,save,_int" />
 		<attribute id="name" style="simple,save" />
+		<attribute id="input_simple_data" style="save,inner,_cdata" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 
@@ -106,6 +108,7 @@
 		<attribute id="height" style="simple,save,_int" />
 		<attribute id="name" style="simple,save" />
 		<attribute id="renderer" style="simple,save" />
+		<attribute id="input_simple_data" style="save,inner,_cdata" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 
@@ -118,6 +121,7 @@
 		<attribute id="emptyText" style="simple,save" />
 		<attribute id="enableBesideDays" style="simple,save" />
 		<attribute id="enableMonthBtn" style="simple,save" />
+		<attribute id="input_simple_data" style="save,inner,_cdata" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 
@@ -129,6 +133,7 @@
 		<attribute id="name" style="simple,save" />
 		<attribute id="emptyText" style="simple,save" />
 		<attribute id="options" style="simple,save" />
+		<attribute id="input_simple_data" style="save,inner,_cdata" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 	<component type="innerLovService" category="aurora">
@@ -165,6 +170,7 @@
 		<attribute id="allowDecimals" style="simple,save,_boolean" />
 		<attribute id="allowNegative" style="simple,save,_boolean" />
 		<attribute id="allowFormat" style="simple,save,_boolean" />
+		<attribute id="input_simple_data" style="save,inner,_cdata" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 
@@ -225,6 +231,16 @@
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 		<attribute id="renderer" style="containment,save" />
 		<attribute id="footerRenderer" style="containment,save" />
+		<attribute id="grid_column_simple_data_1" style="save,inner,_cdata" />
+		<attribute id="grid_column_simple_data_2" style="save,inner,_cdata" />
+		<attribute id="grid_column_simple_data_3" style="save,inner,_cdata" />
+		<attribute id="grid_column_simple_data_4" style="save,inner,_cdata" />
+		<attribute id="grid_column_simple_data_5" style="save,inner,_cdata" />
+		<attribute id="grid_column_simple_data_6" style="save,inner,_cdata" />
+		<attribute id="grid_column_simple_data_7" style="save,inner,_cdata" />
+		<attribute id="grid_column_simple_data_8" style="save,inner,_cdata" />
+		<attribute id="grid_column_simple_data_9" style="save,inner,_cdata" />
+		<attribute id="grid_column_simple_data_10" style="save,inner,_cdata" />
 		<attribute id="component_children" style="containment,save,inner,list" />
 	</component>
 
