@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -40,13 +42,13 @@ public class ExcelParse {
 		Row row;
 		Cell cell;
 		CompositeMap record;
+		List<String> cellList=new LinkedList<String>();
 		String sheetName = sheet.getSheetName();
 		int  l = sheet.getLastRowNum();
 		int maxCellNum=sheet.getRow(0).getLastCellNum();
 		System.out.println("导入文件sheet("+sheetName+")最后一行是："+(l+1));
 		boolean is_write = false;
-		boolean is_new=true;
-		int indexCount=0;
+		boolean is_new=true;		
 		for (int i = 0; i <= l; i++) {
 			row = sheet.getRow(i);
 			if (row == null)
@@ -86,12 +88,22 @@ public class ExcelParse {
 					if (value != null && !"".equalsIgnoreCase(value)) {
 						is_write = true;
 						record.putString("C" + j, value);
-						indexCount++;
+						cellList.add(value);
 					}
+				}else{
+					cellList.add("");
 				}
 			}
-			if(i==0&&maxCellNum!=indexCount){
-				maxCellNum=indexCount;
+			if(i==0){
+				int indexcount=0;
+				for(int index=cellList.size();index>0;index--){
+					String value=cellList.get(index-1);
+					if("".equals(value)){
+						indexcount++;
+						break;
+					}
+				}
+				maxCellNum=maxCellNum-indexcount;
 			}
 			record.putInt("maxCell", maxCellNum);
 			if (is_write)
