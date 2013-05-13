@@ -46,6 +46,7 @@ public class ExcelParse {
 		System.out.println("导入文件sheet("+sheetName+")最后一行是："+(l+1));
 		boolean is_write = false;
 		boolean is_new=true;
+		int indexCount=0;
 		for (int i = 0; i <= l; i++) {
 			row = sheet.getRow(i);
 			if (row == null)
@@ -54,9 +55,10 @@ public class ExcelParse {
 			record.putBoolean("is_new", is_new);
 			is_new=false;
 			is_write = false;			
-			record.putInt("maxCell", maxCellNum);
-			if(i==0)
+			
+			if(i==0){
 				record.putString("sheetName", "sheetName");	
+			}
 			else
 				record.putString("sheetName", sheetName);			
 			for (int j = 0; j < maxCellNum; j++) {
@@ -84,9 +86,14 @@ public class ExcelParse {
 					if (value != null && !"".equalsIgnoreCase(value)) {
 						is_write = true;
 						record.putString("C" + j, value);
+						indexCount++;
 					}
 				}
 			}
+			if(i==0&&maxCellNum!=indexCount){
+				maxCellNum=indexCount;
+			}
+			record.putInt("maxCell", maxCellNum);
 			if (is_write)
 				importProcessor.saveLine(record, i);
 		}
