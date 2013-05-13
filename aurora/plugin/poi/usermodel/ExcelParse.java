@@ -45,6 +45,7 @@ public class ExcelParse {
 		List<String> cellList=new LinkedList<String>();
 		String sheetName = sheet.getSheetName();
 		int  l = sheet.getLastRowNum();
+		if(sheet.getRow(0)==null)return;
 		int maxCellNum=sheet.getRow(0).getLastCellNum();
 		System.out.println("导入文件sheet("+sheetName+")最后一行是："+(l+1));
 		boolean is_write = false;
@@ -89,6 +90,8 @@ public class ExcelParse {
 						is_write = true;
 						record.putString("C" + j, value);
 						cellList.add(value);
+					}else{
+						cellList.add("");
 					}
 				}else{
 					cellList.add("");
@@ -100,6 +103,8 @@ public class ExcelParse {
 					String value=cellList.get(index-1);
 					if("".equals(value)){
 						indexcount++;
+						continue;
+					}else{
 						break;
 					}
 				}
