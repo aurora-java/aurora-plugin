@@ -1,5 +1,8 @@
 package aurora.plugin.sap.sync.idoc;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+
 
 
 public class AuroraIDocException extends Exception {
@@ -18,5 +21,28 @@ public class AuroraIDocException extends Exception {
 	}
 	public AuroraIDocException(Throwable cause) {
 		super(cause);
+	}
+	
+	public static AuroraIDocException createSQLException(String sql, SQLException e) {
+		if (sql != null)
+			return new AuroraIDocException("execute sql:" + sql + " failed.", e);
+		return new AuroraIDocException(e);
+	}
+
+	public static AuroraIDocException createStatementException(Statement statement, SQLException e) {
+		if (statement != null)
+			return new AuroraIDocException("execute sql:" + statement.toString() + " failed.", e);
+		return new AuroraIDocException(e);
+	}
+
+	public static AuroraIDocException createStatementsException(Statement[] statements, SQLException e) {
+		if (statements != null) {
+			for (int i = 0; i < statements.length; i++) {
+				Statement statement = statements[i];
+				if (statement != null)
+					return new AuroraIDocException("execute sql:" + statement.toString() + " failed.", e);
+			}
+		}
+		return new AuroraIDocException(e);
 	}
 }

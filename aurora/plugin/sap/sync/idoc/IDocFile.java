@@ -22,36 +22,39 @@ public class IDocFile {
 	public static final String CRETIM_NODE = "CRETIM";
 	public static final String SERIAL_NODE = "SERIAL";
 	
-	private String path;
-	private int idocId;
-	private int serverId;
-	/**
-	 * @param path
-	 * @param idocId
-	 * @param serverId
-	 */
-	public IDocFile(String path, int idocId, int serverId) {
+	private String fileFullPath;
+	private int idocFileId;
+	private int idocServerId;
+
+	public IDocFile(String fileFullPath, int idocFileId, int idocServerId) {
 		super();
-		this.path = path;
-		this.idocId = idocId;
-		this.serverId = serverId;
+		this.fileFullPath = fileFullPath;
+		this.idocFileId = idocFileId;
+		this.idocServerId = idocServerId;
 	}
-	public String getPath() {
-		return path;
+
+	public String getFileFullPath() {
+		return fileFullPath;
 	}
-	public void setPath(String path) {
-		this.path = path;
+
+	public void setFileFullPath(String fileFullPath) {
+		this.fileFullPath = fileFullPath;
 	}
-	public int getIdocId() {
-		return idocId;
+
+	public int getIdocFileId() {
+		return idocFileId;
 	}
-	public void setIdocId(int idocId) {
-		this.idocId = idocId;
+
+	public void setIdocFileId(int idocFileId) {
+		this.idocFileId = idocFileId;
 	}
-	public int getServerId() {
-		return serverId;
+
+	public int getIdocServerId() {
+		return idocServerId;
 	}
-	public void setServerId(int serverId) {
-		this.serverId = serverId;
+
+	public void setIdocServerId(int idocServerId) {
+		this.idocServerId = idocServerId;
 	}
+
 }
