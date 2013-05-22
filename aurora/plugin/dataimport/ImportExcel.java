@@ -29,6 +29,7 @@ public class ImportExcel extends AbstractEntry {
 	public static final String XLSX_KEY = ".xlsx";
 	public static final String CSV_KEY = ".csv";
 	public static final String TXT_KEY = ".txt";
+	String maxFileSize=null;
 	public String fileName;
 	public String separator = ",";
 	public String header_id;
@@ -87,6 +88,10 @@ public class ImportExcel extends AbstractEntry {
 
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload up = new ServletFileUpload(factory);
+		long fileSizeMaxLong=10*1024*1024;
+		if(this.getMaxFileSize()!=null)			
+			fileSizeMaxLong=Long.parseLong(this.getMaxFileSize());
+		up.setFileSizeMax(fileSizeMaxLong);
 		List items = up.parseRequest(serviceInstance.getRequest());
 		Iterator i = items.iterator();
 		try {
@@ -347,4 +352,13 @@ public class ImportExcel extends AbstractEntry {
 	public void setAttribute5(String attribute5) {
 		this.attribute5 = attribute5;
 	}
+
+	public String getMaxFileSize() {
+		return maxFileSize;
+	}
+
+	public void setMaxFileSize(String maxFileSize) {
+		this.maxFileSize = maxFileSize;
+	}	
+	
 }
