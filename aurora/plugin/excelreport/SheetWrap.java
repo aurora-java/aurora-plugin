@@ -15,6 +15,7 @@ public class SheetWrap {
 	boolean displayGridlines=true;
 	DynamicContent dynamicContent;
 	CellData[] staticContent;
+	String autoSizeColumns;//0,1
 
 	private int offsetRowIndex = 0;
 
@@ -24,12 +25,27 @@ public class SheetWrap {
 
 	public void createSheet(ExcelFactory excelFactory) {
 		this.excelSheet = excelFactory.getWorkbook().createSheet(this.getName());
-		this.excelSheet.setDisplayGridlines(this.displayGridlines);
+		this.excelSheet.setDisplayGridlines(this.displayGridlines);		
 		this.excelFactory = excelFactory;
 		if (this.getDynamicContent() != null)
 			this.offsetRowIndex = this.getDynamicContent().createContent(excelFactory, this.excelSheet);
 		if (this.getStaticContent() != null)
 			createStaticContent(excelFactory.getContext());
+		autoSizeColumn();
+	}
+	
+	void autoSizeColumn(){
+		if(this.autoSizeColumns!=null){
+			String[] autoSizeColumnArray= autoSizeColumns.split(",");
+			for(String autoSizeColumn:autoSizeColumnArray){
+				try{
+					int col=new Integer(autoSizeColumn);
+					this.excelSheet.autoSizeColumn(col);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}		
+		}
 	}
 
 	void createStaticContent(CompositeMap context) {
@@ -101,6 +117,14 @@ public class SheetWrap {
 
 	public void setDisplayGridlines(boolean displayGridlines) {
 		this.displayGridlines = displayGridlines;
+	}
+
+	public String getAutoSizeColumns() {
+		return autoSizeColumns;
+	}
+
+	public void setAutoSizeColumns(String autoSizeColumns) {
+		this.autoSizeColumns = autoSizeColumns;
 	}	
 	
 }
