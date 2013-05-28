@@ -91,7 +91,7 @@ public class ImportExcel extends AbstractEntry {
 		long fileSizeMaxLong=10*1024*1024;
 		if(this.getMaxFileSize()!=null)			
 			fileSizeMaxLong=Long.parseLong(this.getMaxFileSize());
-		up.setFileSizeMax(fileSizeMaxLong);
+		up.setSizeMax(fileSizeMaxLong);
 		List items = up.parseRequest(serviceInstance.getRequest());
 		Iterator i = items.iterator();
 		try {
