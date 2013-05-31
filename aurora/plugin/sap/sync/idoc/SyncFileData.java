@@ -1,25 +1,38 @@
 package aurora.plugin.sap.sync.idoc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
+import aurora.service.IServiceFactory;
+import aurora.service.ServiceInvoker;
+import aurora.service.ServiceThreadLocal;
 
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
+import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.logging.ILogger;
+import uncertain.ocm.IObjectRegistry;
+import uncertain.proc.IProcedureManager;
+import uncertain.proc.Procedure;
 
 public class SyncFileData extends Thread {
 	public static final String DONE_STATUS = "DONE";
 
+	private IObjectRegistry registry;
 	private IDocServerManager serverManager;
 	private IDocServer iDocServer;
 	public IDocType idocType;
 	private DatabaseManager databaseManager;
-	private List<IDocType> errorIdocTypes = new LinkedList<IDocType>();
+	private Set<IDocType> errorIdocTypes = new HashSet<IDocType>();
 	private ILogger logger;
 
-	public SyncFileData(IDocServerManager serverManager, IDocServer iDocServer, ILogger logger) {
+	public SyncFileData(IObjectRegistry registry, IDocServerManager serverManager, IDocServer iDocServer, ILogger logger) {
+		this.registry = registry;
 		this.serverManager = serverManager;
 		this.iDocServer = iDocServer;
 		this.logger = logger;
@@ -30,23 +43,21 @@ public class SyncFileData extends Thread {
 			IDocFile idocFile = iDocServer.pollSyncFile();
 			if (idocFile == null) {
 				sleepOneSecond();
-			} else {
-				try {
-					idocType = null;
-					databaseManager = iDocServer.getDatabaseManager();
-					syncFileData(idocFile);
-					iDocServer.addBackupFile(idocFile);
-				} catch (Throwable e) {
-					logger.log(Level.SEVERE, "", e);
-					if (idocType != null) {
-						errorIdocTypes.add(idocType);
-					}
-					updateIdocStatus(idocFile, "syncFileData failed!");
-				} finally {
-					if (databaseManager != null)
-						databaseManager.close();
-				}
+				continue;
 			}
+			idocType = null;
+			try {
+				databaseManager = iDocServer.getDatabaseManager();
+				syncFileData(idocFile);
+				iDocServer.addBackupFile(idocFile);
+			} catch (Throwable e) {
+				logger.log(Level.SEVERE, "", e);
+				addErrorIdocType(idocType);
+				updateIdocStatus(idocFile, "syncFileData failed!");
+			}
+			executeFeedbackProc(idocFile);
+			if (databaseManager != null)
+				databaseManager.close();
 		}
 	}
 
@@ -93,22 +104,80 @@ public class SyncFileData extends Thread {
 			syncTrxTables(idocFile);
 			databaseManager.commitConnection();
 			logger.log("Sync Idoc File Id=" + idocFile.getIdocFileId() + " Execute Successful !");
+
 		} catch (Throwable e) {
 			databaseManager.rollbackConnection();
 			throw new AuroraIDocException(e);
 		} finally {
 			databaseManager.setConnectionAutoCommit(true);
 		}
+
 	}
 
-	private void syncTrxTables(IDocFile file) throws SQLException, AuroraIDocException {
+	private void syncTrxTables(IDocFile file) throws Exception {
 		int idocFileId = file.getIdocFileId();
 		String executePkg = databaseManager.queryExecutePkg(idocFileId);
+		if (executePkg == null || "".equals(executePkg))
+			throw new IllegalStateException("Please define execute_pkg for idoc file id =" + file.getIdocFileId());
 		String errorMessage = databaseManager.executePkg(executePkg, idocFileId);
 		if (errorMessage != null && !"".equals(errorMessage)) {
 			throw new AuroraIDocException("execute transaction Pkg " + executePkg + " failed:" + errorMessage);
 		}
 		databaseManager.updateIdocFileStatus(idocFileId, DONE_STATUS);
+	}
+
+	private void executeFeedbackProc(IDocFile idocFile) {
+		int idocFileId = idocFile.getIdocFileId();
+		try {
+			String feedback_proc = databaseManager.queryFeedbackProc(idocFileId);
+			if (feedback_proc == null)
+				return;
+			executeProc(idocFile, feedback_proc, databaseManager.getConnection());
+			recordFeedback(idocFileId, DONE_STATUS, "");
+		} catch (Throwable e) {
+			logger.log(Level.SEVERE, "", e);
+			recordFeedback(idocFileId, "EXCEPTION", getFullStackTrace(e));
+		}
+	}
+
+	private void recordFeedback(int idoc_file_id, String status, String message) {
+		try {
+			databaseManager.recordFeedback(idoc_file_id, status, message);
+		} catch (Throwable e) {
+			logger.log(Level.SEVERE, "", e);
+		}
+	}
+
+	private String getFullStackTrace(Throwable exception) {
+		String message = getExceptionStackTrace(exception);
+		return message;
+	}
+
+	private String getExceptionStackTrace(Throwable exception) {
+		if (exception == null)
+			return null;
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintStream pw = new PrintStream(baos);
+		exception.printStackTrace(pw);
+		pw.close();
+		return baos.toString();
+	}
+
+	protected void executeProc(IDocFile idocFile, String procedure_name, Connection connection) throws Exception {
+		logger.log(Level.CONFIG, "load procedure:{0}", new Object[] { procedure_name });
+		CompositeMap context = new CompositeMap("context");
+		int idoc_file_id = idocFile.getIdocFileId();
+		context.putObject("/parameter/@idoc_file_id", idoc_file_id, true);
+		context.putObject("/session/@user_id", 0, true);
+		ServiceThreadLocal.setCurrentThreadContext(context);
+		IProcedureManager procedureManager = (IProcedureManager) registry.getInstanceOfType(IProcedureManager.class);
+		if (procedureManager == null)
+			throw BuiltinExceptionFactory.createInstanceNotFoundException(null, IProcedureManager.class, this.getClass().getName());
+		IServiceFactory serviceFactory = (IServiceFactory) registry.getInstanceOfType(IServiceFactory.class);
+		if (serviceFactory == null)
+			throw BuiltinExceptionFactory.createInstanceNotFoundException(null, IServiceFactory.class, this.getClass().getName());
+		Procedure proc = procedureManager.loadProcedure(procedure_name);
+		ServiceInvoker.invokeProcedureWithTransaction(procedure_name, proc, serviceFactory,context,connection);
 	}
 
 	private boolean isIdocTypeStop(IDocType idocType) throws SQLException, AuroraIDocException {
@@ -117,5 +186,11 @@ public class SyncFileData extends Thread {
 			return true;
 		}
 		return false;
+	}
+
+	private void addErrorIdocType(IDocType idocType) {
+		if (idocType != null) {
+			errorIdocTypes.add(idocType);
+		}
 	}
 }

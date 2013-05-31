@@ -1,8 +1,6 @@
 package aurora.plugin.sap.sync.idoc;
 
 import java.io.File;
-import java.sql.SQLException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -15,8 +13,6 @@ public class BackupFileDataToInterface extends Thread {
 	private IDocServerManager serverManager;
 	private IDocServer iDocServer;
 	private DatabaseManager databaseManager;
-	private List<IDocType> errorIdocTypes = new LinkedList<IDocType>();
-	public IDocType idocType;
 	private ILogger logger;
 
 	public BackupFileDataToInterface(IDocServerManager serverManager, IDocServer iDocServer, ILogger logger) {
@@ -30,21 +26,17 @@ public class BackupFileDataToInterface extends Thread {
 			IDocFile idocFile = iDocServer.pollBckupFile();
 			if (idocFile == null) {
 				sleepOneSecond();
-			} else {
-				try {
-					idocType = null;
-					databaseManager = iDocServer.getDatabaseManager();
-					insertInterface(idocFile);
-				} catch (Throwable e) {
-					logger.log(Level.SEVERE, "", e);
-					if (idocType != null) {
-						errorIdocTypes.add(idocType);
-					}
-					updateIdocStatus(idocFile, "backup to interface failed!");
-				} finally {
-					if (databaseManager != null)
-						databaseManager.close();
-				}
+				continue;
+			}
+			try {
+				databaseManager = iDocServer.getDatabaseManager();
+				insertInterface(idocFile);
+			} catch (Throwable e) {
+				logger.log(Level.SEVERE, "", e);
+				updateIdocStatus(idocFile, "backup to interface failed!");
+			} finally {
+				if (databaseManager != null)
+					databaseManager.close();
 			}
 		}
 	}
@@ -82,12 +74,6 @@ public class BackupFileDataToInterface extends Thread {
 				}
 				CompositeMap control_node = (CompositeMap) idoc_node.getChilds().get(0);
 				header_id = databaseManager.addInterfaceHeader(idocFileId, control_node);
-				if (idocType == null) {
-					idocType = databaseManager.getIdocType(control_node);
-					if (isIdocTypeStop()) {
-						throw new AuroraIDocException("This idocType:" + idocType + " has error before");
-					}
-				}
 				for (int i = 1; i < idoc_node.getChilds().size(); i++) {
 					CompositeMap content_node = (CompositeMap) idoc_node.getChilds().get(i);
 					databaseManager.addInterfaceLine(header_id, content_node);
@@ -108,13 +94,5 @@ public class BackupFileDataToInterface extends Thread {
 		} finally {
 			databaseManager.setConnectionAutoCommit(true);
 		}
-	}
-
-	private boolean isIdocTypeStop() throws SQLException, AuroraIDocException {
-		boolean isOrdinal = databaseManager.isOrdinal(idocType.getIdoctyp(), idocType.getCimtyp());
-		if (isOrdinal && errorIdocTypes.contains(idocType)) {
-			return true;
-		}
-		return false;
 	}
 }

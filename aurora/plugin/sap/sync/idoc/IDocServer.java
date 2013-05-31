@@ -17,6 +17,9 @@ import java.util.logging.Level;
 import javax.sql.DataSource;
 
 import uncertain.logging.ILogger;
+import uncertain.ocm.IObjectRegistry;
+
+import aurora.plugin.sap.ISapConfig;
 
 import com.sap.conn.idoc.IDocDocumentList;
 import com.sap.conn.idoc.IDocXMLProcessor;
@@ -35,6 +38,7 @@ import com.sap.conn.jco.server.JCoServerTIDHandler;
 
 public class IDocServer {
 
+	private IObjectRegistry registry;
 	private IDocServerManager serverManager;
 	private String serverName;
 
@@ -48,7 +52,8 @@ public class IDocServer {
 	public LinkedList<IDocFile> backupFileList = new LinkedList<IDocFile>();
 	private int idocServerId = -1;
 
-	public IDocServer(IDocServerManager serverManager, String serverName) {
+	public IDocServer(IObjectRegistry registry,IDocServerManager serverManager, String serverName) {
+		this.registry = registry;
 		this.serverManager = serverManager;
 		this.serverName = serverName;
 		logger = serverManager.getLogger();
@@ -72,7 +77,7 @@ public class IDocServer {
 				if (jcoIDocServer.getConnectionCount() == 0) {
 					jcoIDocServer.setConnectionCount(1);
 				}
-				SyncFileData sync = new SyncFileData(serverManager, this, logger);
+				SyncFileData sync = new SyncFileData(registry,serverManager, this, logger);
 				sync.start();
 				BackupFileDataToInterface backup = new BackupFileDataToInterface(serverManager, this, logger);
 				backup.start();
@@ -83,9 +88,7 @@ public class IDocServer {
 				logger.log("IDocServer " + serverName + " 's idoc_server_id is " + idocServerId);
 				String programID = jcoIDocServer.getProgramID();
 				processMessage = "fetch fetchUnsettledIdocFiles for programID " + programID;
-				List<IDocFile> unsettledIdocFiles = databaseManager.fetchUnsettledIdocFiles(programID);
-				if (unsettledIdocFiles != null)
-					syncFileList.addAll(unsettledIdocFiles);
+				fetchUnsettledIdocFiles(databaseManager,programID);
 			}
 			jcoIDocServer.start();
 			if (!isRunning()) {
@@ -93,6 +96,10 @@ public class IDocServer {
 				logger.log(serverName + "'s status is " + jcoIDocServer.getState());
 				databaseManager.updateIDocServerStatus(idocServerId, "Error occurred:please check the console or log for details.");
 			} else {
+				if(serverManager.isEnabledJCo()){
+					JCoConfig jcoConfig = new JCoConfig(jcoIDocServer.getRepositoryDestination());
+					registry.registerInstance(ISapConfig.class, jcoConfig);
+				}
 				System.out.println("Connect IDocServer " + serverName + " successful!");
 				logger.log("Connect IDocServer " + serverName + " successful!");
 				databaseManager.updateIDocServerStatus(idocServerId, "OK");
@@ -104,6 +111,11 @@ public class IDocServer {
 			if (databaseManager != null)
 				databaseManager.close();
 		}
+	}
+	public void fetchUnsettledIdocFiles(DatabaseManager databaseManager,String programID) throws AuroraIDocException{
+		List<IDocFile> unsettledIdocFiles = databaseManager.fetchUnsettledIdocFiles(programID);
+		if (unsettledIdocFiles != null)
+			syncFileList.addAll(unsettledIdocFiles);
 	}
 
 	private void addListeners() {

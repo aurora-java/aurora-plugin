@@ -26,6 +26,7 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 	private String idocFileDir;
 	private boolean keepIdocFile = true;
 	private boolean interfaceEnabledFlag = true;
+	private boolean enabledJCo = true;
 	private int reconnectTime = 60000;// 1 minute
 	private int maxReconnectTime = 3600000;// 1 hour
 
@@ -33,6 +34,7 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 	private ILogger logger;
 	private DataSource datasource;
 	private boolean running = true;
+	
 
 	public IDocServerManager(IObjectRegistry registry) {
 		this.registry = registry;
@@ -62,7 +64,7 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 		for (int i = 0; i < servers.length; i++) {
 			String serverName = servers[i];
 			try {
-				IDocServer server = new IDocServer(this, serverName);
+				IDocServer server = new IDocServer(registry,this, serverName);
 				ServerConnectionMonitor serverMonitor = new ServerConnectionMonitor(this,server);
 				serverMonitor.setDaemon(true);
 				serverMonitor.start();
@@ -169,6 +171,18 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 
 	public void setDatasource(DataSource datasource) {
 		this.datasource = datasource;
+	}
+	
+	public boolean isEnabledJCo() {
+		return enabledJCo;
+	}
+
+	public boolean getEnabledJCo() {
+		return enabledJCo;
+	}
+
+	public void setEnabledJCo(boolean enabledJCo) {
+		this.enabledJCo = enabledJCo;
 	}
 	
 }

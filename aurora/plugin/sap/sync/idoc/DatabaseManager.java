@@ -22,10 +22,11 @@ public class DatabaseManager {
 	private Connection dbConnection;
 	private ILogger logger;
 
-	public DatabaseManager(Connection dbConnection,ILogger logger) {
+	public DatabaseManager(Connection dbConnection, ILogger logger) {
 		this.dbConnection = dbConnection;
 		this.logger = logger;
 	}
+
 	public int addIDocServer(JCoIDocServer server, String server_name) throws AuroraIDocException {
 		int server_id = -1;
 		PreparedStatement statement = null;
@@ -253,22 +254,6 @@ public class DatabaseManager {
 
 	}
 
-	/*
-	 * public String getTemplateCode(String idoctyp, String cimtyp) throws
-	 * AuroraIDocException { StringBuffer query_sql = new StringBuffer(
-	 * "select TEMPLATE_CODE from FND_SAP_IDOC_TEMPLATES where IDOCTYP=? "); if
-	 * (cimtyp != null) query_sql.append(" and CIMTYP=?"); PreparedStatement
-	 * statement = null; ResultSet rs = null; String templateCode = null; try {
-	 * statement = dbConnection.prepareStatement(query_sql.toString());
-	 * statement.setString(1, idoctyp); if (cimtyp != null)
-	 * statement.setString(2, cimtyp); rs = statement.executeQuery(); if
-	 * (rs.next()) { templateCode = rs.getString(1); } else { throw new
-	 * AuroraIDocException("IDOCTYP:" + idoctyp + " CIMTYP:" + cimtyp +
-	 * " execute sql:" + query_sql.toString() + " failed."); } rs.close();
-	 * statement.close(); } catch (SQLException e) { throw
-	 * AuroraIDocException.createStatementException(statement, e); } finally {
-	 * closeResultSet(rs); closeStatement(statement); } return templateCode; }
-	 */
 	public IDocType getIdocType(CompositeMap controlNode) {
 		String idoctyp = getChildNodeText(controlNode, IDocFile.IDOCTYP_NODE);
 		String cimtyp = getChildNodeText(controlNode, IDocFile.CIMTYP_NODE);
@@ -335,7 +320,7 @@ public class DatabaseManager {
 					String segmentField = filedMapsRs.getString(2);
 					String tableField = filedMapsRs.getString(3);
 					insert_sql.append("," + tableField);
-					String segmentName = parent_segment_name != null?parent_segment_name:segment_name;
+					String segmentName = parent_segment_name != null ? parent_segment_name : segment_name;
 					String value = getSegmentFieldValue(contentNode, segmentName, segmentField);
 					values_sql.append(",?");
 					values.add(value != null ? value : "");
@@ -344,7 +329,7 @@ public class DatabaseManager {
 				try {
 					insertSt = dbConnection.prepareStatement(insert_sql.toString());
 					int i = 1;
-					for (String value:values) {
+					for (String value : values) {
 						insertSt.setString(i++, value);
 					}
 					insertSt.executeUpdate();
@@ -407,8 +392,8 @@ public class DatabaseManager {
 			statement.setString(index++, content_node.getName());
 			statement.setInt(index++, parent_id);
 			List<CompositeMap> childList = content_node.getChilds();
-			if(childList != null){
-				for (CompositeMap child:childList) {
+			if (childList != null) {
+				for (CompositeMap child : childList) {
 					if (child.getChilds() != null && child.getChilds().size() > 0) {
 						continue;
 					}
@@ -514,67 +499,61 @@ public class DatabaseManager {
 			closeStatement(statement);
 		}
 	}
-/*
-	public String getMiddleExecutePkg(int idocId) throws AuroraIDocException {
-		if (idocId < 1)
-			return null;
-		String query_sql = "select i.idoctyp,i.cimtyp from fnd_sap_idocs i where i.idoc_id = " + idocId;
-		Statement statement = null;
-		ResultSet rs = null;
-		String templateCode = null;
+
+	public void recordFeedback(int idoc_file_id, String status, String message) throws AuroraIDocException {
+		String fnd_idoc_feedbacks_sql = "insert into fnd_idoc_feedbacks(idoc_file_id,status,message,created_by,creation_date,last_updated_by,last_update_date)"
+				+ "values(?,?,?,0,sysdate,0,sysdate)";
+		PreparedStatement statement = null;
 		try {
-			statement = dbConnection.createStatement();
-			rs = statement.executeQuery(query_sql);
-			String idoctyp = null;
-			String cimtyp = null;
-			if (rs.next()) {
-				idoctyp = rs.getString(1);
-				cimtyp = rs.getString(2);
-			} else {
-				throw new AuroraIDocException("execute sql:" + query_sql + " failed!");
-			}
-			rs.close();
+			statement = dbConnection.prepareStatement(fnd_idoc_feedbacks_sql);
+			statement.setInt(1, idoc_file_id);
+			statement.setString(2, status);
+			statement.setString(3, message);
+			statement.executeUpdate();
 			statement.close();
-			templateCode = getTemplateCode(idoctyp, cimtyp);
 		} catch (SQLException e) {
-			throw AuroraIDocException.createSQLException(query_sql, e);
+			throw AuroraIDocException.createStatementException(statement, e);
 		} finally {
-			closeResultSet(rs);
 			closeStatement(statement);
 		}
-		return getMiddleExecutePkg(templateCode);
 	}
 
-	public String getMiddleExecutePkg(String template_code) throws AuroraIDocException {
-		String query_sql = "select execute_pkg from fnd_interface_templates where enabled_flag='Y' and template_code='" + template_code
-				+ "'";
-		Statement statement = null;
-		ResultSet rs = null;
-		String executePkg = null;
-		try {
-			statement = dbConnection.createStatement();
-			rs = statement.executeQuery(query_sql);
-			if (rs.next()) {
-				executePkg = rs.getString(1);
-			} else {
-				throw new AuroraIDocException("execute sql:" + query_sql + " failed!");
-			}
-			rs.close();
-			statement.close();
-		} catch (SQLException e) {
-			throw AuroraIDocException.createSQLException(query_sql, e);
-		} finally {
-			closeResultSet(rs);
-			closeStatement(statement);
-		}
-		return executePkg;
-	}
-*/
 	public String queryExecutePkg(int idoc_file_id) throws AuroraIDocException {
 		if (idoc_file_id < 1)
 			return null;
-		String query_sql = "select s.execute_pkg  from fnd_idoc_files t, fnd_idoc_types s  where t.idoc_file_id = "+idoc_file_id+"  and s.idoctyp = t.idoctyp "+
-				" and ((s.cimtyp is null and t.cimtyp is null) or s.cimtyp = t.cimtyp)";
+		String query_sql = "select s.execute_pkg  from fnd_idoc_files t, fnd_idoc_types s  where t.idoc_file_id = " + idoc_file_id
+				+ "  and s.idoctyp = t.idoctyp " + " and ((s.cimtyp is null and t.cimtyp is null) or s.cimtyp = t.cimtyp)";
+		Statement statement = null;
+		ResultSet rs = null;
+		String execute_pkg = null;
+		try {
+			statement = dbConnection.createStatement();
+			rs = statement.executeQuery(query_sql);
+			if (rs.next()) {
+				execute_pkg = rs.getString(1);
+			} else {
+				throw new AuroraIDocException("execute sql:" + query_sql + " failed!");
+			}
+			rs.close();
+			statement.close();
+		} catch (SQLException e) {
+			throw AuroraIDocException.createSQLException(query_sql, e);
+		} finally {
+			closeResultSet(rs);
+			closeStatement(statement);
+		}
+		return execute_pkg;
+	}
+
+	public Connection getConnection() {
+		return dbConnection;
+	}
+
+	public String queryFeedbackProc(int idoc_file_id) throws AuroraIDocException {
+		if (idoc_file_id < 1)
+			return null;
+		String query_sql = "select s.feedback_proc  from fnd_idoc_files t, fnd_idoc_types s  where t.idoc_file_id = " + idoc_file_id
+				+ "  and s.idoctyp = t.idoctyp " + " and ((s.cimtyp is null and t.cimtyp is null) or s.cimtyp = t.cimtyp)";
 		Statement statement = null;
 		ResultSet rs = null;
 		String execute_pkg = null;
@@ -623,7 +602,8 @@ public class DatabaseManager {
 	}
 
 	public void updateIDocServerStatus(int idoc_server_id, String status) throws AuroraIDocException {
-		String delete_sql = "update fnd_idoc_servers s set s.status='" + status + "',last_update_date=sysdate where s.server_id=" + idoc_server_id;
+		String delete_sql = "update fnd_idoc_servers s set s.status='" + status + "',last_update_date=sysdate where s.server_id="
+				+ idoc_server_id;
 		Statement statement = null;
 		try {
 			statement = dbConnection.createStatement();
@@ -664,7 +644,7 @@ public class DatabaseManager {
 	public List<IDocFile> fetchUnsettledIdocFiles(String program_id) throws AuroraIDocException {
 		List<IDocFile> idocList = new LinkedList<IDocFile>();
 		String get_HistoryIdocs_sql = "select i.idoc_file_id, i.server_id, i.file_path  from "
-				+ " fnd_idoc_files i, fnd_idoc_servers s  where (i.sync_status is null or i.sync_status<>'OK') "
+				+ " fnd_idoc_files i, fnd_idoc_servers s  where (i.sync_status is null or i.sync_status<>'DONE') "
 				+ " and i.server_id = s.server_id" + " and s.program_id='" + program_id + "' order by i.idoc_file_id";
 		Statement statement = null;
 		ResultSet rs = null;
