@@ -96,10 +96,7 @@ public class IDocServer {
 				logger.log(serverName + "'s status is " + jcoIDocServer.getState());
 				databaseManager.updateIDocServerStatus(idocServerId, "Error occurred:please check the console or log for details.");
 			} else {
-				if(serverManager.isEnabledJCo()){
-					JCoConfig jcoConfig = new JCoConfig(jcoIDocServer.getRepositoryDestination());
-					registry.registerInstance(ISapConfig.class, jcoConfig);
-				}
+				serverManager.addDestination(jcoIDocServer.getRepositoryDestination());
 				System.out.println("Connect IDocServer " + serverName + " successful!");
 				logger.log("Connect IDocServer " + serverName + " successful!");
 				databaseManager.updateIDocServerStatus(idocServerId, "OK");

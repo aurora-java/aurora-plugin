@@ -7,6 +7,8 @@ import java.util.logging.Level;
 
 import javax.sql.DataSource;
 
+import aurora.plugin.sap.ISapConfig;
+
 import uncertain.core.ILifeCycle;
 import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.logging.ILogger;
@@ -33,6 +35,7 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 	private List<IDocServer> runningServerList = new LinkedList<IDocServer>();
 	private ILogger logger;
 	private DataSource datasource;
+	private DestinationProvider destinationProvider;
 	private boolean running = true;
 	
 
@@ -60,6 +63,11 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 		logger.info("Aurora IDoc Plugin Version: " + AURORA_IDOC_PLUGIN_VERSION);
 		initParameters();
 
+		if(isEnabledJCo()){
+			destinationProvider = new DestinationProvider();
+			registry.registerInstance(ISapConfig.class, destinationProvider);
+		}
+		
 		String[] servers = serverNameList.split(SERVER_NAME_SEPARATOR);
 		for (int i = 0; i < servers.length; i++) {
 			String serverName = servers[i];
@@ -183,6 +191,10 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 
 	public void setEnabledJCo(boolean enabledJCo) {
 		this.enabledJCo = enabledJCo;
+	}
+	public void addDestination(String destinationName){
+		if(destinationProvider != null)
+			destinationProvider.addDestination(destinationName);
 	}
 	
 }
