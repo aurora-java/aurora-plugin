@@ -18,6 +18,7 @@ import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 
 import aurora.plugin.sap.ISapConfig;
+import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 
 public class JcoInvoke extends AbstractEntry {
@@ -46,8 +47,11 @@ public class JcoInvoke extends AbstractEntry {
 		logger.config("jco-invoke");
 		logger.config("===================================");
 		logger.log(Level.CONFIG, "config:{0}", new Object[] { this });
-		HttpServiceInstance service = (HttpServiceInstance) HttpServiceInstance
-				.getInstance(context.getRoot());
+		
+		ServiceInstance service = (ServiceInstance) ServiceInstance.getInstance(context.getRoot());
+		
+//		HttpServiceInstance service = (HttpServiceInstance) HttpServiceInstance
+//				.getInstance(context.getRoot());
 		CompositeMap target = null;
 		CompositeMap model = null;
 		if (service != null)
