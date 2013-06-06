@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,14 +36,21 @@ public class WordExport extends AbstractEntry {
 	private static final String TEMPLATE_TABLE = "table.ftl";
 	private static final String DEFAULT_WORD_NAME = "default.doc";
 	
+	protected SectList[] sectLists;
 	protected Table[] tables;
 	protected Replace[] replaces;
 	private String template = null;
 	private String name = DEFAULT_WORD_NAME;
 	private WordTemplateProvider provider;
 	
+	private int baseId;
+	
+	private StringBuffer listDefSb = new StringBuffer();
+	private StringBuffer listMapSb = new StringBuffer();
+	
 	public WordExport(IObjectRegistry registry) {
 		provider = (WordTemplateProvider) registry.getInstanceOfType(WordTemplateProvider.class);
+		baseId = 1000;
 	}
 
 	
@@ -54,15 +60,34 @@ public class WordExport extends AbstractEntry {
 		CompositeMap model = service.getModel();
 		
 		Map dataMap = new HashMap();
-		if(replaces != null)
-		for(Replace replace:replaces){
-			CompositeMap data = (CompositeMap)model.getObject(replace.getPath());
-			Map map = transformHashMap(data);
-			dataMap.put(replace.getName(),map);
+		if(replaces != null){
+			for(Replace replace:replaces){
+				CompositeMap data = (CompositeMap)model.getObject(replace.getPath());
+				dataMap.put(replace.getName(),data);
+			}
 		}
 		
+		if(sectLists != null) {
+			listDefSb.append(createTopListDef());
+			listMapSb.append(createListDefMap());
+			for(SectList list:sectLists){
+				CompositeMap data = (CompositeMap)model.getObject(list.getModel());
+				CompositeMap top = buildTree(data);
+				List children = top.getChilds();
+				if(children!=null){
+					StringBuffer psb = new StringBuffer();
+					createSection(psb,children,0);
+					dataMap.put(list.getId(),psb.toString());
+				}
+			}
+			listDefSb.append(listMapSb);
+			dataMap.put("listdef", listDefSb.toString());
+		}
+		
+		
+		
+		
 		Configuration configuration = provider.getFreeMarkerConfiguration();
-		getData(dataMap);
 		Template t = null;
 		Writer out = null;
 		try {
@@ -107,6 +132,14 @@ public class WordExport extends AbstractEntry {
 		this.name = n;
 	}
 	
+	public SectList[] getSectLists() {
+		return sectLists;
+	}
+
+	public void setSectLists(SectList[] lists) {
+		this.sectLists = lists;
+	}
+	
 	public Table[] getTables() {
 		return tables;
 	}
@@ -147,17 +180,6 @@ public class WordExport extends AbstractEntry {
 		return rtn;
 	}
 	
-	private Map transformHashMap(CompositeMap data){
-		Map map = new HashMap();
-		Set ks = data.keySet();
-		Iterator kit = ks.iterator();
-		while(kit.hasNext()){
-			Object key = kit.next();
-			map.put(key, data.get(key));
-		}
-		return map;
-	}
-	
 	
 	private String createTable(Table table, Template template,CompositeMap model) throws TemplateException, IOException{
 		StringWriter out = new StringWriter();
@@ -171,23 +193,198 @@ public class WordExport extends AbstractEntry {
 		map.put("columns", columns);
 		
 		CompositeMap data = (CompositeMap)model.getObject(table.getModel());
-		map.put("records", data.getChilds());
+		map.put("records", data.getChildsNotNull());
 		
 		template.process(map, out);
 		out.flush();
 		return out.toString();
 	}
-
-	/**
-	 * 注意dataMap里存放的数据Key值要与模板中的参数相对应
-	 * 
-	 * @param dataMap
-	 */
-	private void getData(Map dataMap) {
-		for(int i=0;i<200;i++){
-			dataMap.put("act"+i, Math.random()*2000);			
+	
+	
+	
+	private CompositeMap buildTree(CompositeMap data){
+		CompositeMap top = new CompositeMap();
+		Map map = new HashMap();
+		if(data!=null && data.getChilds()!=null){
+			List children = data.getChilds();
+			Iterator it = children.iterator();
+			while(it.hasNext()){
+				CompositeMap item = (CompositeMap)it.next();
+				String id = item.getString("id");
+				String pid = item.getString("pid");
+				map.put(id, item);
+				if(pid == null || "".equals(pid)){
+					top.addChild(item);					
+				}
+			}
+			it = children.iterator();
+			while(it.hasNext()){
+				CompositeMap item = (CompositeMap)it.next();
+				String pid = item.getString("pid");
+				if(pid != null && !"".equals(pid)){
+					CompositeMap parent = (CompositeMap)map.get(pid);
+					if(parent != null){
+						parent.addChild(item);						
+					}
+				}
+			}
+		}
+		return top;
+	}
+	
+	
+	
+	private String createListDefMap(){
+		StringBuffer sb = new StringBuffer();
+		sb.append("<w:list w:ilfo='"+baseId+"'>");		
+		sb.append("<w:ilst w:val='"+baseId+"'/>");
+		sb.append("</w:list>");
+		return sb.toString();
+	}
+	
+	
+	private void createSection(StringBuffer psb,List children,int level){
+		if(children == null) return;
+		Iterator it = children.iterator();
+		while(it.hasNext()){
+			CompositeMap item = (CompositeMap)it.next();
+			String pid = item.getString("pid");
+			String text = item.getString("text");
+			boolean isBold = (pid == null || "".equals(pid));
+			boolean isTop = level ==0;
+			if(isTop){
+				baseId ++;
+				listDefSb.append(createListDef(baseId-1000));
+				listMapSb.append(createListDefMap());
+			}
+			psb.append(createP(level==0, isBold,level,baseId,text));
+			List childs = item.getChilds();
+			if(childs!=null){
+				createSection(psb,childs,level+1);
+			}
+			
+			if(isTop){
+				psb.append("<w:p>");
+				psb.append("    <w:pPr>");
+				psb.append("        <w:widowControl/>");
+				psb.append("        <w:spacing w:line='400' w:line-rule='exact'/>");
+				psb.append("        <w:rPr>");
+				psb.append("            <w:rFonts w:ascii='宋体' w:h-ansi='宋体'/>");
+				psb.append("            <wx:font wx:val='宋体'/>");
+				psb.append("            <w:sz w:val='24'/>");
+				psb.append("            <w:sz-cs w:val='24'/>");
+				psb.append("        </w:rPr>");
+				psb.append("    </w:pPr>");
+				psb.append("</w:p>");
+			}
 		}
 		
+	}
+	
+	
+	private String createP(boolean isOutLine,boolean isBold,int level,int listDefId,String text){
+		StringBuffer sb = new StringBuffer();
+		sb.append("<w:p>");
+		sb.append("    <w:pPr>");
+		if(isOutLine) sb.append("        <w:outlineLvl w:val='0'/>");
+		sb.append("        <w:listPr>");
+		sb.append("            <w:ilvl w:val='"+level+"'/>");
+		sb.append("            <w:ilfo w:val='"+(isOutLine ? 1000 : listDefId)+"'/>");
+		sb.append("        </w:listPr>");
+		sb.append("        <w:rPr>");
+		sb.append("            <w:rFonts w:ascii='宋体' w:h-ansi='宋体'/>");
+		sb.append("            <wx:font wx:val='宋体'/>");
+		sb.append("            <w:sz w:val='24'/>");
+		sb.append("            <w:sz-cs w:val='24'/>");
+		if(isBold)sb.append("            <w:b/>");
+		sb.append("        </w:rPr>");
+		sb.append("    </w:pPr>");
+		sb.append("    <w:r>");
+		sb.append("        <w:rPr>");
+		sb.append("            <w:rFonts w:ascii='宋体' w:h-ansi='宋体'/>");
+		sb.append("            <wx:font wx:val='宋体'/>");
+		sb.append("            <w:sz w:val='24'/>");
+		sb.append("            <w:sz-cs w:val='24'/>");
+		if(isBold)sb.append("            <w:b/>");
+		sb.append("        </w:rPr>");
+		sb.append("        <w:t>"+text+"</w:t>");
+		sb.append("    </w:r>");
+		sb.append("</w:p>");
+		return sb.toString();
+	}
+	
+	
+	private String createTopListDef(){
+		StringBuffer sb = new StringBuffer();
+		sb.append("<w:listDef w:listDefId='"+baseId+"'>");
+		sb.append("  <w:plt w:val='Multilevel'/>");
+		sb.append("  <w:lvl w:ilvl='0'>");
+		sb.append("    <w:start w:val='1'/>");
+		sb.append("    <w:lvlText w:val='%1'/>");
+		sb.append("    <w:lvlJc w:val='left'/>");
+		sb.append("    <w:pPr>");
+		sb.append("      <w:ind w:left='420' w:hanging='420'/>");
+		sb.append("      <w:spacing w:line='300' w:line-rule='auto' />");
+		sb.append("    </w:pPr>");
+		sb.append("    <w:rPr>");
+		sb.append("      <w:rFonts w:hint='default'/>");
+		sb.append("    </w:rPr>");
+		sb.append("  </w:lvl>");
+		sb.append("</w:listDef>");
+		return sb.toString();	
+	}
+	
+	
+	
+	
+	private String createListDef(int level){
+		StringBuffer sb = new StringBuffer();
+		sb.append("<w:listDef w:listDefId='"+baseId+"'>");
+		sb.append("  <w:plt w:val='Multilevel'/>");
+		sb.append("  <w:lvl w:ilvl='0'>");
+		sb.append("    <w:start w:val='1'/>");
+		sb.append("    <w:lvlText w:val='%1'/>");
+		sb.append("    <w:lvlJc w:val='left'/>");
+		sb.append("    <w:rPr>");
+		sb.append("      <w:rFonts w:hint='default'/>");
+		sb.append("    </w:rPr>");
+		sb.append("  </w:lvl>");
+		sb.append("  <w:lvl w:ilvl='1'>");
+		sb.append("    <w:start w:val='1'/>");
+		sb.append("    <w:lvlText w:val='"+level+".%2'/>");
+		sb.append("    <w:lvlJc w:val='left'/>");
+		sb.append("    <w:pPr>");
+		sb.append("      <w:ind w:left='420' w:hanging='420'/>");
+		sb.append("      <w:spacing w:line='300' w:line-rule='auto' />");
+		sb.append("    </w:pPr>");
+		sb.append("    <w:rPr>");
+		sb.append("      <w:rFonts w:hint='default'/>");
+		sb.append("    </w:rPr>");
+		sb.append("  </w:lvl>");
+		sb.append("  <w:lvl w:ilvl='2'>");
+		sb.append("    <w:start w:val='1'/>");
+		sb.append("    <w:lvlText w:val='(%3)'/>");
+		sb.append("    <w:lvlJc w:val='left'/>");
+		sb.append("    <w:pPr>");
+		sb.append("      <w:ind w:left='840' w:hanging='420'/>");
+		sb.append("      <w:spacing w:line='300' w:line-rule='auto' />");
+		sb.append("    </w:pPr>");
+		sb.append("    <w:rPr>");
+		sb.append("      <w:rFonts w:hint='default'/>");
+		sb.append("    </w:rPr>");
+		sb.append("  </w:lvl>");
+		sb.append("  <w:lvl w:ilvl='3'>");
+		sb.append("    <w:start w:val='1'/>");
+		sb.append("    <w:nfc w:val='4'/>");
+		sb.append("    <w:lvlText w:val='%4)'/>");
+		sb.append("    <w:lvlJc w:val='left'/>");
+		sb.append("    <w:pPr>");
+		sb.append("      <w:ind w:left='1260' w:hanging='420'/>");
+		sb.append("      <w:spacing w:line='300' w:line-rule='auto' />");
+		sb.append("    </w:pPr>");
+		sb.append("  </w:lvl>");
+		sb.append("</w:listDef>");
+		return sb.toString();		
 	}
 
 }
