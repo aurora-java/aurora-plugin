@@ -1,9 +1,9 @@
 package aurora.plugin.sap.sync.idoc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-
 
 public class AuroraIDocException extends Exception {
 	private static final long serialVersionUID = -3184478964424768398L;
@@ -44,5 +44,15 @@ public class AuroraIDocException extends Exception {
 			}
 		}
 		return new AuroraIDocException(e);
+	}
+	
+	public static String getExceptionStackTrace(Throwable exception) {
+		if (exception == null)
+			return null;
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintStream pw = new PrintStream(baos);
+		exception.printStackTrace(pw);
+		pw.close();
+		return baos.toString();
 	}
 }

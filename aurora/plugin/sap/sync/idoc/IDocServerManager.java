@@ -1,6 +1,8 @@
 package aurora.plugin.sap.sync.idoc;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -20,7 +22,7 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 
 	public static final String PLUGIN = IDocServerManager.class.getCanonicalName();
 	public static final String SERVER_NAME_SEPARATOR = ",";
-	public static final String AURORA_IDOC_PLUGIN_VERSION = "2.0";
+	public static final String AURORA_IDOC_PLUGIN_VERSION = "2.1";
 
 	private IObjectRegistry registry;
 
@@ -31,19 +33,23 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 	private boolean enabledJCo = true;
 	private int reconnectTime = 60000;// 1 minute
 	private int maxReconnectTime = 3600000;// 1 hour
+	private boolean debug = false;
 
-	private List<IDocServer> runningServerList = new LinkedList<IDocServer>();
+	private List<IDocServer> idocServerList = new LinkedList<IDocServer>();
 	private ILogger logger;
 	private DataSource datasource;
 	private DestinationProvider destinationProvider;
 	private boolean running = true;
-	
 
 	public IDocServerManager(IObjectRegistry registry) {
 		this.registry = registry;
 	}
 
 	private void initParameters() {
+
+		logger = LoggingContext.getLogger(PLUGIN, registry);
+		logger.info("Aurora IDoc Plugin Version: " + AURORA_IDOC_PLUGIN_VERSION);
+
 		datasource = (DataSource) registry.getInstanceOfType(DataSource.class);
 		if (datasource == null)
 			throw BuiltinExceptionFactory.createInstanceNotFoundException(this, DataSource.class, this.getClass().getCanonicalName());
@@ -51,18 +57,15 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 			throw BuiltinExceptionFactory.createAttributeMissing(this, "serverNameList");
 		if (idocFileDir == null)
 			throw BuiltinExceptionFactory.createAttributeMissing(this, "idocFileDir");
-		File file = new File(idocFileDir);
-		if (!file.exists()) {
+		File idocDir = new File(idocFileDir);
+		if (!idocDir.exists()) {
 			throw BuiltinExceptionFactory.createRequiredFileNotFound(idocFileDir);
 		}
 	}
 
 	@Override
 	public boolean startup() {
-		logger = LoggingContext.getLogger(PLUGIN, registry);
-		logger.info("Aurora IDoc Plugin Version: " + AURORA_IDOC_PLUGIN_VERSION);
 		initParameters();
-
 		if(isEnabledJCo()){
 			destinationProvider = new DestinationProvider();
 			registry.registerInstance(ISapConfig.class, destinationProvider);
@@ -71,35 +74,41 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 		String[] servers = serverNameList.split(SERVER_NAME_SEPARATOR);
 		for (int i = 0; i < servers.length; i++) {
 			String serverName = servers[i];
-			try {
-				IDocServer server = new IDocServer(registry,this, serverName);
-				ServerConnectionMonitor serverMonitor = new ServerConnectionMonitor(this,server);
-				serverMonitor.setDaemon(true);
-				serverMonitor.start();
-				runningServerList.add(server);
-			} catch (Throwable e) {
-				logger.log(Level.SEVERE, "start server " + serverName + " failed!", e);
-			}
+			IDocServer server = new IDocServer(this, serverName);
+			server.startup();
+			idocServerList.add(server);
 		}
 		return true;
 	}
 
+	public IObjectRegistry getRegistry() {
+		return registry;
+	}
+	
+	public DatabaseTool getDatabaseTool() throws SQLException {
+		Connection connection = datasource.getConnection();
+		DatabaseTool dbTool = new DatabaseTool(connection, logger);
+		return dbTool;
+	}
+	public void closeDatabaseTool(DatabaseTool databaseManager){
+		if (databaseManager != null)
+			databaseManager.close();
+	}
+
 	@Override
 	public void shutdown() {
-		setRunning(false);
-		
-		if (runningServerList != null && !runningServerList.isEmpty()) {
-			for (IDocServer server : runningServerList) {
+		running = false;
+		if (idocServerList != null && !idocServerList.isEmpty()) {
+			for (IDocServer server : idocServerList) {
 				try {
 					server.shutdown();
 				} catch (Throwable e) {
 					logger.log(Level.SEVERE, "shutdown server " + server.getServerName() + " failed!", e);
 				}
 			}
-			runningServerList = null;
+			idocServerList = null;
 		}
 	}
-	
 
 	public boolean isRunning() {
 		return running;
@@ -180,7 +189,7 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 	public void setDatasource(DataSource datasource) {
 		this.datasource = datasource;
 	}
-	
+
 	public boolean isEnabledJCo() {
 		return enabledJCo;
 	}
@@ -192,9 +201,20 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 	public void setEnabledJCo(boolean enabledJCo) {
 		this.enabledJCo = enabledJCo;
 	}
+
+	public boolean isDebug() {
+		return debug;
+	}
+	public boolean getDebug() {
+		return debug;
+	}
+
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+	}
+
 	public void addDestination(String destinationName){
 		if(destinationProvider != null)
 			destinationProvider.addDestination(destinationName);
 	}
-	
 }

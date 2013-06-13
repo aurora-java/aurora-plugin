@@ -1,18 +1,18 @@
 package aurora.plugin.sap.sync.idoc;
 
 
-public class ServerConnectionMonitor extends Thread {
+public class ListenerMonitor extends Thread {
 
 	private IDocServerManager idocServerManager;
-	private IDocServer idocServer;
+	private IDocFileListener listener;
 	private int minReconnectTime;
 	private int maxReconnectTime;
 
 	private int reconnectTime;
 
-	public ServerConnectionMonitor(IDocServerManager idocServerManager, IDocServer idocServer) {
+	public ListenerMonitor(IDocServerManager idocServerManager, IDocFileListener listener) {
 		this.idocServerManager = idocServerManager;
-		this.idocServer = idocServer;
+		this.listener = listener;
 		this.minReconnectTime = idocServerManager.getReconnectTime();
 		this.maxReconnectTime = idocServerManager.getMaxReconnectTime();
 		this.reconnectTime = minReconnectTime;
@@ -20,7 +20,7 @@ public class ServerConnectionMonitor extends Thread {
 
 	public void run() {
 		while (idocServerManager.isRunning()) {
-			if (idocServer.isRunning()) {
+			if (listener.isRunning()) {
 				reconnectTime = minReconnectTime;
 				sleepOneSecond();
 			} else {
@@ -42,7 +42,7 @@ public class ServerConnectionMonitor extends Thread {
 			Thread.sleep(thisReconnectTime);
 		} catch (InterruptedException e) {
 		}
-		idocServer.start();
+		listener.start();
 	}
 
 	private int computeConnectTime() {

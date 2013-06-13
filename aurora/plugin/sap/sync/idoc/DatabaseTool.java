@@ -1,6 +1,8 @@
 package aurora.plugin.sap.sync.idoc;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,12 +19,14 @@ import uncertain.logging.ILogger;
 
 import com.sap.conn.idoc.jco.JCoIDocServer;
 
-public class DatabaseManager {
-
+public class DatabaseTool {
+	public static final String DONE_STATUS = "DONE";
+	public static final String EXCEPTION_STATUS = "EXCEPTION";
+	
 	private Connection dbConnection;
 	private ILogger logger;
 
-	public DatabaseManager(Connection dbConnection, ILogger logger) {
+	public DatabaseTool(Connection dbConnection, ILogger logger) {
 		this.dbConnection = dbConnection;
 		this.logger = logger;
 	}
@@ -484,13 +488,14 @@ public class DatabaseManager {
 		}
 	}
 
-	public void updateIdocFileStatus(int idoc_file_id, String status) throws AuroraIDocException {
-		String idoc_update_sql = "update fnd_idoc_files t set t.sync_status=? where t.idoc_file_id =?";
+	public void updateIdocFileStatus(int idoc_file_id, String status,String exception_message) throws AuroraIDocException {
+		String idoc_update_sql = "update fnd_idoc_files t set t.sync_status=?,t.exception_message=? where t.idoc_file_id =?";
 		PreparedStatement statement = null;
 		try {
 			statement = dbConnection.prepareStatement(idoc_update_sql);
 			statement.setString(1, status);
-			statement.setInt(2, idoc_file_id);
+			statement.setString(2, exception_message);
+			statement.setInt(3, idoc_file_id);
 			statement.executeUpdate();
 			statement.close();
 		} catch (SQLException e) {
@@ -592,7 +597,7 @@ public class DatabaseManager {
 			}
 			proc.close();
 		} catch (SQLException e) {
-			rollbackConnection();
+			rollback();
 			throw AuroraIDocException.createStatementException(proc, e);
 		} finally {
 			closeStatement(proc);
@@ -676,7 +681,7 @@ public class DatabaseManager {
 		closeConnection();
 	}
 
-	public void rollbackConnection() {
+	public void rollback() {
 		if (dbConnection == null)
 			return;
 		try {
@@ -686,7 +691,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public void commitConnection() {
+	public void commit() {
 		if (dbConnection == null)
 			return;
 		try {
@@ -695,12 +700,20 @@ public class DatabaseManager {
 			logger.log(Level.SEVERE, "", ex);
 		}
 	}
-
-	public void setConnectionAutoCommit(boolean autoCommit) {
+	public void disableAutoCommit() {
 		if (dbConnection == null)
 			return;
 		try {
-			dbConnection.setAutoCommit(autoCommit);
+			dbConnection.setAutoCommit(false);
+		} catch (SQLException ex) {
+			logger.log(Level.SEVERE, "", ex);
+		}
+	}
+	public void enableAutoCommit() {
+		if (dbConnection == null)
+			return;
+		try {
+			dbConnection.setAutoCommit(true);
 		} catch (SQLException ex) {
 			logger.log(Level.SEVERE, "", ex);
 		}

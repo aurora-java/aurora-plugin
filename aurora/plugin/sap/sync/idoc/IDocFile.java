@@ -1,5 +1,7 @@
 package aurora.plugin.sap.sync.idoc;
 
+import uncertain.composite.CompositeMap;
+
 public class IDocFile {
 	public static final String IDOC_NODE = "IDOC";
 	public static final String TABNAM_NODE = "TABNAM";
@@ -25,6 +27,8 @@ public class IDocFile {
 	private String fileFullPath;
 	private int idocFileId;
 	private int idocServerId;
+	private CompositeMap fileContent;
+	private IDocType idocType;
 
 	public IDocFile(String fileFullPath, int idocFileId, int idocServerId) {
 		super();
@@ -57,4 +61,24 @@ public class IDocFile {
 		this.idocServerId = idocServerId;
 	}
 
+	public CompositeMap getFileContent() {
+		return fileContent;
+	}
+
+	public void setFileContent(CompositeMap fileContent) {
+		this.fileContent = fileContent;
+	}
+	
+	public IDocType getIdocType() {
+		return idocType;
+	}
+
+	public void setIdocType(IDocType idocType) {
+		this.idocType = idocType;
+	}
+
+	public void clear(){
+		if(fileContent != null)
+			fileContent.clear();
+	}
 }
