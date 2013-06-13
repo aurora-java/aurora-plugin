@@ -1,7 +1,5 @@
 package aurora.plugin.sap.sync.idoc;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.sql.Connection;
 import java.util.logging.Level;
 
