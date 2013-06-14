@@ -24,6 +24,7 @@ public class Label extends Input {
 		setPrompt("label");
 		this.setSize(120, 20);
 		this.setComponentType(Label);
+		this.setPrompt(this.getComponentType());
 		this.setRenderer("");
 	}
 

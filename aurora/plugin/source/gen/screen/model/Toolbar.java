@@ -3,8 +3,6 @@ package aurora.plugin.source.gen.screen.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import aurora.plugin.source.gen.screen.model.properties.IPropertyDescriptor;
-
 public class Toolbar extends RowCol {
 
 	public static final String TOOLBAR = "toolbar";

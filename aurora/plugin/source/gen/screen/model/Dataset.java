@@ -50,8 +50,8 @@ public class Dataset extends AuroraComponent {
 	public static final String SELECT_MULTI = "multiple";
 	public static final String SELECT_SINGLE = "single";
 	public static final String SELECTION_MODE = "selectionModel";
-	private static final String[] selectionModes = { SELECT_NONE, SELECT_MULTI,
-			SELECT_SINGLE };
+//	private static final String[] selectionModes = { SELECT_NONE, SELECT_MULTI,
+//			SELECT_SINGLE };
 	// private static final IPropertyDescriptor PD_SELECTION_MODE = new
 	// ComboPropertyDescriptor(
 	// SELECTION_MODE, "*SelectionModel", selectionModes);

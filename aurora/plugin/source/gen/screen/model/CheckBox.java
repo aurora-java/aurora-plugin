@@ -12,6 +12,7 @@ public class CheckBox extends Input {
 		setSize(120, 20);
 		this.setComponentType(CHECKBOX);
 		this.setText(TEXT);
+		this.setPrompt(this.getComponentType());
 		DatasetField datasetField = getDatasetField();
 		datasetField.setCheckedValue("Y");
 		datasetField.setUncheckedValue("N");

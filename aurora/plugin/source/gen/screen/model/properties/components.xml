@@ -271,6 +271,7 @@
 		<attribute id="width" style="simple,save,_int" />
 		<attribute id="height" style="simple,save,_int" />
 		<attribute id="title" style="simple,save" />
+		<attribute id="labelWidth" style="simple,save,_int" />
 		<attribute id="container_section_type" style="simple,save,inner" />
 		<attribute id="column" style="simple,save,_int" />
 		<attribute id="i_dataset_delegate" style="containment,save,inner" />

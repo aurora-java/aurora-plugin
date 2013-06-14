@@ -4,6 +4,7 @@ public class LOV extends Input {
 
 	public LOV() {
 		this.setComponentType(LOV);
+		this.setPrompt(this.getComponentType());
 	}
 
 }

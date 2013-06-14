@@ -23,8 +23,8 @@ public class Grid extends GridColumn implements DatasetBinder, IDatasetDelegate 
 	public static final String NAVBAR_SIMPLE = "simple";
 	public static final String NAVBAR_COMPLEX = "complex";
 	public static final String NAVBAR = "navBar";
-	private static final String[] navBarTypes = { NAVBAR_NONE, NAVBAR_SIMPLE,
-			NAVBAR_COMPLEX };
+//	private static final String[] navBarTypes = { NAVBAR_NONE, NAVBAR_SIMPLE,
+//			NAVBAR_COMPLEX };
 	private Navbar navBar;
 
 	// private static final IPropertyDescriptor PD_NAVBAR_TYPE = new
@@ -34,7 +34,7 @@ public class Grid extends GridColumn implements DatasetBinder, IDatasetDelegate 
 	// IPropertyDescriptor[] {
 	// PD_PROMPT, PD_WIDTH, PD_HEIGHT, PD_NAVBAR_TYPE };
 
-	private Toolbar toolbar;
+//	private Toolbar toolbar;
 
 	public Grid() {
 		super();
@@ -153,7 +153,7 @@ public class Grid extends GridColumn implements DatasetBinder, IDatasetDelegate 
 	}
 
 	public void setToolbar(Toolbar tl) {
-		this.toolbar = tl;
+//		this.toolbar = tl;
 		this.addChild(tl, 0);
 	}
 

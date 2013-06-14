@@ -93,6 +93,7 @@ public interface ComponentInnerProperties {
 	String FUNCTION = "function";
 	String INNER_PARAMERTER = "inner_paramerter";
 	String QUERY_FORM_TOOLBAR_CHILDREN = "query_form_toolbar_children";
+	String QUERY_FORM_TOOLBAR = "query_form_toolbar";
 	String RESULT_TARGET_CONTAINER = "resultTargetContainer";
 	String EDITOR_TYPE = "editor_type";
 	String IS_HEAD_DS = "is_head_ds";

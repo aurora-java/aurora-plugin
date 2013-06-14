@@ -6,5 +6,6 @@ public class TextArea extends Input {
 	public TextArea() {
 		this.setSize(150, 50);
 		this.setComponentType(TEXT_AREA);
+		this.setPrompt(this.getComponentType());
 	}
 }

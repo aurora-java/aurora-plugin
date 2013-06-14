@@ -21,6 +21,10 @@ public class CompositeMap2Object implements KEYS {
 			return (ScreenBody) xml2Object;
 		return new ScreenBody();
 	}
+	public AuroraComponent createObject(CompositeMap rootMap) {
+		AuroraComponent xml2Object = this.xml2Object(rootMap);
+		return xml2Object;
+	}
 
 	private class ComponentHelper {
 		private AuroraComponent component;

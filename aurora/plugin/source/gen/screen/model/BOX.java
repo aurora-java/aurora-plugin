@@ -1,7 +1,6 @@
 package aurora.plugin.source.gen.screen.model;
 
 import aurora.plugin.source.gen.screen.model.properties.ComponentProperties;
-import aurora.plugin.source.gen.screen.model.properties.IPropertyDescriptor;
 
 
 public class BOX extends RowCol {
@@ -48,6 +47,16 @@ public class BOX extends RowCol {
 	}
 
 	public void setLabelWidth(int lw) {
+//		if (this.labelWidth == labelWidth) {
+//			return;
+//		}
+//		int old = this.labelWidth;
+//		this.labelWidth = labelWidth;
+//		firePropertyChange(LABELWIDTH, old, labelWidth);
+//		this.labelWidth = labelWidth;
+		this.setPropertyValue(ComponentProperties.labelWidth, lw);
+	}
+	public void setLabelWidth(Object lw) {
 //		if (this.labelWidth == labelWidth) {
 //			return;
 //		}

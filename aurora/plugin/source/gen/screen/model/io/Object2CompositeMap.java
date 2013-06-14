@@ -216,4 +216,9 @@ public class Object2CompositeMap implements KEYS {
 		return object2xml;
 	}
 
+	public CompositeMap createCompositeMap(AuroraComponent viewDiagram) {
+		CompositeMap object2xml = this.object2XML(viewDiagram);
+		return object2xml;
+	}
+
 }

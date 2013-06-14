@@ -21,7 +21,6 @@ public class QueryFormToolBar extends HBox implements PropertyChangeListener {
 		// addChild(btnMore);
 	}
 
-
 	public HBox getHBox() {
 		return hBox;
 	}
@@ -44,6 +43,24 @@ public class QueryFormToolBar extends HBox implements PropertyChangeListener {
 	}
 
 	@Override
+	public int getLabelWidth() {
+		if (hBox != null)
+			return hBox.getLabelWidth();
+		return 80;
+	}
+
+	@Override
+	public void setLabelWidth(int lw) {
+		if (hBox != null)
+			hBox.setLabelWidth(lw);
+	}
+
+	public void setLabelWidth(Object lw) {
+		if (hBox != null)
+			hBox.setLabelWidth(lw);
+	}
+
+	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (evt.getPropertyName().equals(QueryForm.DEFAULT_QUERY_HINT_KEY)) {
 			this.firePropertyChange(QueryForm.DEFAULT_QUERY_HINT_KEY,
@@ -56,6 +73,6 @@ public class QueryFormToolBar extends HBox implements PropertyChangeListener {
 				this.setHasMore(this.getParent().getChildren().contains(newVal));
 			}
 		}
-	
+
 	}
 }

@@ -1,9 +1,9 @@
 package aurora.plugin.source.gen.screen.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
+import aurora.plugin.source.gen.screen.model.properties.ComponentProperties;
 
 //import org.eclipse.draw2d.geometry.Dimension;
 //import org.eclipse.ui.views.properties.IPropertyDescriptor;
@@ -24,7 +24,7 @@ public class QueryForm extends BOX {
 	// private QueryFormBody body = new QueryFormBody();
 	private String defaultQueryField = "";
 	private String defaultQueryHint = "";
-	private String queryHook = "";
+//	private String queryHook = "";
 	private ContainerHolder resultTargetContainer = null;
 
 	public QueryForm() {
@@ -91,9 +91,17 @@ public class QueryForm extends BOX {
 			return getResultTargetContainer().getTarget();
 		else if ("queryFormBody".equals(propName))
 			return this.getBody();
-		else if ("query_form_toolbar_children".equals(propName))
+		else if (ComponentInnerProperties.QUERY_FORM_TOOLBAR_CHILDREN
+				.equals(propName))
 			return this.toolBar.getHBox().getPropertyValue(
 					ComponentInnerProperties.CHILDREN);
+		else if (ComponentInnerProperties.QUERY_FORM_TOOLBAR.equals(propName)) {
+			return this.toolBar;
+		} else if (ComponentProperties.labelWidth.equals(propName)) {
+			if (toolBar != null) {
+				return this.toolBar.getLabelWidth();
+			}
+		}
 		return super.getPropertyValue(propName);
 	}
 
@@ -111,14 +119,18 @@ public class QueryForm extends BOX {
 		else if ("queryFormBody".equals(propName)
 				&& val instanceof QueryFormBody) {
 			this.addChild((AuroraComponent) val);
-		} else if ("query_form_toolbar_children".equals(propName)
-				&& val instanceof List) {
+		} else if (ComponentInnerProperties.QUERY_FORM_TOOLBAR_CHILDREN
+				.equals(propName) && val instanceof List) {
 			this.toolBar.getHBox().setPropertyValue(
 					ComponentInnerProperties.CHILDREN, val);
 			// for (AuroraComponent c : (List<AuroraComponent>) val) {
 			// this.addChild(c);
 			// }
 			// return this.toolBar.getHBox().getChildren();
+		} else if (ComponentProperties.labelWidth.equals(propName)) {
+			if (toolBar != null) {
+				toolBar.setLabelWidth(val);
+			}
 		} else
 			super.setPropertyValue(propName, val);
 	}
