@@ -1,6 +1,5 @@
 package aurora.plugin.sap.sync.idoc;
 
-import java.util.Date;
 
 public class ListenerMonitor extends Thread {
 
