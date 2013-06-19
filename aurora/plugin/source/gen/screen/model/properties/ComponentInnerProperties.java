@@ -110,4 +110,7 @@ public interface ComponentInnerProperties {
 	String FILE_NAME = "file_name";
 	String INPUT_SIMPLE_DATA = "input_simple_data";
 	String GRID_COLUMN_SIMPLE_DATA = "grid_column_simple_data_";
+	String ICON_BYTES_DATA = "icon_bytes_data";
+	
+	
 }
