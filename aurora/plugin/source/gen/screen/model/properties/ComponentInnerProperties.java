@@ -111,6 +111,7 @@ public interface ComponentInnerProperties {
 	String INPUT_SIMPLE_DATA = "input_simple_data";
 	String GRID_COLUMN_SIMPLE_DATA = "grid_column_simple_data_";
 	String ICON_BYTES_DATA = "icon_bytes_data";
-	
-	
+	static final String IMAGE_WIDTH = "image_width";
+	static final String IMAGE_HEIGHT = "image_height";
+
 }

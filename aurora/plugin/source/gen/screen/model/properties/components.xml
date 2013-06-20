@@ -308,6 +308,8 @@
 		<attribute id="component_type" style="simple,save,inner" />
 		<attribute id="width" style="simple,save,_int" />
 		<attribute id="height" style="simple,save,_int" />
+		<attribute id="image_width" style="simple,save,_int" />
+		<attribute id="image_height" style="simple,save,_int" />
 		<attribute id="icon_bytes_data" style="save,inner,_cdata" />
 	</component>
 </components>
