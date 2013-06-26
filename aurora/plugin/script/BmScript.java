@@ -17,10 +17,7 @@ import aurora.plugin.script.engine.ScriptRunner;
 import aurora.plugin.script.scriptobject.ScriptShareObject;
 import aurora.service.ServiceThreadLocal;
 
-/**
- * Implements "Standard who feature": created_by, creation_date,
- * last_updated_by, last_updated_date
- */
+
 public class BmScript implements IConfigurable {
 
 	IDatabaseFactory mFactory;
