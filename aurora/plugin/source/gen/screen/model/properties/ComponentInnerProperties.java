@@ -113,5 +113,5 @@ public interface ComponentInnerProperties {
 	String ICON_BYTES_DATA = "icon_bytes_data";
 	static final String IMAGE_WIDTH = "image_width";
 	static final String IMAGE_HEIGHT = "image_height";
-
+	String TEXT_STYLE = "_text_style";
 }

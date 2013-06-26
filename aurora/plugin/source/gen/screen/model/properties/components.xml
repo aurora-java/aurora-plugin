@@ -10,6 +10,7 @@
 		<attribute id="icon" style="simple,save" />
 		<attribute id="title" style="simple,save" />
 		<attribute id="text" style="simple,save" />
+		<attribute id="text_text_style" style="containment,save,inner" />
 		<attribute id="button_clicker" style="containment,save,inner" />
 	</component>
 
@@ -88,6 +89,8 @@
 		<attribute id="emptyText" style="simple,save" />
 		<attribute id="typeCase" style="simple,save" />
 		<attribute id="input_simple_data" style="save,inner,_cdata" />
+		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
+		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 	
@@ -98,6 +101,8 @@
 		<attribute id="height" style="simple,save,_int" />
 		<attribute id="name" style="simple,save" />
 		<attribute id="input_simple_data" style="save,inner,_cdata" />
+		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
+		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 
@@ -109,6 +114,8 @@
 		<attribute id="name" style="simple,save" />
 		<attribute id="renderer" style="simple,save" />
 		<attribute id="input_simple_data" style="save,inner,_cdata" />
+		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
+		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 
@@ -122,6 +129,8 @@
 		<attribute id="enableBesideDays" style="simple,save" />
 		<attribute id="enableMonthBtn" style="simple,save" />
 		<attribute id="input_simple_data" style="save,inner,_cdata" />
+		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
+		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 
@@ -134,6 +143,8 @@
 		<attribute id="emptyText" style="simple,save" />
 		<attribute id="options" style="simple,save" />
 		<attribute id="input_simple_data" style="save,inner,_cdata" />
+		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
+		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 	<component type="innerLovService" category="aurora">
@@ -157,6 +168,8 @@
 		<attribute id="height" style="simple,save,_int" />
 		<attribute id="name" style="simple,save" />
 		<attribute id="text" style="simple,save" />
+		<attribute id="prompt_text_style" style="containment,save,inner" />
+		<attribute id="text_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 
@@ -171,6 +184,8 @@
 		<attribute id="allowNegative" style="simple,save,_boolean" />
 		<attribute id="allowFormat" style="simple,save,_boolean" />
 		<attribute id="input_simple_data" style="save,inner,_cdata" />
+		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
+		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
 	</component>
 
@@ -241,6 +256,17 @@
 		<attribute id="grid_column_simple_data_8" style="save,inner,_cdata" />
 		<attribute id="grid_column_simple_data_9" style="save,inner,_cdata" />
 		<attribute id="grid_column_simple_data_10" style="save,inner,_cdata" />
+		<attribute id="grid_column_simple_data_1_text_style" style="containment,save,inner" />
+		<attribute id="grid_column_simple_data_2_text_style" style="containment,save,inner" />
+		<attribute id="grid_column_simple_data_3_text_style" style="containment,save,inner" />
+		<attribute id="grid_column_simple_data_4_text_style" style="containment,save,inner" />
+		<attribute id="grid_column_simple_data_5_text_style" style="containment,save,inner" />
+		<attribute id="grid_column_simple_data_6_text_style" style="containment,save,inner" />
+		<attribute id="grid_column_simple_data_7_text_style" style="containment,save,inner" />
+		<attribute id="grid_column_simple_data_8_text_style" style="containment,save,inner" />
+		<attribute id="grid_column_simple_data_9_text_style" style="containment,save,inner" />
+		<attribute id="grid_column_simple_data_10_text_style" style="containment,save,inner" />
+		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="component_children" style="containment,save,inner,list" />
 	</component>
 
@@ -311,5 +337,17 @@
 		<attribute id="image_width" style="simple,save,_int" />
 		<attribute id="image_height" style="simple,save,_int" />
 		<attribute id="icon_bytes_data" style="save,inner,_cdata" />
+	</component>
+	<component type="styled_string_text" category="inner">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="underline_style" style="simple,save,_int" />
+		<attribute id="underline_color" style="simple,save" />
+		<attribute id="strikeout_color" style="simple,save" />
+		<attribute id="background" style="simple,save" />
+		<attribute id="foreground" style="simple,save" />
+		<attribute id="is_strikeout" style="simple,save,inner,_boolean" />
+		<attribute id="is_underline" style="simple,save,inner,_boolean" />
+		<attribute id="is_italic" style="simple,save,inner,_boolean" />
+		<attribute id="is_bold" style="simple,save,inner,_boolean" />
 	</component>
 </components>
