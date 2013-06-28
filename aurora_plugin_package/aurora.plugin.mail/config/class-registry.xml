@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <class-registry>
   <package-mapping packageName="aurora.plugin.mail" />
+  <!--原AutoSendMail已经更改为SendMail ，为保持兼容性，添加如下语句。-->
+  <class-mapping className="aurora.plugin.mail.SendMail" elementName="AutoSendMail" nameSpace="aurora.plugin.mail"/>
 </class-registry>

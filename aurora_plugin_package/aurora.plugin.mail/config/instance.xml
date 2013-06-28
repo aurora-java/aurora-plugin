@@ -7,6 +7,5 @@
 				<u:type typeName="aurora.plugin.mail.IMailServerConfig" />
 			</u:implement-types>
 		</u:configurable-instance>
-					
 	</u:instances>
 </u:instance-config>
