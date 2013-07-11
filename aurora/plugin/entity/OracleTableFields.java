@@ -35,8 +35,6 @@ public class OracleTableFields {
 				fMap.put("msg", "TABLE_NOT_EXISTS");
 				return fMap;
 			}
-			// ResultSet rs = metaData.getColumns(null, userName, tableName,
-			// "%");
 			ResultSet pkRs = metaData.getPrimaryKeys(null, userName, tableName);
 			String pkName = null;
 			if (pkRs.next()) {
@@ -45,10 +43,11 @@ public class OracleTableFields {
 					fMap.put("msg", "PK_NOT_UNIQUE");
 					return fMap;
 				}
-			} else {
-				fMap.put("msg", "PK_NOT_EXISTS");
-				return fMap;
 			}
+			// else {
+			// fMap.put("msg", "PK_NOT_EXISTS");
+			// return fMap;
+			// }
 
 			List<String> excluedColumnList = Arrays.asList(excluedColumns);
 			PreparedStatement ps = conn.prepareStatement(column_infos_sql);
