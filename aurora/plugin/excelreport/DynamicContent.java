@@ -5,12 +5,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
 import uncertain.composite.CompositeMap;
@@ -18,22 +20,22 @@ import uncertain.composite.TextParser;
 import uncertain.composite.transform.GroupConfig;
 import uncertain.composite.transform.GroupTransformer;
 
-public class DynamicContent {	
+public class DynamicContent {
 	String cell = "A";
 	int row = 1;
 	String dataModel;
 	TableColumn[] tableColumns;
-	boolean freezeEnable=false;
-	boolean displayTitle=true;
-	
+	boolean freezeEnable = false;
+	boolean displayTitle = true;
+
 	int totalCount = -1;
 	private int rowIndex = 0;
 	private Sheet excelSheet;
 	ExcelFactory excelFactory;
 	Map<String, TableColumn> columnsMap = new HashMap<String, TableColumn>();
 	CompositeMap groupMap = new CompositeMap();
-	
-	final String KEY_LEVEL_NAME="level";
+
+	final String KEY_LEVEL_NAME = "level";
 
 	public void createGroupMap() {
 		if (this.getColumns() == null)
@@ -80,12 +82,15 @@ public class DynamicContent {
 	public int createContent(ExcelFactory excelFactory, Sheet excelSheet) {
 		this.excelSheet = excelSheet;
 		this.excelFactory = excelFactory;
-		createTableTitle(excelFactory.getContext());
 		CompositeMap data = (CompositeMap) excelFactory.getContext().getObject(
 				getDataModel());
-		if (data == null)
+		if (data == null) {
+			createTableTitle(excelFactory.getContext());
 			return this.rowIndex;
+		}
 		GroupConfig[] groupConfig = createGroupConfig(data);
+		createTableTitle(excelFactory.getContext());
+
 		if (groupConfig != null) {
 			CompositeMap target = GroupTransformer.transform(data, groupConfig);
 			createGroupMap();
@@ -103,7 +108,8 @@ public class DynamicContent {
 	}
 
 	void createTableTitle(CompositeMap context) {
-		if(!this.getDisplayTitle())return;
+		if (!this.getDisplayTitle())
+			return;
 		if (this.getColumns() == null)
 			return;
 		CellStyle style;
@@ -112,13 +118,14 @@ public class DynamicContent {
 		int cellnum = CellReference.convertColStringToIndex(getCell());
 		for (TableColumn column : this.getColumns()) {
 			Cell cell = row.createCell(cellnum++);
-			this.excelFactory.setCellValue(cell, TextParser.parse(column.getTitle(), context));
+			this.excelFactory.setCellValue(cell,
+					TextParser.parse(column.getTitle(), context));
 			style = this.excelFactory.getStyle(column.getTitleStyle());
 			if (ExcelFactory.isNotNull(style)) {
 				cell.setCellStyle(style);
 			}
 		}
-		if(this.getFreezeEnable())
+		if (this.getFreezeEnable())
 			this.excelSheet.createFreezePane(0, this.rowIndex);// 冻结
 	}
 
@@ -149,6 +156,10 @@ public class DynamicContent {
 		StringBuffer buffer = null;
 		int level = 0;
 		int index = CellReference.convertColStringToIndex(getCell());
+		if (this.getColumns()[0].isSubtotalSelf() && index == 0) {
+			index++;
+			this.setCell(CellReference.convertNumToColString(index));
+		}
 		CompositeMap levelMap = new CompositeMap();
 		for (TableColumn column : this.getColumns()) {
 			column.setIndex(index);
@@ -207,7 +218,8 @@ public class DynamicContent {
 			stConfig = colIt.next();
 			column = this.getColumnsMap().get(stConfig.getColumnField());
 			if (stConfig.getColumnField().equals(curField)
-					|| !stConfig.getGroupFormula().equals(curGroupFormula)||stConfig.getColumnField().equals(column.getField())) {
+					|| !stConfig.getGroupFormula().equals(curGroupFormula)
+					|| stConfig.getColumnField().equals(column.getField())) {
 				curGroupFormula = stConfig.getGroupFormula();
 				curField = stConfig.getColumnField();
 				row = ExcelFactory.createRow(this.excelSheet, ++this.rowIndex);
@@ -217,7 +229,7 @@ public class DynamicContent {
 					totalCount++;
 			}
 
-			if (stConfig.getGroupFormula() != null) {				
+			if (stConfig.getGroupFormula() != null) {
 				Cell cell = row.createCell(column.getIndex());
 				StringBuffer colBuffer = new StringBuffer("SUBTOTAL(");
 				colBuffer.append(stConfig.getGroupFormula());
@@ -254,8 +266,8 @@ public class DynamicContent {
 				if (is_flag) {
 					String field = stConfig.getGroupColumnFild();
 					TableColumn groupColumn = columnMap.get(field);
-					int groupColumnFildIndex=groupColumn.getIndex();
-					if(field!=null&&field.equals(column.getField()))
+					int groupColumnFildIndex = groupColumn.getIndex();
+					if (field != null && field.equals(column.getField()))
 						groupColumnFildIndex--;
 					Cell groupCell = row.createCell(groupColumnFildIndex);
 					if (is_total)
@@ -274,18 +286,19 @@ public class DynamicContent {
 						cell.setCellStyle(excelFactory.styles.get(stConfig
 								.getFormulaStyle()));
 					}
-					int cellnum = CellReference.convertColStringToIndex(getCell());
-					int tIndex=tableColumns.length+cellnum;
-					for(int i=0+cellnum;i<tIndex;i++){
-						Cell blankCell=row.getCell(i);
-						if(blankCell==null){
-							blankCell=row.createCell(i);
-							if (ExcelFactory.isNotNull(excelFactory.styles.get(stConfig
-									.getLineStyle()))) {
-								blankCell.setCellStyle(excelFactory.styles.get(stConfig
-										.getLineStyle()));
+					int cellnum = CellReference
+							.convertColStringToIndex(getCell());
+					int tIndex = tableColumns.length + cellnum;
+					for (int i = 0 + cellnum; i < tIndex; i++) {
+						Cell blankCell = row.getCell(i);
+						if (blankCell == null) {
+							blankCell = row.createCell(i);
+							if (ExcelFactory.isNotNull(excelFactory.styles
+									.get(stConfig.getLineStyle()))) {
+								blankCell.setCellStyle(excelFactory.styles
+										.get(stConfig.getLineStyle()));
 							}
-						}						
+						}
 					}
 
 				}
@@ -309,6 +322,48 @@ public class DynamicContent {
 		}
 	}
 
+	void setMergedRegion(List<CompositeMap> rowList, CompositeMap dataModel) {
+		if (dataModel == null)
+			return;
+		Iterator<CompositeMap> iterator = rowList.iterator();
+		CompositeMap record;
+		int firstLine = 0;
+		int endLine = 0;
+		int rownum;
+		boolean is_first = true;
+		while (iterator.hasNext()) {
+			record = iterator.next();
+			rownum = record.getInt("rownum");
+			endLine = rownum;
+			if (is_first) {
+				firstLine = rownum;
+				is_first = false;
+			}
+		}
+		Set<String> keySet = dataModel.keySet();
+		Iterator<String> it = keySet.iterator();
+		while (it.hasNext()) {
+			String levelName = it.next();
+			TableColumn tableColumn = this.getColumnsMap().get(levelName);
+			if (!tableColumn.getMerged())
+				break;
+			String colString = CellReference.convertNumToColString(tableColumn
+					.getIndex());
+			StringBuffer buffer = new StringBuffer();
+			buffer.append("$");
+			buffer.append(colString);
+			buffer.append("$");
+			buffer.append(firstLine);
+			buffer.append(":");
+			buffer.append("$");
+			buffer.append(colString);
+			buffer.append("$");
+			buffer.append(endLine);
+			this.excelSheet.addMergedRegion(CellRangeAddress.valueOf(buffer
+					.toString()));
+		}
+	}
+
 	List<CompositeMap> createTableGroup(CompositeMap dataModel) {
 		Iterator it = dataModel.getChildIterator();
 		List<CompositeMap> rowList = new LinkedList<CompositeMap>();
@@ -325,6 +380,7 @@ public class DynamicContent {
 				if (dataModel.getName().startsWith(this.KEY_LEVEL_NAME)) {
 					CompositeMap groupMap = getGroupMap();
 					String levelName = dataModel.getName();
+					setMergedRegion(rowList, dataModel);
 					List<SubtotalConfig> list = (List<SubtotalConfig>) groupMap
 							.getChild(levelName).get("list");
 					if (list != null) {
@@ -332,19 +388,21 @@ public class DynamicContent {
 					}
 				} else {
 					CompositeMap m = null;
-					List a=groupMap.getChildsNotNull();
-					for(int i=0,l=a.size();i<l;l--){
-						CompositeMap record =(CompositeMap)a.get(l-1);						
+					List a = groupMap.getChildsNotNull();
+					for (int i = 0, l = a.size(); i < l; l--) {
+						CompositeMap record = (CompositeMap) a.get(l - 1);
 						String levelName = record.getName();
 						List<SubtotalConfig> list1 = (List<SubtotalConfig>) record
 								.get("list");
-						m = createGroupData(list1, rowList, true);
+						if (list1 != null)
+							m = createGroupData(list1, rowList, true);
 					}
-					int firstRownum = m.getInt("first");
-					int endRownum = m.getInt("end");
-					this.excelSheet.groupRow(firstRownum - 1, endRownum
-							+ totalCount);
-
+					if (m != null) {
+						int firstRownum = m.getInt("first");
+						int endRownum = m.getInt("end");
+						this.excelSheet.groupRow(firstRownum - 1, endRownum
+								+ totalCount);
+					}
 				}
 			}
 		}
@@ -409,6 +467,6 @@ public class DynamicContent {
 
 	public void setDisplayTitle(boolean displayTitle) {
 		this.displayTitle = displayTitle;
-	}		
-	
+	}
+
 }

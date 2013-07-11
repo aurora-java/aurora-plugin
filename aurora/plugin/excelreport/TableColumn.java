@@ -8,6 +8,7 @@ public class TableColumn {
 	String type;
 	String titleStyle;
 	String cellStyle;
+	boolean merged;
 	int groupLevel = 0;
 	String order;
 	CompositeMap columns;
@@ -92,6 +93,27 @@ public class TableColumn {
 
 	public void setColumns(CompositeMap columns) {
 		this.columns = columns;
+	}
+
+	public boolean getMerged() {
+		return merged;
+	}
+
+	public void setMerged(boolean merged) {
+		this.merged = merged;
+	}
+	public boolean isSubtotalSelf(){
+		SubtotalConfig[] configs=this.getGroups();
+		if(configs!=null){
+			for(SubtotalConfig config:configs){
+				String[] fields=config.getGroupField().split(",");
+				for(String field:fields){
+					if(field.equals(this.getField()))
+						return true;
+				}				
+			}
+		}
+		return false;
 	}
 
 }
