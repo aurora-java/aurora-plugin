@@ -17,7 +17,6 @@ import aurora.plugin.script.engine.ScriptRunner;
 import aurora.plugin.script.scriptobject.ScriptShareObject;
 import aurora.service.ServiceThreadLocal;
 
-
 public class BmScript implements IConfigurable {
 
 	IDatabaseFactory mFactory;
@@ -64,8 +63,9 @@ public class BmScript implements IConfigurable {
 			engine.getLogger(getClass().getSimpleName()).log(Level.SEVERE,
 					e.getMessage(), e);
 			throw new RuntimeException(e);
+		} finally {
+			model.makeReady();
 		}
-		model.makeReady();
 
 	}
 
