@@ -79,7 +79,7 @@ public class AuroraScriptEngine {
 		Scriptable ctx = cx.newObject(scope, CompositeMapObject.CLASS_NAME,
 				new Object[] { service_context });
 		ScriptableObject.defineProperty(scope, "$ctx", ctx,
-				ScriptableObject.READONLY);
+				ScriptableObject.EMPTY);
 		// define property for $ctx
 		definePropertyForCtx((CompositeMapObject) ctx, cx, service_context);
 
@@ -152,8 +152,8 @@ public class AuroraScriptEngine {
 				scope = cx.newObject(topLevel);
 				scope.setParentScope(null);
 				scope.setPrototype(topLevel);
-				preDefine(cx, scope);
 			}
+			preDefine(cx, scope);
 			ScriptImportor.organizeUserImport(cx, scope, service_context);
 			Script scr = CompiledScriptCache.getInstance()
 					.getScript(source, cx);
