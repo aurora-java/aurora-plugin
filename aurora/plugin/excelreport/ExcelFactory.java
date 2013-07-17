@@ -40,7 +40,6 @@ public class ExcelFactory {
 			sheetObj.createSheet(this);
 		}
 		wb.write(excelReport.getOutputStream());		
-		excelReport.getOutputStream().close();
 	}
 
 	private Map<String, CellStyle> createStyles(Workbook wb,

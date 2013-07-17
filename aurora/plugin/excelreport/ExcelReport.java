@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.logging.Level;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,6 +25,8 @@ import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.XMLOutputter;
 import uncertain.core.UncertainEngine;
+import uncertain.logging.ILogger;
+import uncertain.logging.LoggingContext;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.proc.AbstractEntry;
@@ -44,54 +47,73 @@ public class ExcelReport extends AbstractEntry {
 	public SheetWrap[] sheets;
 	CompositeMap configObj;
 	boolean enableTask = true;
-
+	ILogger logger;
 	public ExcelReport(UncertainEngine uncertainEngine) {
 		this.uncertainEngine = uncertainEngine;
+		
 	}
 
 	public void run(ProcedureRunner runner) throws Exception {
 		CompositeMap context = runner.getContext();
+		logger = LoggingContext.getLogger(context, "aurora.plugin.excelreport");
 		ExcelReport excelReport = createExcelReport(context);
 		if (excelReport == null)
-			return;		
+			return;
 		String filename = excelReport.getFileName();
 		if (filename != null) {
 			if (filename.endsWith(KEY_EXCEL2007_SUFFIX)) {
 				excelReport.setFormat(KEY_EXCEL2007_SUFFIX);
 			} else if (filename.endsWith(KEY_EXCEL2003_SUFFIX)) {
 				excelReport.setFormat(KEY_EXCEL2003_SUFFIX);
-			} else {
+			} else {				
 				throw new IllegalAddException(filename + " illegal suffix");
 			}
+		} else {
+			throw new IllegalAddException("fileName attribute is undefined");
 		}
 		File tempFile = null;
-		if (!enableTask) {
-			tempFile = File.createTempFile("excelreport",
-					excelReport.getFormat());
-			os = new FileOutputStream(tempFile);
-		} else {
-			IObjectRegistry or=this.uncertainEngine.getObjectRegistry();
-			IReportTask excelTask=(IReportTask)or.getInstanceOfType(IReportTask.class);
-			String fileFullPath = excelTask.getReportDir()+"/"+"excel"+System.currentTimeMillis()+excelReport.getFormat();
-			os = new FileOutputStream(fileFullPath);
-			context.putObject("/parameter/@file_path", fileFullPath,true);
-			context.putObject("/parameter/@file_name", excelReport.getFileName(),true);
-		}
-		excelReport.setOutputStream(os);
 		try {
+			if (!enableTask) {
+				tempFile = File.createTempFile("excelreport",
+						excelReport.getFormat());
+				os = new FileOutputStream(tempFile);
+			} else {
+				IObjectRegistry or = this.uncertainEngine.getObjectRegistry();
+				IReportTask excelTask = (IReportTask) or
+						.getInstanceOfType(IReportTask.class);
+				String fileFullPath = excelTask.getReportDir() + "/" + "excel"
+						+ System.currentTimeMillis() + excelReport.getFormat();
+				os = new FileOutputStream(fileFullPath);
+				context.putObject("/parameter/@file_path", fileFullPath, true);
+				context.putObject("/parameter/@file_name",
+						excelReport.getFileName(), true);
+			}
+			excelReport.setOutputStream(os);
 			new ExcelFactory().createExcel(context, excelReport);
+			if (!enableTask) {
+				ServiceInstance svc = ServiceInstance.getInstance(context);
+				HttpServletResponse response = ((HttpServiceInstance) svc)
+						.getResponse();
+				setResponseHeader(response, excelReport);
+				transferOutputStream(response.getOutputStream(),
+						new FileInputStream(tempFile));
+				
+			}
 		} catch (Exception e) {
+			logger.log(Level.SEVERE, null, e);
 			throw e;
-		}
-		if (!enableTask) {
-			ServiceInstance svc = ServiceInstance.getInstance(context);
-			HttpServletResponse response = ((HttpServiceInstance) svc)
-					.getResponse();
-			setResponseHeader(response, excelReport);
-			transferOutputStream(response.getOutputStream(),
-					new FileInputStream(tempFile));
-			stopRunner(runner);
-		}
+		} finally {			
+			if (os != null){
+				try{
+					os.close();
+				}catch(Exception e){
+					logger.log(Level.SEVERE, null, e);
+				}
+			}
+			if(!enableTask){
+				stopRunner(runner);
+			}
+		}		
 	}
 
 	ExcelReport createExcelReport(CompositeMap context) throws IOException,
@@ -160,7 +182,7 @@ public class ExcelReport extends AbstractEntry {
 					+ new String(excelReport.getFileName().getBytes(),
 							"ISO-8859-1") + "\"");
 			response.setHeader("cache-control", "must-revalidate");
-			response.setHeader("pragma", "public");	
+			response.setHeader("pragma", "public");
 		} catch (UnsupportedEncodingException e) {
 			throw e;
 		}
@@ -228,5 +250,5 @@ public class ExcelReport extends AbstractEntry {
 
 	public void setEnableTask(boolean enableTask) {
 		this.enableTask = enableTask;
-	}	
+	}
 }
