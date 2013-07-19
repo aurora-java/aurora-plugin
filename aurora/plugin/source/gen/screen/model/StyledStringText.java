@@ -1,6 +1,5 @@
 package aurora.plugin.source.gen.screen.model;
 
-
 public class StyledStringText extends AuroraComponent {
 	private static final String STYLED_STRING_TEXT = "styled_string_text";
 
@@ -42,6 +41,48 @@ public class StyledStringText extends AuroraComponent {
 		this.setStrikeoutColor(UNAVAILABLE_RGB);
 		this.setTextBackground(UNAVAILABLE_RGB);
 		this.setTextForeground(UNAVAILABLE_RGB);
+	}
+
+	public boolean isUseless() {
+		if (this.isBold()) {
+			return false;
+		}
+		if (this.isItalic()) {
+			return false;
+		}
+		if (this.isStrikeout()) {
+			return false;
+		}
+		if (this.isUnderline()) {
+			return false;
+		}
+
+		// SWT.UNDERLINE_SINGLE;
+		// SWT.UNDERLINE_DOUBLE
+		// SWT.UNDERLINE_ERROR
+		// SWT.UNDERLINE_SQUIGGLE
+		// SWT.UNDERLINE_LINK
+		// public static final int UNDERLINE_SINGLE = 0;
+		// public static final int UNDERLINE_DOUBLE = 1;
+		// public static final int UNDERLINE_ERROR = 2;
+		// public static final int UNDERLINE_SQUIGGLE = 3;
+		// public static final int UNDERLINE_LINK = 4;
+		if (this.getUnderlineStyle() >= 0 && this.getUnderlineStyle() <= 4) {
+			return false;
+		}
+		if (this.getTextBackground().equals(UNAVAILABLE_RGB) == false) {
+			return false;
+		}
+		if (this.getTextForeground().equals(UNAVAILABLE_RGB) == false) {
+			return false;
+		}
+		if (this.getUnderlineColor().equals(UNAVAILABLE_RGB) == false) {
+			return false;
+		}
+		if (this.getStrikeoutColor().equals(UNAVAILABLE_RGB) == false) {
+			return false;
+		}
+		return true;
 	}
 
 	public String getText() {
