@@ -13,6 +13,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
 
 import uncertain.composite.CompositeMap;
+import aurora.service.ServiceContext;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 
@@ -51,7 +52,7 @@ public class UploadFileToServer {
 				FileItem item = (FileItem) iter.next();
 				if (item.isFormField()) {
 					System.out.println("处理表单内容 ...");
-//					processFormField(item);
+					processFormField(item);
 				} else {
 					System.out.println("处理上传的文件 ...");
 					processUploadFile(item);
@@ -66,9 +67,13 @@ public class UploadFileToServer {
 
 	// 处理表单内容
 	private void processFormField(FileItem item) throws Exception {
+//		this.context.get(key)
+		ServiceContext service = ServiceContext.createServiceContext(context);
+		CompositeMap parameter = service.getParameter();
 		String name = item.getFieldName();
-		String value = item.getString();
-		System.out.println(name + " : " + value + "\r\n");
+		String value = item.getString("UTF-8");
+		parameter.put(name, value);
+		//System.out.println(name + " : " + value + "\r\n");
 	}
 
 	// 处理上传的文件
@@ -99,7 +104,10 @@ public class UploadFileToServer {
 		if (files == null) {
 			files = context.createChild("uploadFiles");
 		}
-		files.createChild("file").put("filePath", uploadFile.getPath());
+		CompositeMap createChild = files.createChild("file");
+		createChild.put("filePath", uploadFile.getPath());
+		createChild.put("fileName", filename);
+		createChild.put("fileSize", fileSize);
 
 		System.out.println(filename + " 文件保存完毕 ...");
 		System.out.println("文件大小为 ：" + fileSize + "\r\n");
