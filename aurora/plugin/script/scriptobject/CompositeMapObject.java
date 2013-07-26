@@ -142,6 +142,14 @@ public class CompositeMapObject extends ScriptableObject {
 		return jsGet_children();
 	}
 
+	public void jsFunction_setText(String text) {
+		data.setText(text);
+	}
+
+	public String jsFunction_getText() {
+		return data.getText();
+	}
+
 	public Object composite_get(Object name) {
 		Object d = data.get(name);
 		if (d instanceof CompositeMap) {
@@ -204,6 +212,13 @@ public class CompositeMapObject extends ScriptableObject {
 	public CompositeMapObject jsFunction_createChild(String name) {
 		CompositeMapObject map = newMap();
 		map.setData(data.createChild(name));
+		return map;
+	}
+
+	public CompositeMapObject jsFunction_createChildNS(String name) {
+		CompositeMapObject map = jsFunction_createChild(name);
+		map.data.setPrefix(data.getPrefix());
+		map.data.setNameSpaceURI(data.getNamespaceURI());
 		return map;
 	}
 

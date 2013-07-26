@@ -59,7 +59,8 @@ public class ScriptRunner {
 			engine = new AuroraScriptEngine(context);
 			sso.put(engine);
 		}
-		String str = getParsedScript();
+		// DON'T parse xpath tag in script
+		String str = exp;// getParsedScript();
 		if (optimizeLevel != null && optimizeLevel.length() > 0)
 			engine.setOptimizeLevel(Integer.parseInt(optimizeLevel));
 		return engine.eval(str);
