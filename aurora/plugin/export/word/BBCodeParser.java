@@ -33,6 +33,7 @@ public class BBCodeParser {
 	}
 	
 	private void parse(String text, BBCodeHandler handler) throws IOException {
+		if(text == null)return;
 		Reader reader = new StringReader(text);
 		String tag = "";
 		int index=0,ts=0,te=0,ss=0;
