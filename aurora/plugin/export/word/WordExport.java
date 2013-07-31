@@ -1,7 +1,10 @@
 package aurora.plugin.export.word;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -15,7 +18,10 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
+import uncertain.composite.XMLOutputter;
+import uncertain.core.UncertainEngine;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
@@ -36,12 +42,17 @@ public class WordExport extends AbstractEntry {
 	private static final String TEMPLATE_TABLE = "table.ftl";
 	private static final String DEFAULT_WORD_NAME = "default.doc";
 	
+	private static final String LISTS_START = "<w:lists xmlns:w='http://schemas.microsoft.com/office/word/2003/wordml'>";
+	private static final String LISTS_END = "</w:lists>";
+	
 	protected SectList[] sectLists;
 	protected Table[] tables;
 	protected Replace[] replaces;
 	private String template = null;
 	private String name = DEFAULT_WORD_NAME;
 	private WordTemplateProvider provider;
+	private UncertainEngine uncertainEngine;
+	
 	
 	private int baseId;
 	
@@ -51,6 +62,7 @@ public class WordExport extends AbstractEntry {
 	public WordExport(IObjectRegistry registry) {
 		provider = (WordTemplateProvider) registry.getInstanceOfType(WordTemplateProvider.class);
 		baseId = 1000;
+		uncertainEngine = (UncertainEngine) registry.getInstanceOfType(UncertainEngine.class);
 	}
 
 	
@@ -58,14 +70,37 @@ public class WordExport extends AbstractEntry {
 		CompositeMap context = runner.getContext();
 		ServiceContext service = ServiceContext.createServiceContext(context);
 		CompositeMap model = service.getModel();
+		String templateName =  getTemplate();
 		
 		Map dataMap = new HashMap();
 		if(replaces != null){
 			for(Replace replace:replaces){
-				CompositeMap data = (CompositeMap)model.getObject(replace.getPath());
-				dataMap.put(replace.getName(),data);
+				Object data = model.getObject(replace.getPath());
+				if(data instanceof String){
+					List rs = createWordR((String)data);
+					if(rs.size() > 1) {
+						StringBuffer psb = new StringBuffer("<w:p>");
+						Iterator rit = rs.iterator();
+						while(rit.hasNext()){
+							WordR r = (WordR)rit.next();
+							psb.append(r.toXML());
+						}
+						psb.append("</w:p>"); 
+						dataMap.put(replace.getName(),psb);
+					}else {
+						dataMap.put(replace.getName(),data);
+						
+					}
+				}else {
+					dataMap.put(replace.getName(),data);
+				}
 			}
 		}
+		
+		CompositeLoader loader = new CompositeLoader();
+		loader.setSaveNamespaceMapping(true);
+		File f = new File(uncertainEngine.getConfigDirectory(),templateName);
+		CompositeMap file = loader.loadByFullFilePath(f.getCanonicalPath());
 		
 		if(sectLists != null) {
 			listDefSb.append(createTopListDef());
@@ -80,20 +115,90 @@ public class WordExport extends AbstractEntry {
 					dataMap.put(list.getId(),psb.toString());
 				}
 			}
-			listDefSb.append(listMapSb);
-			dataMap.put("listdef", listDefSb.toString());
+//			listDefSb.append(listMapSb);
+//			dataMap.put("listDefSb", listDefSb);
+//			dataMap.put("listMapSb", listMapSb);
+			
+			
+			List childList = file.getChilds();
+			int index = 0;
+			Iterator it = childList.iterator();
+			while(it.hasNext()){
+				CompositeMap c = (CompositeMap)it.next();
+				if("fonts".equals(c.getName())){
+					break;
+				}
+				index ++;
+			}
+			CompositeMap lists = file.getChild("lists");
+			if(lists == null) {
+				lists = new CompositeMap("w","http://schemas.microsoft.com/office/word/2003/wordml", "lists");
+				childList.add(index, lists);
+			}
+			String listDefStr =  LISTS_START + listDefSb + LISTS_END;
+			String listMapStr =  LISTS_START + listMapSb + LISTS_END;
+			CompositeMap listDefObj = loader.loadFromString(listDefStr);
+			CompositeMap listMapObj = loader.loadFromString(listMapStr);
+			
+			List listDef = new ArrayList();
+			List listMap = new ArrayList();
+			List child = lists.getChilds();
+			if(child!= null){
+				Iterator lit = child.iterator();
+				while(lit.hasNext()) {
+					CompositeMap litem = (CompositeMap)lit.next();
+					if("listDef".equals(litem.getName())){
+						listDef.add(litem);
+					}else if("list".equals(litem.getName())){
+						listMap.add(litem);
+					}
+				}
+				listDef.addAll(listDefObj.getChilds());
+				listMap.addAll(listMapObj.getChilds());
+				child.clear();
+				child.addAll(listDef);
+				child.addAll(listMap);
+			}else {
+				lists.addChilds(listDefObj.getChilds());
+				lists.addChilds(listMapObj.getChilds());
+			}
 		}
 		
+		//CompositeLoader 会丢失命名空间
+		file.put("xmlns:aml", "http://schemas.microsoft.com/aml/2001/core");
+		file.put("xmlns:dt", "uuid:C2F41010-65B3-11d1-A29F-00AA00C14882");
+		file.put("xmlns:ve", "http://schemas.openxmlformats.org/markup-compatibility/2006");
+		file.put("xmlns:o", "urn:schemas-microsoft-com:office:office");
+		file.put("xmlns:v", "urn:schemas-microsoft-com:vml");
+		file.put("xmlns:w10", "urn:schemas-microsoft-com:office:word");
+//		file.put("xmlns:w", "http://schemas.microsoft.com/office/word/2003/wordml");
+		file.put("xmlns:wx", "http://schemas.microsoft.com/office/word/2003/auxHint");
+		file.put("xmlns:wsp", "http://schemas.microsoft.com/office/word/2003/wordml/sp2");
+		file.put("xmlns:sl", "http://schemas.microsoft.com/schemaLibrary/2003/core");
+		file.put("w:macrosPresent", "no");
+		file.put("w:embeddedObjPresent", "no");
+		file.put("w:ocxPresent", "no");
+		file.put("xml:space", "preserve");
 		
 		
+		XMLOutputter putter = XMLOutputter.defaultInstance();
+		putter.setGenerateCdata(false);
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><?mso-application progid=\"Word.Document\"?>" + putter.toXML(file);
 		
 		Configuration configuration = provider.getFreeMarkerConfiguration();
 		Template t = null;
 		Writer out = null;
 		try {
-			String templateName =  getTemplate();
+			
 			if(templateName == null) throw new IllegalArgumentException("template can not be null!");
-			t = configuration.getTemplate(templateName);	
+//			t = configuration.getTemplate(templateName);
+			Reader reader = new BufferedReader(new StringReader(xml));
+			try {
+				t = new Template("word_template", reader ,configuration,"UTF-8");
+			}finally{
+				reader.close();
+			}
+			
 			Template tbl = configuration.getTemplate(DEFAULT_TEMPLATE_DIR + File.separatorChar + TEMPLATE_TABLE);
 			
 			if(tables != null)
@@ -157,7 +262,6 @@ public class WordExport extends AbstractEntry {
 	}
 	
 	
-	
 	private String processFileName(HttpServletRequest request, String filename) throws UnsupportedEncodingException {
 		String userAgent = request.getHeader("User-Agent");
 		String new_filename = URLEncoder.encode(filename, "UTF8");
@@ -181,7 +285,7 @@ public class WordExport extends AbstractEntry {
 	}
 	
 	
-	private String createTable(Table table, Template template,CompositeMap model) throws TemplateException, IOException{
+	private String createTable(Table table, Template template,CompositeMap model) throws TemplateException, IOException {
 		StringWriter out = new StringWriter();
 		Map map = new HashMap();
 		List columns = new ArrayList();
@@ -199,7 +303,6 @@ public class WordExport extends AbstractEntry {
 		out.flush();
 		return out.toString();
 	}
-	
 	
 	
 	private CompositeMap buildTree(CompositeMap data){
@@ -233,17 +336,16 @@ public class WordExport extends AbstractEntry {
 	}
 	
 	
-	
 	private String createListDefMap(){
 		StringBuffer sb = new StringBuffer();
 		sb.append("<w:list w:ilfo='"+baseId+"'>");		
-		sb.append("<w:ilst w:val='"+baseId+"'/>");
+		sb.append("	 <w:ilst w:val='"+baseId+"'/>");
 		sb.append("</w:list>");
 		return sb.toString();
 	}
 	
 	
-	private void createSection(StringBuffer psb,List children,int level){
+	private void createSection(StringBuffer psb,List children,int level) throws IOException {
 		if(children == null) return;
 		Iterator it = children.iterator();
 		while(it.hasNext()){
@@ -257,7 +359,25 @@ public class WordExport extends AbstractEntry {
 				listDefSb.append(createListDef(baseId-1000));
 				listMapSb.append(createListDefMap());
 			}
-			psb.append(createP(level==0, isBold,level,baseId,text));
+			
+			psb.append("<w:p>");
+			WordPPr pPr = new WordPPr();
+			pPr.setOutlineLvl(level);
+			pPr.createListPr();
+			pPr.getRPr().setBold(isBold);
+			pPr.getListPr().setIlvl(level);
+			pPr.getListPr().setIlfo((level==0 ? 1000 : baseId));
+			psb.append(pPr.toXML());
+			
+			List rs = createWordR(text);
+			Iterator rit = rs.iterator();
+			while(rit.hasNext()){
+				WordR r = (WordR)rit.next();
+				if(level==0)r.getRPr().setBold(true);
+				psb.append(r.toXML());
+			}
+			
+			psb.append("</w:p>");
 			List childs = item.getChilds();
 			if(childs!=null){
 				createSection(psb,childs,level+1);
@@ -278,40 +398,44 @@ public class WordExport extends AbstractEntry {
 				psb.append("</w:p>");
 			}
 		}
-		
 	}
 	
 	
-	private String createP(boolean isOutLine,boolean isBold,int level,int listDefId,String text){
-		StringBuffer sb = new StringBuffer();
-		sb.append("<w:p>");
-		sb.append("    <w:pPr>");
-		if(isOutLine) sb.append("        <w:outlineLvl w:val='0'/>");
-		sb.append("        <w:listPr>");
-		sb.append("            <w:ilvl w:val='"+level+"'/>");
-		sb.append("            <w:ilfo w:val='"+(isOutLine ? 1000 : listDefId)+"'/>");
-		sb.append("        </w:listPr>");
-		sb.append("        <w:rPr>");
-		sb.append("            <w:rFonts w:ascii='宋体' w:h-ansi='宋体'/>");
-		sb.append("            <wx:font wx:val='宋体'/>");
-		sb.append("            <w:sz w:val='24'/>");
-		sb.append("            <w:sz-cs w:val='24'/>");
-		if(isBold)sb.append("            <w:b/>");
-		sb.append("        </w:rPr>");
-		sb.append("    </w:pPr>");
-		sb.append("    <w:r>");
-		sb.append("        <w:rPr>");
-		sb.append("            <w:rFonts w:ascii='宋体' w:h-ansi='宋体'/>");
-		sb.append("            <wx:font wx:val='宋体'/>");
-		sb.append("            <w:sz w:val='24'/>");
-		sb.append("            <w:sz-cs w:val='24'/>");
-		if(isBold)sb.append("            <w:b/>");
-		sb.append("        </w:rPr>");
-		sb.append("        <w:t>"+text+"</w:t>");
-		sb.append("    </w:r>");
-		sb.append("</w:p>");
-		return sb.toString();
+	private List createWordR(String text) throws IOException{
+		List result = new ArrayList();
+		BBCodeParser parser = new BBCodeParser();
+		List list = parser.parse(text);
+		boolean isBold = false;
+		boolean isUnderLine = false;
+		if(list != null){
+			Iterator it = list.iterator();
+			while(it.hasNext()){
+				WordR wr = new WordR();
+				String item = (String)it.next();
+				if(!parser.isTag(item)){
+					wr.getRPr().setBold(isBold);
+					wr.getRPr().setUnderLine(isUnderLine);
+					wr.setText(item);
+					result.add(wr);
+				}else if(BBCodeParser.TAG_BR.equals(item)){
+					wr.getRPr().setBold(isBold);
+					wr.getRPr().setUnderLine(isUnderLine);
+					wr.setBr();
+					result.add(wr);
+				}else if(BBCodeParser.TAG_B_S.equals(item)){
+					isBold = true;
+				}else if(BBCodeParser.TAG_B_E.equals(item)){
+					isBold = false;
+				}else if(BBCodeParser.TAG_U_S.equals(item)){
+					isUnderLine = true;
+				}else if(BBCodeParser.TAG_U_E.equals(item)){
+					isUnderLine = false;
+				}
+			}
+		}
+		return result;
 	}
+	
 	
 	
 	private String createTopListDef(){
@@ -339,7 +463,7 @@ public class WordExport extends AbstractEntry {
 	
 	private String createListDef(int level){
 		StringBuffer sb = new StringBuffer();
-		sb.append("<w:listDef w:listDefId='"+baseId+"'>");
+		sb.append("<w:listDef xmlns:w='http://schemas.microsoft.com/office/word/2003/wordml' w:listDefId='"+baseId+"'>");
 		sb.append("  <w:plt w:val='Multilevel'/>");
 		sb.append("  <w:lvl w:ilvl='0'>");
 		sb.append("    <w:start w:val='1'/>");
