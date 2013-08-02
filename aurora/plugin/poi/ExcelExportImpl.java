@@ -15,6 +15,7 @@ import org.apache.poi.ss.usermodel.*;
 import aurora.i18n.ILocalizedMessageProvider;
 import aurora.plugin.export.MergedHeader;
 import uncertain.composite.CompositeMap;
+import uncertain.composite.TextParser;
 import uncertain.composite.transform.GroupConfig;
 import uncertain.composite.transform.GroupTransformer;
 
@@ -27,6 +28,7 @@ public class ExcelExportImpl {
 	Workbook wb;
 
 	CompositeMap dataModel;
+	CompositeMap context;
 	CompositeMap mergeColumn;
 	CompositeMap headerConfig;
 	List<CompositeMap> headerList;
@@ -41,6 +43,7 @@ public class ExcelExportImpl {
 
 	public void createExcel(CompositeMap dataModel, CompositeMap column_config,
 			OutputStream os, CompositeMap merge_column) throws Exception {
+		context=dataModel.getRoot();
 		if (merge_column != null) {
 			CompositeMap groupConfig = null;
 			CompositeMap record;
@@ -244,6 +247,7 @@ public class ExcelExportImpl {
 	String getPrompt(String key) {
 		String promptString = localMsgProvider.getMessage(key);
 		promptString = promptString == null ? key : promptString;
+		promptString = TextParser.parse(promptString, context);
 		return promptString;
 	}
 

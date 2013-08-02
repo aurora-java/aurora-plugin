@@ -33,6 +33,7 @@ import aurora.service.http.HttpServiceInstance;
 
 import uncertain.composite.CompositeMap;
 import uncertain.composite.DynamicObject;
+import uncertain.composite.TextParser;
 import uncertain.event.IContextAcceptable;
 import uncertain.logging.ILogger;
 import uncertain.logging.LoggingContext;
@@ -146,6 +147,7 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 				col++;			
 				record = (CompositeMap) iterator.next();
 				title=getPrompt(record.getString("prompt"));
+				title=TextParser.parse(title, context.getObjectContext());
 				Map<Integer, String> map=headMap.get(Integer.valueOf(rownum));
 				if(map!=null)					
 					map.put(Integer.valueOf(col), title);
