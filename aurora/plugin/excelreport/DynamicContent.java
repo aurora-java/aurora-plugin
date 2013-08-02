@@ -1,5 +1,12 @@
 package aurora.plugin.excelreport;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -84,25 +91,78 @@ public class DynamicContent {
 		this.excelFactory = excelFactory;
 		CompositeMap data = (CompositeMap) excelFactory.getContext().getObject(
 				getDataModel());
+		createTableTitle(excelFactory.getContext());
 		if (data == null) {
-			createTableTitle(excelFactory.getContext());
 			return this.rowIndex;
 		}
-		GroupConfig[] groupConfig = createGroupConfig(data);
-		createTableTitle(excelFactory.getContext());
+		GroupConfig[] groupConfig = createGroupConfig();
 
 		if (groupConfig != null) {
-			CompositeMap target = GroupTransformer.transform(data, groupConfig);
+			data = GroupTransformer.transform(data, groupConfig);
 			createGroupMap();
-			createTableGroup(target);
+			createTableGroup(data);
 		} else {
+			OutputStreamWriter osw = null;
+			OutputStream os = null;
+			File file = null;
 			Iterator rowIt = data.getChildIterator();
 			if (rowIt == null)
 				return this.rowIndex;
+			//new file
+			CompositeMap recordDemo = null;
 			while (rowIt.hasNext()) {
-				CompositeMap record = (CompositeMap) rowIt.next();
-				createRecord(record);
+				recordDemo = (CompositeMap) rowIt.next();
+				break;
 			}
+			try {
+				file = File.createTempFile("excel", ".data");				
+				os = new FileOutputStream(file);
+				osw = new OutputStreamWriter(os, "UTF-8");
+				osw.write(data.toXML());				
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			} finally {
+				data = null;
+				if (osw != null)
+					try {
+						osw.close();
+					} catch (IOException e) {
+					}
+				if (os != null)
+					try {
+						os.close();
+					} catch (IOException e) {
+					}
+
+			}
+			if (file != null) {
+				XMLParse p = new XMLParse();
+				p.setDynamicContent(this);
+				p.setRawName(recordDemo.getName());
+				InputStream is = null;
+				try {					
+					is = new FileInputStream(file);
+					p.parseStream(is);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				} finally {
+					if (is != null)
+						try {
+							is.close();
+						} catch (IOException e) {
+						}
+					file.deleteOnExit();
+				}
+			}
+
+			// Iterator rowIt = data.getChildIterator();
+			// if (rowIt == null)
+			// return this.rowIndex;
+			// CompositeMap record;
+			// while (rowIt.hasNext()) {
+			// record = (CompositeMap) rowIt.next();
+			// createRecord(record);
+			// }
 		}
 		return this.rowIndex;
 	}
@@ -142,13 +202,14 @@ public class DynamicContent {
 					&& !"".equals(column.getCellStyle()))
 				cell.setCellStyle(excelFactory.styles.get(column.getCellStyle()));
 		}
-		CompositeMap map = new CompositeMap();
-		map.put("rownum", this.rowIndex);
-		map.put("record", record);
-		return map;
+		// CompositeMap map = new CompositeMap();
+		// map.put("rownum", this.rowIndex);
+		// map.put("record", record);
+		record.put("__rownum", this.rowIndex);
+		return record;
 	}
 
-	GroupConfig[] createGroupConfig(CompositeMap dataModel) {
+	GroupConfig[] createGroupConfig() {
 		if (this.getColumns() == null)
 			return null;
 
@@ -241,17 +302,16 @@ public class DynamicContent {
 				boolean is_first = true;
 				while (iterator.hasNext()) {
 					CompositeMap map1 = iterator.next();
-					value = ((CompositeMap) map1.get("record"))
-							.getString(stConfig.getGroupColumnFild());
+					value = map1.getString(stConfig.getGroupColumnFild());
 					if (is_first) {
-						firstRownum = map1.getInt("rownum");
+						firstRownum = map1.getInt("__rownum");
 						ref1 = CellReference.convertNumToColString(cell
 								.getColumnIndex()) + firstRownum;
 						colBuffer.append(ref1);
 						colBuffer.append(":");
 						is_first = false;
 					} else {
-						endRownum = map1.getInt("rownum");
+						endRownum = map1.getInt("__rownum");
 						ref2 = CellReference.convertNumToColString(cell
 								.getColumnIndex()) + endRownum;
 					}
@@ -333,7 +393,7 @@ public class DynamicContent {
 		boolean is_first = true;
 		while (iterator.hasNext()) {
 			record = iterator.next();
-			rownum = record.getInt("rownum");
+			rownum = record.getInt("__rownum");
 			endLine = rownum;
 			if (is_first) {
 				firstLine = rownum;
