@@ -107,11 +107,11 @@ public class WordExport extends AbstractEntry {
 			listMapSb.append(createListDefMap());
 			for(SectList list:sectLists){
 				CompositeMap data = (CompositeMap)model.getObject(list.getModel());
-				CompositeMap top = buildTree(data);
+				CompositeMap top = buildTree(list,data);
 				List children = top.getChilds();
 				if(children!=null){
 					StringBuffer psb = new StringBuffer();
-					createSection(psb,children,0);
+					createSection(list,psb,children,0);
 					dataMap.put(list.getId(),psb.toString());
 				}
 			}
@@ -305,7 +305,7 @@ public class WordExport extends AbstractEntry {
 	}
 	
 	
-	private CompositeMap buildTree(CompositeMap data){
+	private CompositeMap buildTree(SectList list,CompositeMap data){
 		CompositeMap top = new CompositeMap();
 		Map map = new HashMap();
 		if(data!=null && data.getChilds()!=null){
@@ -313,8 +313,8 @@ public class WordExport extends AbstractEntry {
 			Iterator it = children.iterator();
 			while(it.hasNext()){
 				CompositeMap item = (CompositeMap)it.next();
-				String id = item.getString("id");
-				String pid = item.getString("pid");
+				String id = item.getString(list.getIdField());
+				String pid = item.getString(list.getParentIdField());
 				map.put(id, item);
 				if(pid == null || "".equals(pid)){
 					top.addChild(item);					
@@ -323,7 +323,7 @@ public class WordExport extends AbstractEntry {
 			it = children.iterator();
 			while(it.hasNext()){
 				CompositeMap item = (CompositeMap)it.next();
-				String pid = item.getString("pid");
+				String pid = item.getString(list.getParentIdField());
 				if(pid != null && !"".equals(pid)){
 					CompositeMap parent = (CompositeMap)map.get(pid);
 					if(parent != null){
@@ -345,13 +345,13 @@ public class WordExport extends AbstractEntry {
 	}
 	
 	
-	private void createSection(StringBuffer psb,List children,int level) throws IOException {
+	private void createSection(SectList list,StringBuffer psb,List children,int level) throws IOException {
 		if(children == null) return;
 		Iterator it = children.iterator();
 		while(it.hasNext()){
 			CompositeMap item = (CompositeMap)it.next();
-			String pid = item.getString("pid");
-			String text = item.getString("text");
+			String pid = item.getString(list.getParentIdField());
+			String text = item.getString(list.getTextField());
 			boolean isBold = (pid == null || "".equals(pid));
 			boolean isTop = level ==0;
 			if(isTop){
@@ -380,7 +380,7 @@ public class WordExport extends AbstractEntry {
 			psb.append("</w:p>");
 			List childs = item.getChilds();
 			if(childs!=null){
-				createSection(psb,childs,level+1);
+				createSection(list,psb,childs,level+1);
 			}
 			
 			if(isTop){
