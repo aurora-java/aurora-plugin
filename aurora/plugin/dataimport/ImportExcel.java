@@ -1,5 +1,6 @@
 package aurora.plugin.dataimport;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -360,5 +361,9 @@ public class ImportExcel extends AbstractEntry {
 	public void setMaxFileSize(String maxFileSize) {
 		this.maxFileSize = maxFileSize;
 	}	
-	
+	public static void main(String[] args) throws Exception{
+		ImportExcel importExcel=new ImportExcel(null);
+		InputStream is=new FileInputStream("/Volumes/MacintoshHD/download/财务报表测试_07112.xlsx");
+		importExcel.parseFile(is, ".xlsx", importExcel);
+	}
 }
