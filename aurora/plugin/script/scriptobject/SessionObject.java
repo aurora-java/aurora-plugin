@@ -3,7 +3,6 @@ package aurora.plugin.script.scriptobject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-
 import uncertain.composite.CompositeMap;
 import aurora.application.action.HttpSessionCopy;
 import aurora.application.action.HttpSessionOperate;
@@ -65,6 +64,13 @@ public class SessionObject extends ScriptableObject {
 		hso.setTarget(target);
 		hso.setSource(source);
 		hso.writeSession(request, context);
+	}
+
+	public void jsFunction_writeValue(String target, Object value) {
+		init();
+		HttpSession session = request.getSession();
+		session.setAttribute(target, value);
+		context.putObject("/session/@" + target, value);
 	}
 
 	public void jsFunction_create() {

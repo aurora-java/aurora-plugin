@@ -201,6 +201,24 @@ public class CompositeMapObject extends ScriptableObject {
 		return c;
 	}
 
+	public CompositeMapObject jsFunction_getParent() {
+		CompositeMap p = data.getParent();
+		if (p == null)
+			return null;
+		CompositeMapObject c = newMap();
+		c.setData(p);
+		return c;
+	}
+
+	public CompositeMapObject jsFunction_getRoot() {
+		CompositeMap t = data.getRoot();
+		if (t == null)
+			return null;
+		CompositeMapObject c = newMap();
+		c.setData(t);
+		return c;
+	}
+
 	public void jsFunction_addChild(Object obj) {
 		if (obj instanceof CompositeMap) {
 			data.addChild((CompositeMap) obj);
