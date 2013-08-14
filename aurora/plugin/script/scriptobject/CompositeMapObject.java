@@ -327,4 +327,9 @@ public class CompositeMapObject extends ScriptableObject {
 		sb.append(']');
 		return sb.toString();
 	}
+
+	@Override
+	public Object[] getIds() {
+		return data.keySet().toArray();
+	}
 }
