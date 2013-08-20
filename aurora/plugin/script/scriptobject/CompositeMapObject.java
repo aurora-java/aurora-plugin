@@ -2,6 +2,7 @@ package aurora.plugin.script.scriptobject;
 
 import java.util.List;
 
+import uncertain.composite.CompositeMap;
 import aurora.javascript.Callable;
 import aurora.javascript.Context;
 import aurora.javascript.Function;
@@ -9,8 +10,6 @@ import aurora.javascript.NativeArray;
 import aurora.javascript.NativeJavaObject;
 import aurora.javascript.Scriptable;
 import aurora.javascript.ScriptableObject;
-
-import uncertain.composite.CompositeMap;
 
 public class CompositeMapObject extends ScriptableObject {
 
@@ -95,7 +94,9 @@ public class CompositeMapObject extends ScriptableObject {
 	}
 
 	public int jsGet_length() {
-		return data.getChildsNotNull().size();
+		if (data.getChilds() == null)
+			return 0;
+		return data.getChilds().size();
 	}
 
 	public Object jsFunction_getData() {
@@ -111,8 +112,8 @@ public class CompositeMapObject extends ScriptableObject {
 
 	public NativeArray jsGet_children() {
 		@SuppressWarnings("unchecked")
-		List<CompositeMap> list = data.getChildsNotNull();
-		int length = list.size();
+		List<CompositeMap> list = data.getChilds();
+		int length = list == null ? 0 : list.size();
 		NativeArray arr = ScriptUtil.newArray(this, length);
 		for (int i = 0; i < length; i++) {
 			CompositeMapObject m = newMap();

@@ -1,6 +1,7 @@
 package aurora.plugin.script.scriptobject;
 
 import java.io.IOException;
+import java.util.Map;
 
 
 import uncertain.composite.CompositeMap;
@@ -91,21 +92,13 @@ public class ModelServiceObject extends ScriptableObject {
 		desc = fd;
 	}
 
-	private CompositeMap convert(Object obj) {
+	private Map convert(Object obj) {
 		if (obj instanceof CompositeMapObject) {// js CompositeMap
 			return ((CompositeMapObject) obj).getData();
-		} else if (obj instanceof CompositeMap)// uncertain
-												// CompositeMap
+		} else if (obj instanceof CompositeMap)// uncertain CompositeMap
 			return (CompositeMap) obj;
 		else if (obj instanceof NativeObject) {// json object
-			CompositeMap map = new CompositeMap();
-			NativeObject no = (NativeObject) obj;
-			for (Object o : no.keySet()) {
-				if (o instanceof String) {
-					map.put(o, no.get(o));
-				}
-			}
-			return map;
+			return (NativeObject)obj;
 		}
 		return new CompositeMap();
 	}

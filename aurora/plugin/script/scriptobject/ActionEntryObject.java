@@ -1,18 +1,18 @@
 package aurora.plugin.script.scriptobject;
 
-import java.lang.reflect.Method;
-
+import uncertain.composite.CompositeMap;
+import uncertain.ocm.ClassRegistry;
+import uncertain.ocm.IConfigurable;
+import uncertain.ocm.IObjectRegistry;
+import uncertain.ocm.OCManager;
+import uncertain.ocm.ObjectRegistryImpl;
+import uncertain.ocm.ReflectionMapper;
+import uncertain.proc.AbstractEntry;
+import uncertain.proc.ProcedureRunner;
 import aurora.javascript.Context;
 import aurora.javascript.Function;
 import aurora.javascript.NativeObject;
 import aurora.javascript.ScriptableObject;
-
-import uncertain.composite.CompositeMap;
-import uncertain.ocm.ClassRegistry;
-import uncertain.ocm.IObjectRegistry;
-import uncertain.ocm.ObjectRegistryImpl;
-import uncertain.proc.AbstractEntry;
-import uncertain.proc.ProcedureRunner;
 
 public class ActionEntryObject extends ScriptableObject {
 	/**
@@ -57,20 +57,18 @@ public class ActionEntryObject extends ScriptableObject {
 				.getInstanceOfType(ClassRegistry.class);
 		String className = cr.getClassName(new CompositeMap("", uri, name));
 		if (className == null)
-			throw new RuntimeException("Can not find class for '" + name
-					+ "' in '" + uri + "'.");
-		AbstractEntry entry = null;
+			throw new RuntimeException(String.format(
+					"Can not find class for '%s' in '%s'.", name, uri));
 		try {
-			entry = (AbstractEntry) ((ObjectRegistryImpl) ior)
+			AbstractEntry entry = (AbstractEntry) ((ObjectRegistryImpl) ior)
 					.createInstanceSilently(Class.forName(className));
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-		if (entry == null)
-			return;
-		try {
-			if (param instanceof NativeObject)
-				autoAssignParameter(entry, (NativeObject) param);
+			CompositeMap map = toCompositeMap((NativeObject) param);
+			if (entry instanceof IConfigurable) {
+				((IConfigurable) entry).beginConfigure(map);
+			}
+			OCManager ocm = (OCManager) ior.getInstanceOfType(OCManager.class);
+			ReflectionMapper rm = new ReflectionMapper(ocm);
+			rm.toObject(map, entry);
 			ProcedureRunner runner = ScriptUtil.getProcedureRunner();
 			entry.run(runner);
 		} catch (Exception e) {
@@ -78,23 +76,18 @@ public class ActionEntryObject extends ScriptableObject {
 		}
 	}
 
-	private void autoAssignParameter(Object obj, NativeObject no)
-			throws Exception {
-		Class<?> cls = obj.getClass();
-		StringBuilder sb = new StringBuilder();
-		for (Object key : no.keySet()) {
-			if (key instanceof String) {
-				sb.delete(0, sb.length());
-				sb.append(key);
-				sb.setCharAt(0, Character.toTitleCase(sb.charAt(0)));
-				Method m = null;
-				try {
-					m = cls.getMethod("set" + sb.toString(), String.class);
-				} catch (Exception e) {
-					continue;
+	private CompositeMap toCompositeMap(NativeObject nObj) {
+		CompositeMap map = new CompositeMap("");
+		for (Object k : nObj.keySet()) {
+			if (k instanceof String) {
+				String key = k.toString();
+				Object value = nObj.get(k);
+				if (value != null) {
+					map.put(key, value.toString());
+					map.put(key.toLowerCase(), value.toString());
 				}
-				m.invoke(obj, "" + no.get(key));
 			}
 		}
+		return map;
 	}
 }
