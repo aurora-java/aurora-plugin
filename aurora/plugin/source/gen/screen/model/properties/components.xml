@@ -12,6 +12,12 @@
 		<attribute id="text" style="simple,save" />
 		<attribute id="text_text_style" style="containment,save,inner" />
 		<attribute id="button_clicker" style="containment,save,inner" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 
 
@@ -38,6 +44,12 @@
 		<attribute id="height" style="simple,save,_int" />
 		<attribute id="labelWidth" style="simple,save,_int" />
 		<attribute id="component_children" style="containment,save,inner,list" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 
 	<component type="fieldset,form" category="aurora">
@@ -53,6 +65,12 @@
 		<attribute id="container_section_type" style="simple,save,inner" />
 		<attribute id="i_dataset_delegate" style="containment,save,inner" />
 		<attribute id="component_children" style="containment,save,inner,list" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 
 	<component type="resultdataset" category="inner">
@@ -78,6 +96,12 @@
 		<attribute id="diagram_bind_template_type" style="simple,save,inner" />
 		<attribute id="component_children" style="containment,save,inner,list" />
 		<attribute id="inner_editor_un_bind_models" style="containment,save,inner,list,_string" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 
 	<component type="textfield" category="aurora">
@@ -92,6 +116,12 @@
 		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
 		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 	
 	<component type="textArea" category="aurora">
@@ -104,6 +134,12 @@
 		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
 		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 
 	<component type="label" category="aurora">
@@ -117,6 +153,12 @@
 		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
 		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 
 	<component type="datetimepicker,datepicker" category="aurora">
@@ -132,6 +174,12 @@
 		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
 		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 
 	<component type="combobox,lov" category="aurora">
@@ -146,6 +194,12 @@
 		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
 		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 	<component type="innerLovService" category="aurora">
 		<attribute id="component_type" style="simple,save,inner" />
@@ -171,6 +225,12 @@
 		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="text_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 
 	<component type="numberfield" category="aurora">
@@ -187,6 +247,12 @@
 		<attribute id="input_simple_data_text_style" style="containment,save,inner" />
 		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="i_dataset_field_delegate" style="containment,save,inner" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 
 	<component type="datasetfield" category="aurora">
@@ -218,6 +284,12 @@
 		<attribute id="height" style="simple,save,_int" />
 		<attribute id="name" style="simple,save" />
 		<attribute id="component_children" style="containment,save,inner,list" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 
 	<component type="grid" category="aurora">
@@ -230,6 +302,12 @@
 		<attribute id="i_dataset_delegate" style="containment,save,inner" />
 		<attribute id="toolbar" style="containment,save" />
 		<attribute id="component_children" style="containment,save,inner,list" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 	<component type="toolbar" category="aurora">
 		<attribute id="component_type" style="simple,save,inner" />
@@ -268,6 +346,12 @@
 		<attribute id="grid_column_simple_data_10_text_style" style="containment,save,inner" />
 		<attribute id="prompt_text_style" style="containment,save,inner" />
 		<attribute id="component_children" style="containment,save,inner,list" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 
 	<component type="gridselectioncol" category="inner">
@@ -306,6 +390,12 @@
 		<attribute id="defaultQueryField" style="simple,save" />
 		<attribute id="query_form_toolbar_children" style="containment,save,inner,list" />
 		<attribute id="resultTargetContainer" style="reference,save,inner" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 	<component type="formBody" category="aurora">
 		<attribute id="component_type" style="simple,save,inner" />
@@ -320,6 +410,7 @@
 		<attribute id="width" style="simple,save,_int" />
 		<attribute id="height" style="simple,save,_int" />
 		<attribute id="component_tabs" style="containment,save,inner,list" />
+		
 	</component>
 	<component type="tab" category="aurora">
 		<attribute id="component_type" style="simple,save,inner" />
@@ -327,6 +418,12 @@
 		<attribute id="prompt" style="simple,save" />
 		<attribute id="tab_item_current" style="simple,save,inner,_boolean" />
 		<attribute id="component_children" style="containment,save,inner,list" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 	
 	<!--custom component-->
@@ -337,6 +434,12 @@
 		<attribute id="image_width" style="simple,save,_int" />
 		<attribute id="image_height" style="simple,save,_int" />
 		<attribute id="icon_bytes_data" style="save,inner,_cdata" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 	</component>
 	<component type="styled_string_text" category="inner">
 		<attribute id="component_type" style="simple,save,inner" />
