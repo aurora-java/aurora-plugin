@@ -195,10 +195,10 @@ public class DatabaseTool {
 		return null;
 	}
 
-	private String getChildNodeText(CompositeMap content_node, String childName) {
-		if (content_node == null || childName == null)
+	private String getChildNodeText(CompositeMap segmentNode, String childName) {
+		if (segmentNode == null || childName == null)
 			return null;
-		CompositeMap childNode = content_node.getChild(childName);
+		CompositeMap childNode = segmentNode.getChild(childName);
 		if (childNode == null)
 			return null;
 		return childNode.getText();
@@ -293,7 +293,7 @@ public class DatabaseTool {
 	}
 
 	public void syncMapTables(int idoc_file_id, CompositeMap contentNode) throws AuroraIDocException {
-		if (idoc_file_id < 1 || contentNode == null)
+		if (idoc_file_id < 1 || contentNode == null || contentNode.getChilds() == null)
 			return;
 		PreparedStatement segmentMapsSt = null;
 		PreparedStatement fieldMapsSt = null;
@@ -364,6 +364,9 @@ public class DatabaseTool {
 	}
 
 	private void handleContentNode(int headerId, int parent_id, CompositeMap content_node) throws AuroraIDocException {
+		List<CompositeMap> content_childs = content_node.getChilds();
+		if( content_childs == null)
+			return;
 		if (!isSegmentDefined(content_node.getName()))
 			return;
 		StringBuffer insert_sql = new StringBuffer(
