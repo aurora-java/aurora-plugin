@@ -443,5 +443,9 @@ public interface ComponentProperties {
 	String defaultQueryField = "defaultQueryField";
 	String defaultQueryHint = "defaultQueryHint";
 	String action = "action";
+	
+	
+	String rowspan = "rowspan";
+	String colspan = "colspan";
 
 }

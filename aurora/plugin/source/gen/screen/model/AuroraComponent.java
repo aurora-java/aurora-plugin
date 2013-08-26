@@ -31,6 +31,8 @@ abstract public class AuroraComponent extends PropertyEditSupport implements
 	{
 		this.setPropertyValue(ComponentInnerProperties.COMPONENT_MARKER_ID,
 				markid);
+		this.setRowspan(1);
+		this.setColspan(1);
 	}
 
 	protected boolean eq(Object o1, Object o2) {
@@ -198,6 +200,25 @@ abstract public class AuroraComponent extends PropertyEditSupport implements
 	public void setBounds(aurora.plugin.source.gen.screen.model.Rectangle aurora) {
 		bounds = aurora.getCopy();
 		this.firePropertyChange(ComponentInnerProperties.BOUNDS, aurora, bounds);
+	}
+	
+	
+	public int getColspan() {
+		return  this.getIntegerPropertyValue(ComponentProperties.colspan);
+	}
+
+
+	public void setColspan(int name) {
+		this.setPropertyValue(ComponentProperties.colspan, name);
+	}
+	
+	public int getRowspan() {
+		return  this.getIntegerPropertyValue(ComponentProperties.rowspan);
+	}
+
+
+	public void setRowspan(int name) {
+		this.setPropertyValue(ComponentProperties.rowspan, name);
 	}
 
 }
