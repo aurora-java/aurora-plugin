@@ -6,6 +6,10 @@ abstract public class RowCol extends Container {
 	// protected int r = 3;
 	// protected int c = 3;
 	protected int headHight = 0;
+	{
+		this.setMinColWidth(200);
+		this.setMinRowHeight(20);
+	}
 
 	public int getRow() {
 		// return row;
@@ -36,6 +40,42 @@ abstract public class RowCol extends Container {
 
 	public void setCol(int col) {
 		this.setPropertyValue(ComponentProperties.column, col);
+		// if (this.col == col) {
+		// return;
+		// }
+		// int old = this.col;
+		// this.col = col;
+		// firePropertyChange(COL, old, col);
+	}
+
+	public int getMinColWidth() {
+		Object r = this.getPropertyValue(ComponentProperties.minColWidth);
+		if (r instanceof Integer) {
+			return (Integer) r;
+		}
+		return 200;
+	}
+
+	public void setMinColWidth(int w) {
+		this.setPropertyValue(ComponentProperties.minColWidth, w);
+		// if (this.col == col) {
+		// return;
+		// }
+		// int old = this.col;
+		// this.col = col;
+		// firePropertyChange(COL, old, col);
+	}
+
+	public int getMinRowHeight() {
+		Object r = this.getPropertyValue(ComponentProperties.minRowHeight);
+		if (r instanceof Integer) {
+			return (Integer) r;
+		}
+		return 20;
+	}
+
+	public void setMinRowHeight(int h) {
+		this.setPropertyValue(ComponentProperties.minRowHeight, h);
 		// if (this.col == col) {
 		// return;
 		// }

@@ -447,5 +447,9 @@ public interface ComponentProperties {
 	
 	String rowspan = "rowspan";
 	String colspan = "colspan";
+	
+	String minColWidth = "minColWidth";
+	String minRowHeight = "minRowHeight";
+	
 
 }

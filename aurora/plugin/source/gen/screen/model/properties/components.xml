@@ -54,6 +54,8 @@
 		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 		<attribute id="rowspan" style="simple,save,_int" />
 		<attribute id="colspan" style="simple,save,_int" />
+		<attribute id="minColWidth" style="simple,save,_int" />
+		<attribute id="minRowHeight" style="simple,save,_int" />
 	</component>
 
 	<component type="fieldset,form" category="aurora">
@@ -77,6 +79,8 @@
 		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 		<attribute id="rowspan" style="simple,save,_int" />
 		<attribute id="colspan" style="simple,save,_int" />
+		<attribute id="minColWidth" style="simple,save,_int" />
+		<attribute id="minRowHeight" style="simple,save,_int" />
 	</component>
 
 	<component type="resultdataset" category="inner">
@@ -425,6 +429,8 @@
 		<attribute id="component_type" style="simple,save,inner" />
 		<attribute id="column" style="simple,save,_int" />
 		<attribute id="component_children" style="containment,save,inner,list" />
+		<attribute id="minColWidth" style="simple,save,_int" />
+		<attribute id="minRowHeight" style="simple,save,_int" />
 	</component>
 	<component type="formToolbar" category="aurora">
 		<attribute id="component_type" style="simple,save,inner" />
