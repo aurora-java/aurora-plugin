@@ -2,13 +2,13 @@ package aurora.plugin.script;
 
 import javax.script.ScriptException;
 
-
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.ocm.OCManager;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 import aurora.application.action.ActionUtil;
+import aurora.javascript.EcmaError;
 import aurora.javascript.RhinoException;
 import aurora.plugin.script.engine.InterruptException;
 import aurora.plugin.script.engine.ScriptRunner;
@@ -76,21 +76,28 @@ public class ServerScript extends AbstractEntry {
 		} catch (InterruptException ie) {
 			ActionUtil.raiseApplicationError(runner, registry, ie.getMessage());
 		} catch (RhinoException re) {
-			String srcName = re.sourceName();
-			int line = re.lineNumber();
-			if ("<Unknown source>".equals(srcName))
-				line += lineno - 1;
-			StringBuilder sb = new StringBuilder(500);
-			sb.append("\n");
-			sb.append("source  : " + source + " --> " + srcName + "\n");
-			sb.append("lineno  : " + line + "\n");
-			sb.append("line src: " + re.lineSource() + "\n");
-			sb.append("message : " + re.getMessage() + "\n");
-			// re.printStackTrace();
-			throw new ScriptException(sb.toString());
+			if (re instanceof EcmaError) {
+				String srcName = re.sourceName();
+				int line = re.lineNumber();
+				if ("<Unknown source>".equals(srcName))
+					line += lineno - 1;
+				StringBuilder sb = new StringBuilder(500);
+				sb.append("\n");
+				sb.append("source  : " + source + " --> " + srcName + "\n");
+				sb.append("lineno  : " + line + "\n");
+				sb.append("line src: " + re.lineSource() + "\n");
+				sb.append("message : " + re.getMessage() + "\n");
+				// re.printStackTrace();
+				throw new ScriptException(sb.toString());
+			} else {
+				Exception thr = (Exception) re;
+				while (thr.getCause() != null)
+					thr = (Exception) thr.getCause();
+				throw thr;
+			}
 		} finally {
-//			System.out.println("server-script:" + (System.nanoTime() - t)
-//					/ 1000000 + "ms");
+			// System.out.println("server-script:" + (System.nanoTime() - t)
+			// / 1000000 + "ms");
 		}
 	}
 
