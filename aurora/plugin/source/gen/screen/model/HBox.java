@@ -15,6 +15,7 @@ public class HBox extends BOX {
 	public HBox() {
 		setSize(200, 40);
 		this.setComponentType(H_BOX);
+		this.setMinColWidth(50);
 	}
 
 	public int getHeadHight() {
