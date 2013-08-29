@@ -9,6 +9,8 @@ import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 import aurora.application.action.ActionUtil;
 import aurora.javascript.EcmaError;
+import aurora.javascript.EvaluatorException;
+import aurora.javascript.JavaScriptException;
 import aurora.javascript.RhinoException;
 import aurora.plugin.script.engine.InterruptException;
 import aurora.plugin.script.engine.ScriptRunner;
@@ -76,19 +78,22 @@ public class ServerScript extends AbstractEntry {
 		} catch (InterruptException ie) {
 			ActionUtil.raiseApplicationError(runner, registry, ie.getMessage());
 		} catch (RhinoException re) {
-			if (re instanceof EcmaError) {
+			if ((re instanceof EcmaError) || (re instanceof EvaluatorException)
+					|| (re instanceof JavaScriptException)) {
 				String srcName = re.sourceName();
 				int line = re.lineNumber();
 				if ("<Unknown source>".equals(srcName))
 					line += lineno - 1;
 				StringBuilder sb = new StringBuilder(500);
-				sb.append("\n");
 				sb.append("source  : " + source + " --> " + srcName + "\n");
 				sb.append("lineno  : " + line + "\n");
 				sb.append("line src: " + re.lineSource() + "\n");
-				sb.append("message : " + re.getMessage() + "\n");
-				// re.printStackTrace();
-				throw new ScriptException(sb.toString());
+				sb.append("message : " + re.getMessage());
+				System.err.println(sb.toString());
+				ScriptException se = new ScriptException(re.getMessage(),
+						source + " --> " + srcName, line);
+				// se.printStackTrace();
+				throw se;
 			} else {
 				Exception thr = (Exception) re;
 				while (thr.getCause() != null)
