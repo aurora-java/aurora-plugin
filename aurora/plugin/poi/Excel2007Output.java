@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -42,6 +43,20 @@ import uncertain.ocm.IObjectRegistry;
 public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 
 	private static final String XML_ENCODING = "UTF-8";
+	/*
+	 * 导出类型配置默认路径是
+	 * 	<context>
+	 * 		<_export_datatype>
+	 * 			<record field="code" datatype="Number"/>
+	 * 			<record field="name" datatype="String"/>
+	 * 		</_export_datatype>
+	 * </context>
+	 * */
+	public static final String KEY_DATA_TYPE = "datatype";
+	public static final String KEY_DATA_TYPE_NUMBER = "Number";
+	public static final String KEY_DATA_TYPE_STRING = "String";
+	public static final String KEY_DATA_FORMAT = "dataFormat";
+	
 	 
 	private static int CELL_CHAR_LIMIT = (int) Math.pow(2, 15) - 1; // 32,767
 
@@ -52,7 +67,7 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 	Map<String ,Object> rowMap;
 	
 	int headLevel;
-	Excel2007 excel2007=new Excel2007();
+	Excel2007Bean excel2007=new Excel2007Bean();
 	ExcelCellStyles styles;
 	File rawSheet;
 	File templateFile;
@@ -70,8 +85,8 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 		mLogger = LoggingContext.getLogger("aurora.plugin.export",mObjectRegistry);			
 	}
 	
-	public void setContext(CompositeMap context) {
-		this.context=(SqlServiceContext)DynamicObject.cast(context, SqlServiceContext.class);
+	public void setContext(CompositeMap contextMap) {
+		this.context=(SqlServiceContext)DynamicObject.cast(contextMap, SqlServiceContext.class);
 		IMessageProvider msgProvider = (IMessageProvider) mObjectRegistry.getInstanceOfType(IMessageProvider.class);
 		String langString = this.context.getSession().getString("lang","ZHS");
 		localMsgProvider = msgProvider.getLocalizedMessageProvider(langString);		
@@ -80,7 +95,7 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 			rawSheet = File.createTempFile("Excel2007TempSheet", ".xml");
 			rawWriter = new OutputStreamWriter(new FileOutputStream(rawSheet), XML_ENCODING);
 			sw = new SpreadsheetWriter(rawWriter, XML_ENCODING);
-			createExcelHeader(getHeaderConfig());
+			createExcelHeader(getHeaderConfig());			
 		} catch (Exception e) {
 			if(rawWriter!=null)
 				try {
@@ -99,6 +114,23 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 		if (columnConfig == null) {			
 			throw new ServletException(
 					"service-output tag and output attibute must be defined");
+		}
+		CompositeMap contextMap = context.getObjectContext();
+		CompositeMap datatype = (CompositeMap) contextMap
+				.getObject("/_export_datatype");
+		if (datatype != null) {
+			Iterator it = datatype.getChildIterator();
+			if (it != null) {
+				while (it.hasNext()) {
+					CompositeMap record = (CompositeMap) it.next();
+					String name = record.getString("field");
+					CompositeMap columnRecord = columnConfig.getChildByAttrib(
+							"record", "name", name);
+					columnRecord.put(ExcelExportImpl.KEY_DATA_TYPE, record
+							.getString(ExcelExportImpl.KEY_DATA_TYPE
+									.toLowerCase()));
+				}
+			}
 		}
 		return (new MergedHeader(columnConfig)).conifg;
 	}	
@@ -243,11 +275,25 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 		Iterator<Integer> iterator =keySet.iterator();
 		try {
 			while(iterator.hasNext()){
-				Integer key=(Integer)iterator.next();						
-				Object att=rowMap.get(columnMap.get(key).getString("name"));
+				Integer key=(Integer)iterator.next();	
+				CompositeMap record=columnMap.get(key);
+				Object att=rowMap.get(record.getString("name"));
 				int col=Integer.valueOf(key);
 				if(col>excel2007.getColLimit())break;	
 				if (att != null) {
+					if (record.getString(KEY_DATA_TYPE) != null) {
+						if (KEY_DATA_TYPE_STRING.equalsIgnoreCase(record
+								.getString(KEY_DATA_TYPE)))							
+							sw.createCell(col,att.toString());
+						else {
+							try {
+								sw.createCell(col,Double.parseDouble(att
+										.toString()));								
+							} catch (Exception e) {
+								sw.createCell(col,att.toString());
+							}
+						}						
+					} else{
 	                if (att instanceof Number) {
 	                    sw.createCell(col, ((Number) att).doubleValue());
 	                } else if (att instanceof Calendar) {
@@ -272,6 +318,7 @@ public class Excel2007Output implements IResultSetConsumer,IContextAcceptable{
 	                        sw.createCell(col, stringVal);
 	                    }
 	                }
+					}
 	            }
 				
 			}
