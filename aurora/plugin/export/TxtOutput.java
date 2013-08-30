@@ -26,7 +26,7 @@ import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 
 public class TxtOutput implements IResultSetConsumer, IContextAcceptable {
-	private static final String ENCODING = "GBK";
+	private static final String ENCODING = "UTF-8";
 	String separator;
 	ServiceContext context;
 	PrintWriter pw = null;
@@ -91,8 +91,10 @@ public class TxtOutput implements IResultSetConsumer, IContextAcceptable {
 		StringBuffer sb = new StringBuffer();
 		String content = null;
 		while (it.hasNext()) {
-			content = (String) rowMap.get(it.next());
-			if (content == null)
+			Object value=rowMap.get(it.next());
+			if(value!=null)
+				content = value.toString();				
+			else
 				content = "";
 			sb.append(content);
 			sb.append(this.separator);
