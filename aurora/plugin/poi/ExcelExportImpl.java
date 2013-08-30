@@ -1,16 +1,16 @@
 package aurora.plugin.poi;
 
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import java.util.Map;
+
+
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.CellRangeAddress;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 
 import aurora.i18n.ILocalizedMessageProvider;
 import aurora.plugin.export.MergedHeader;
@@ -20,10 +20,10 @@ import uncertain.composite.transform.GroupConfig;
 import uncertain.composite.transform.GroupTransformer;
 
 public class ExcelExportImpl {
-	public static final String KEY_DATA_TYPE = "dataType";
+	public static final String KEY_DATA_TYPE = "datatype";
 	public static final String KEY_DATA_TYPE_NUMBER = "Number";
 	public static final String KEY_DATA_TYPE_STRING = "String";
-	public static final String KEY_DATA_FORMAT = "dataFormat";
+	public final String KEY_DATA_FORMAT = "dataFormat";
 	ILocalizedMessageProvider localMsgProvider;
 	Workbook wb;
 
@@ -34,8 +34,12 @@ public class ExcelExportImpl {
 	List<CompositeMap> headerList;
 	final int numberLimit = 65535;
 	int headLevel;
-	HSSFCellStyle headstyle;
-	HSSFCellStyle bodystyle;	
+	CellStyle headstyle;
+	CellStyle bodystyle;	
+	Map<Integer,CellStyle> styleMap=new HashMap<Integer,CellStyle>();
+	Sheet sheet;
+	CreationHelper creationHelper;
+
 
 	public ExcelExportImpl(ILocalizedMessageProvider localMsgProvider) {
 		this.localMsgProvider = localMsgProvider;
@@ -68,7 +72,8 @@ public class ExcelExportImpl {
 		}
 
 		headerConfig = (new MergedHeader(column_config)).conifg;
-		wb = new HSSFWorkbook();			
+		wb = new HSSFWorkbook();	
+		creationHelper=wb.getCreationHelper();
 		setCellStyle(wb);// 设置列style
 		createExcel();
 		try {
@@ -86,19 +91,19 @@ public class ExcelExportImpl {
 	}
 
 	void setCellStyle(Workbook wb) {
-		headstyle = (HSSFCellStyle) wb.createCellStyle();
-		HSSFFont headfont = (HSSFFont) wb.createFont();
+		headstyle =  wb.createCellStyle();
+		Font headfont = wb.createFont();
 		headfont.setFontName("宋体");
-		headfont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);// 加粗
+		headfont.setBoldweight(Font.BOLDWEIGHT_BOLD);// 加粗
 		headfont.setFontHeightInPoints((short) 12);// 字体大小
 		headstyle.setFont(headfont);
-		headstyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 左右居中
-		headstyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 上下居中
-		bodystyle = (HSSFCellStyle) wb.createCellStyle();
-		bodystyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 上下居中
-		HSSFFont bodyfont = (HSSFFont) wb.createFont();
+		headstyle.setAlignment(CellStyle.ALIGN_CENTER);// 左右居中
+		headstyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);// 上下居中
+		bodystyle = (CellStyle) wb.createCellStyle();
+		bodystyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);// 上下居中
+		Font bodyfont = wb.createFont();
 		bodyfont.setFontName("宋体");
-		bodyfont.setBoldweight(HSSFFont.BOLDWEIGHT_NORMAL);// 加粗
+//		bodyfont.setBoldweight(Font.BOLDWEIGHT_NORMAL);// 加粗
 		bodyfont.setFontHeightInPoints((short) 12);// 字体大小
 		bodystyle.setFont(bodyfont);
 	}
@@ -106,16 +111,16 @@ public class ExcelExportImpl {
 	short getExcelAlign(String align) {
 		short excelAlign = 0;
 		if (align == null || "left".equalsIgnoreCase(align))
-			excelAlign = HSSFCellStyle.ALIGN_LEFT;
+			excelAlign = CellStyle.ALIGN_LEFT;
 		else if ("right".equalsIgnoreCase(align))
-			excelAlign = HSSFCellStyle.ALIGN_RIGHT;
+			excelAlign = CellStyle.ALIGN_RIGHT;
 		else if ("center".equalsIgnoreCase(align))
-			excelAlign = HSSFCellStyle.ALIGN_CENTER;
+			excelAlign = CellStyle.ALIGN_CENTER;
 		return excelAlign;
 	}
 
 	void createExcel() {
-		Sheet sheet = null;
+		sheet = null;
 		Iterator iterator = this.dataModel.getChildIterator();
 		this.headLevel = 0;
 		sheet = wb.createSheet();
@@ -133,6 +138,24 @@ public class ExcelExportImpl {
 		Row header = sheet.createRow(0);
 		headerList = new LinkedList<CompositeMap>();
 		generatExcelHead(headerConfig, sheet, header, -1);
+		createBodyStyle();
+	}
+	
+	void createBodyStyle(){		
+		CompositeMap record;
+		CellStyle style;
+		for(int i=0,length=headerList.size();i<length;i++){
+			record=headerList.get(i);
+			style=wb.createCellStyle();
+			style.cloneStyleFrom(bodystyle);
+			style.setAlignment(getExcelAlign(record.getString("align")));
+			if(record.getString(this.KEY_DATA_FORMAT)!=null){	
+				style.setDataFormat(wb.createDataFormat().getFormat(record.getString(this.KEY_DATA_FORMAT)));
+			}
+			styleMap.put(i, style);
+			int width = record.getInt("width", 100);
+			sheet.setColumnWidth(i, (short) (width * 42));
+		}	
 	}
 
 	void createExcelTableMerge(Sheet sheet, CompositeMap record) {
@@ -170,15 +193,12 @@ public class ExcelExportImpl {
 	}
 
 	void createExcelTable(Sheet sheet, Iterator iterator) {
-		boolean is_setwidth = false;
 		int col = 0;
 		Cell cell;
-		String columnName;
-
 		while (iterator.hasNext()) {
 			if (this.headLevel == numberLimit) {
 				break;
-			}
+			}		
 			CompositeMap object = (CompositeMap) iterator.next();
 			if (!"record".equals(object.getName()))
 				continue;
@@ -188,60 +208,48 @@ public class ExcelExportImpl {
 			}
 			Iterator it = this.headerList.iterator();
 			while (it.hasNext()) {
-				cell = row.createCell(col);
 				CompositeMap record = (CompositeMap) it.next();
-				CellStyle dateStyle=wb.createCellStyle();
-				if(record.getString(this.KEY_DATA_FORMAT)!=null){	
-					dateStyle.setDataFormat(wb.createDataFormat().getFormat(record.getString(this.KEY_DATA_FORMAT)));
-				}
-				columnName = record.getString("name");
-				Object value = object.get(columnName);
-				bodystyle
-						.setAlignment(getExcelAlign(record.getString("align")));
-				cell.setCellType(Cell.CELL_TYPE_STRING);
-				cell.setCellStyle(bodystyle);
-				if (value != null) {
-					if (record.getString(KEY_DATA_TYPE) != null) {
-						if (KEY_DATA_TYPE_STRING.equalsIgnoreCase(record
-								.getString(KEY_DATA_TYPE)))
-							cell.setCellValue(new HSSFRichTextString(value
-									.toString()));						
-						else {
-							try {
-								cell.setCellValue(Double.parseDouble(value
-										.toString()));
-							} catch (Exception e) {
-								cell.setCellValue(new HSSFRichTextString(value
-										.toString()));
-							}
-						}						
-					} else {
-						if (value instanceof String) {
-							cell.setCellValue(new HSSFRichTextString(value
-									.toString()));
-						}else if (value instanceof java.lang.Number) {
-							cell.setCellValue(Double.parseDouble(value
-									.toString()));
-						}else{
-							if(value!=null)
-								cell.setCellValue(new HSSFRichTextString(value
-									.toString()));
-						}						
-					}
-					cell.setCellStyle(dateStyle);
-				}
-
-				if (!is_setwidth) {
-					int width = record.getInt("width", 100);
-					sheet.setColumnWidth(col, (short) (width * 35.7));
-				}
+				CellStyle style=styleMap.get(col);			
+				cell = row.createCell(col);
+				cell.setCellStyle(style);				
+				setCellValue(cell,object,record);		
 				col++;
 			}
-			is_setwidth = true;
 			col = 0;
 			this.headLevel++;
 		}
 
+	}
+	
+	void setCellValue(Cell cell,CompositeMap record,CompositeMap config){
+		Object value = record.get(config.getString("name"));	
+		if(value==null)return;
+		if (config.getString(KEY_DATA_TYPE) != null) {
+			if (KEY_DATA_TYPE_STRING.equalsIgnoreCase(config
+					.getString(KEY_DATA_TYPE)))
+				cell.setCellValue(creationHelper.createRichTextString(value.toString()));						
+			else {
+				try {
+					cell.setCellValue(Double.parseDouble(value
+							.toString()));
+				} catch (Exception e) {
+					cell.setCellValue(creationHelper.createRichTextString(value
+							.toString()));
+				}
+			}						
+		} else {
+			if (value instanceof String) {
+				cell.setCellValue(creationHelper.createRichTextString(value
+						.toString()));
+			}else if (value instanceof java.lang.Number) {
+				cell.setCellValue(Double.parseDouble(value
+						.toString()));
+			}else{
+				if(value!=null)
+					cell.setCellValue(creationHelper.createRichTextString(value
+						.toString()));
+			}						
+		}
 	}
 
 	String getPrompt(String key) {
@@ -269,7 +277,7 @@ public class ExcelExportImpl {
 				record = (CompositeMap) iterator.next();
 				title = getPrompt(record.getString("prompt"));
 				Cell cell = header.createCell(col);
-				cell.setCellValue(new HSSFRichTextString(title));
+				cell.setCellValue(creationHelper.createRichTextString(title));
 				cell.setCellStyle(this.headstyle);
 				level = record.getInt("_level", 0);
 				if (this.headLevel == 0)
