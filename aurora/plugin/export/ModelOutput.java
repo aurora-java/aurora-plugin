@@ -43,6 +43,12 @@ public class ModelOutput {
 	
 	public final static String KEY_ENABLETASK = "enableTask";
 	private File excelDir;
+	
+	public final static String KEY_XLSX = "xlsx";
+	public final static String KEY_TXT = "txt";
+	public final static String KEY_XLS = "xls";
+	public final static String KEY_XLS_MEMORY = "xls_memory";
+
 
 	IObjectRegistry mObjectRegistry;
 
@@ -127,7 +133,7 @@ public class ModelOutput {
 					actionConfig.putBoolean(DataSetConfig.PROPERTITY_FETCHALL,
 							true);
 					String format = parameters.getString(KEY_FORMAT);
-					if ("xlsx".equals(format)) {
+					if (KEY_XLSX.equals(format)||KEY_XLS.equals(format)) {
 						actionConfig
 								.createChildByTag("consumer")
 								.createChildByTag("output-excel")
@@ -136,7 +142,7 @@ public class ModelOutput {
 						modelQueryTagNum++;
 						return true;
 					}
-					if ("txt".equals(format)) {
+					if (KEY_TXT.equals(format)) {
 						actionConfig
 								.createChildByTag("consumer")
 								.createChildByTag("output-txt")
@@ -144,7 +150,7 @@ public class ModelOutput {
 										"http://www.aurora-framework.org/application");
 						modelQueryTagNum++;
 						return true;
-					}
+					}					
 				}
 			}
 		}
@@ -156,7 +162,7 @@ public class ModelOutput {
 		CompositeMap parameter = context.getParameter();
 		if (!parameter.getBoolean(KEY_GENERATE_STATE, false))
 			return EventModel.HANDLE_NORMAL;
-		if (!"xls".equals(parameter.getString(KEY_FORMAT)))
+		if (!KEY_XLS_MEMORY.equals(parameter.getString(KEY_FORMAT)))
 			return EventModel.HANDLE_STOP;
 		// get ILocalizedMessageProvider
 		IMessageProvider msgProvider = (IMessageProvider) mObjectRegistry
@@ -230,6 +236,23 @@ public class ModelOutput {
 					"_column_config_ tag and column attibute must be defined");
 			throw new ServletException(
 					"_column_config_ tag and column attibute must be defined");
+		}
+		CompositeMap contextMap = context.getObjectContext();
+		CompositeMap datatype = (CompositeMap) contextMap
+				.getObject("/_export_datatype");
+		if (datatype != null) {
+			Iterator it = datatype.getChildIterator();
+			if (it != null) {
+				while (it.hasNext()) {
+					CompositeMap record = (CompositeMap) it.next();
+					String name = record.getString("field");
+					CompositeMap columnRecord = column_config.getChildByAttrib(
+							"record", "name", name);
+					columnRecord.put(ExcelExportImpl.KEY_DATA_TYPE, record
+							.getString(ExcelExportImpl.KEY_DATA_TYPE
+									.toLowerCase()));
+				}
+			}
 		}
 		return column_config;
 	}
