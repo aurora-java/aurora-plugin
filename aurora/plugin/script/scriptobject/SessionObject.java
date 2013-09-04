@@ -141,7 +141,7 @@ public class SessionObject extends ScriptableObject {
 	public void put(String name, Scriptable start, Object value) {
 		initSession();
 		if (sessionMap != null && !(value instanceof Callable))
-			sessionMap.put(name, value);
+			jsFunction_writeValue(name, value);
 		if (!isSealed())
 			super.put(name, start, value);
 	}
@@ -149,4 +149,12 @@ public class SessionObject extends ScriptableObject {
 	public String jsFunction_toXML() {
 		return sessionObject.jsFunction_toXML();
 	}
+
+	@Override
+	public Object[] getIds() {
+		if (sessionObject == null)
+			return new Object[0];
+		return sessionObject.getIds();
+	}
+
 }

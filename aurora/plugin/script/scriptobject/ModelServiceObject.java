@@ -3,7 +3,6 @@ package aurora.plugin.script.scriptobject;
 import java.io.IOException;
 import java.util.Map;
 
-
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
 import uncertain.core.UncertainEngine;
@@ -68,6 +67,7 @@ public class ModelServiceObject extends ScriptableObject {
 
 	public Object jsGet_fetchDescriptor() {
 		NativeObject no = (NativeObject) ScriptUtil.newObject(this, "Object");
+		ScriptableObject.putProperty(no, "pagenum", desc.getPageNum());
 		ScriptableObject.putProperty(no, "offset", desc.getOffSet());
 		ScriptableObject.putProperty(no, "pagesize", desc.getPageSize());
 		ScriptableObject.putProperty(no, "fetchAll", desc.getFetchAll());
@@ -81,13 +81,26 @@ public class ModelServiceObject extends ScriptableObject {
 		}
 		FetchDescriptor fd = new FetchDescriptor();
 		NativeObject no = (NativeObject) obj;
-		Object o = no.get("offset");
-		if (ScriptUtil.isValid(o))
-			fd.setOffSet(((Double) o).intValue());
+		Object o = no.get("pagenum");
+		if (ScriptUtil.isValid(o)) {
+			if (o instanceof String) {
+				fd.setPageNum(Integer.parseInt((String) o));
+			} else
+				fd.setPageNum(((Number) o).intValue());
+		}
+		// o = no.get("offset");
+		// if (ScriptUtil.isValid(o))
+		// fd.setOffSet(((Double) o).intValue());
 		o = no.get("pagesize");
-		if (ScriptUtil.isValid(o))
-			fd.setPageSize(((Double) o).intValue());
+		if (ScriptUtil.isValid(o)) {
+			if (o instanceof String) {
+				fd.setPageSize(Integer.parseInt((String) o));
+			} else
+				fd.setPageSize(((Number) o).intValue());
+		}
 		o = no.get("fetchAll");
+		if (!ScriptUtil.isValid(o))
+			o = no.get("fetchall");
 		fd.setFetchAll(Boolean.TRUE.equals(o));
 		desc = fd;
 	}
@@ -98,7 +111,7 @@ public class ModelServiceObject extends ScriptableObject {
 		} else if (obj instanceof CompositeMap)// uncertain CompositeMap
 			return (CompositeMap) obj;
 		else if (obj instanceof NativeObject) {// json object
-			return (NativeObject)obj;
+			return (NativeObject) obj;
 		}
 		return new CompositeMap();
 	}

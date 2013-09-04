@@ -1,5 +1,7 @@
 package aurora.plugin.script;
 
+import java.io.File;
+
 import javax.script.ScriptException;
 
 import uncertain.composite.CompositeMap;
@@ -80,30 +82,42 @@ public class ServerScript extends AbstractEntry {
 		} catch (RhinoException re) {
 			if ((re instanceof EcmaError) || (re instanceof EvaluatorException)
 					|| (re instanceof JavaScriptException)) {
+				String fileName = new File(source).getName();
+				System.out.println(fileName);
 				String srcName = re.sourceName();
+				String source_ = fileName;
 				int line = re.lineNumber();
-				if ("<Unknown source>".equals(srcName))
+				boolean isInLine = "<Unknown source>".equals(srcName);
+				if (isInLine) {
 					line += lineno - 1;
+				} else {
+					source_ = source_ + " --> " + srcName;
+				}
 				StringBuilder sb = new StringBuilder(500);
-				sb.append("source  : " + source + " --> " + srcName + "\n");
+				sb.append("source  : " + source_ + "\n");
 				sb.append("lineno  : " + line + "\n");
 				sb.append("line src: " + re.lineSource() + "\n");
-				sb.append("message : " + re.getMessage());
+				Throwable ee = getRootCause(re);
+				sb.append("message : " + ee.getMessage());
 				System.err.println(sb.toString());
-				ScriptException se = new ScriptException(re.getMessage(),
-						source + " --> " + srcName, line);
-				// se.printStackTrace();
+				ScriptException se = new ScriptException(ee.getMessage(),
+						source_, line);
+				ee.printStackTrace();
 				throw se;
 			} else {
-				Exception thr = (Exception) re;
-				while (thr.getCause() != null)
-					thr = (Exception) thr.getCause();
-				throw thr;
+				re.printStackTrace();
+				throw (Exception) getRootCause(re);
 			}
 		} finally {
 			// System.out.println("server-script:" + (System.nanoTime() - t)
 			// / 1000000 + "ms");
 		}
+	}
+
+	private Throwable getRootCause(Throwable thr) {
+		while (thr.getCause() != null)
+			thr = thr.getCause();
+		return thr;
 	}
 
 	@Override

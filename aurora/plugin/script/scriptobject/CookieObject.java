@@ -1,9 +1,10 @@
 package aurora.plugin.script.scriptobject;
 
-
 import uncertain.composite.CompositeMap;
 import uncertain.proc.ProcedureRunner;
 import aurora.application.action.AuroraCookie;
+import aurora.javascript.Callable;
+import aurora.javascript.Scriptable;
 import aurora.javascript.ScriptableObject;
 
 public class CookieObject extends ScriptableObject {
@@ -42,6 +43,15 @@ public class CookieObject extends ScriptableObject {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public void put(String name, Scriptable start, Object value) {
+		if (!(value instanceof Callable)) {
+			jsFunction_put(name, value == null ? null : value.toString(), -1);
+		}
+		if (!isSealed())
+			super.put(name, start, value);
 	}
 
 	@Override
