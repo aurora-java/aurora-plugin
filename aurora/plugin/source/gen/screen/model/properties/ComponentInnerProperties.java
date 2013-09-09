@@ -114,4 +114,5 @@ public interface ComponentInnerProperties {
 	static final String IMAGE_WIDTH = "image_width";
 	static final String IMAGE_HEIGHT = "image_height";
 	String TEXT_STYLE = "_text_style";
+	String GRID_COLUMN_SORTABLE = "grid_column_sortable";
 }

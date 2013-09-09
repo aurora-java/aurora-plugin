@@ -378,6 +378,7 @@
 		<attribute id="fsd_logic" style="save,inner,_cdata" />
 		<attribute id="fsd_meaning" style="save,inner,_cdata" />
 		<attribute id="fsd_data_from" style="save,inner,_cdata" />
+		<attribute id="grid_column_sortable" style="simple,save,_boolean,inner" />
 	</component>
 
 	<component type="gridselectioncol" category="inner">
