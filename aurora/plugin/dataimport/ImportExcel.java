@@ -85,7 +85,7 @@ public class ImportExcel extends AbstractEntry {
 			conn = sqlServiceContext.getNamedConnection(dataSourceName);
 		}
 
-		saveHead();
+		
 
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload up = new ServletFileUpload(factory);
@@ -100,6 +100,7 @@ public class ImportExcel extends AbstractEntry {
 				FileItem fileItem = (FileItem) i.next();
 				if (!fileItem.isFormField()) {
 					fileName = fileItem.getName();
+					saveHead();
 					String suffix = fileName.substring(fileName
 							.lastIndexOf("."));
 					parseFile(fileItem.getInputStream(), suffix.toLowerCase(),
@@ -228,7 +229,7 @@ public class ImportExcel extends AbstractEntry {
 			for (int i = 0; i < maxcell; i++) {
 				lineSql.append(",?");
 			}
-			lineSql.append(",?)");
+			lineSql.append(")");
 			if(this.lineCstm!=null){
 				try{
 					this.lineCstm.executeBatch();					
@@ -249,7 +250,12 @@ public class ImportExcel extends AbstractEntry {
 		lineCstm.setNull(3, java.sql.Types.VARCHAR);
 		lineCstm.setString(4, user_id);
 		lineCstm.setLong(5, rownum);
-		lineCstm.setNull(6, java.sql.Types.VARCHAR);
+//		lineCstm.setNull(6, java.sql.Types.VARCHAR);
+		String sheetName = data.getString("sheetName");
+		if (sheetName == null)
+			lineCstm.setNull(6, java.sql.Types.VARCHAR);
+		else
+			lineCstm.setString(6,sheetName);
 		lineCstm.setNull(7, java.sql.Types.NUMERIC);
 		String valueString;
 		for (int i = 0; i < maxcell; i++) {
@@ -258,12 +264,7 @@ public class ImportExcel extends AbstractEntry {
 				lineCstm.setNull(8 + i, java.sql.Types.VARCHAR);
 			else
 				lineCstm.setString(8 + i, valueString);
-		}
-		String sheetName = data.getString("sheetName");
-		if (sheetName == null)
-			lineCstm.setNull(8 + maxcell, java.sql.Types.VARCHAR);
-		else
-			lineCstm.setString(8 + maxcell,sheetName);
+		}		
 		lineCstm.addBatch();
 		if (count % 1000 == 0) {
 			try {
