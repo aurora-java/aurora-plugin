@@ -9,10 +9,10 @@ import com.sap.conn.jco.JCoDestinationManager;
 
 public class SapConfig implements ISapConfig,IGlobalInstance{
 	public SapConfig(){
-		String jarPath=JCoDestinationManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		jarPath=jarPath.substring(0, jarPath.lastIndexOf("/"));
-		System.setProperty("java.library.path", System.getProperty("java.library.path")+":"+jarPath);		
-		System.out.println(System.getProperty("java.library.path"));		
+//		String jarPath=JCoDestinationManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+//		jarPath=jarPath.substring(0, jarPath.lastIndexOf("/"));
+//		System.setProperty("java.library.path", System.getProperty("java.library.path")+":"+jarPath);		
+//		System.out.println(System.getProperty("java.library.path"));		
 	}
 	
 	Map<String,InstanceConfig> sapInstanceMap=new HashMap<String,InstanceConfig>();
