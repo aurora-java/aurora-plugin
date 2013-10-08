@@ -14,6 +14,7 @@ import aurora.javascript.EcmaError;
 import aurora.javascript.EvaluatorException;
 import aurora.javascript.JavaScriptException;
 import aurora.javascript.RhinoException;
+import aurora.javascript.WrappedException;
 import aurora.plugin.script.engine.InterruptException;
 import aurora.plugin.script.engine.ScriptRunner;
 
@@ -80,8 +81,9 @@ public class ServerScript extends AbstractEntry {
 		} catch (InterruptException ie) {
 			ActionUtil.raiseApplicationError(runner, registry, ie.getMessage());
 		} catch (RhinoException re) {
-			if ((re instanceof EcmaError) || (re instanceof EvaluatorException)
-					|| (re instanceof JavaScriptException)) {
+			Class<?> clz = re.getClass();
+			if (clz == EcmaError.class || clz == JavaScriptException.class
+					|| clz == EvaluatorException.class) {
 				String fileName = new File(source).getName();
 				System.out.println(fileName);
 				String srcName = re.sourceName();
