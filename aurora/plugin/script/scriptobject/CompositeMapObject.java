@@ -123,6 +123,14 @@ public class CompositeMapObject extends ScriptableObject {
 		return arr;
 	}
 
+	public String jsFunction_getName() {
+		return data.getName();
+	}
+
+	public void jsFunction_setName(String name) {
+		data.setName(name);
+	}
+
 	public String jsFunction_getPrefix() {
 		return data.getPrefix();
 	}

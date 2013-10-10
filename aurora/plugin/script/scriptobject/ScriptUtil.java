@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import javax.script.ScriptException;
 
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.IObjectRegistry;
@@ -14,6 +15,11 @@ import aurora.javascript.NativeArray;
 import aurora.javascript.Scriptable;
 import aurora.javascript.ScriptableObject;
 import aurora.plugin.script.engine.AuroraScriptEngine;
+import aurora.plugin.script.engine.InterruptException;
+import aurora.plugin.script.engine.InterruptExceptionDescriptor;
+import aurora.plugin.script.engine.ScriptExceptionDescriptor;
+import aurora.service.exception.ExceptionDescriptorConfig;
+import aurora.service.exception.IExceptionDescriptor;
 
 public class ScriptUtil {
 	public static Scriptable newObject(Scriptable scope, String clsName) {
@@ -100,6 +106,30 @@ public class ScriptUtil {
 			throw new RuntimeException(e);
 		}
 		return "";
+	}
+
+	public static void registerExceptionHandle(IObjectRegistry or) {
+		ExceptionDescriptorConfig excpDesc = (ExceptionDescriptorConfig) or
+				.getInstanceOfType(IExceptionDescriptor.class);
+		try {
+			excpDesc.addExceptionDescriptor(createExceptionHandleItem(
+					InterruptException.class,
+					InterruptExceptionDescriptor.class));
+			excpDesc.addExceptionDescriptor(createExceptionHandleItem(
+					ScriptException.class, ScriptExceptionDescriptor.class));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static CompositeMap createExceptionHandleItem(Class<?> expClass,
+			Class<?> handleClass) {
+		String className = handleClass.getSimpleName();
+		CompositeMap item = new CompositeMap(className);
+		item.put("exception", expClass.getName());
+		item.put("handleclass", handleClass.getName());
+		item.put("xmlns", handleClass.getPackage().getName());
+		return item;
 	}
 
 }

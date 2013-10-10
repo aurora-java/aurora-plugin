@@ -101,7 +101,7 @@ public class ModelServiceObject extends ScriptableObject {
 		o = no.get("fetchAll");
 		if (!ScriptUtil.isValid(o))
 			o = no.get("fetchall");
-		fd.setFetchAll(Boolean.TRUE.equals(o));
+		fd.setFetchAll("true".equalsIgnoreCase("" + o));
 		desc = fd;
 	}
 

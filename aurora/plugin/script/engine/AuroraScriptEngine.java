@@ -33,6 +33,8 @@ import aurora.plugin.script.scriptobject.ScriptShareObject;
 import aurora.plugin.script.scriptobject.ScriptUtil;
 import aurora.plugin.script.scriptobject.SessionObject;
 import aurora.service.ServiceInstance;
+import aurora.service.exception.ExceptionDescriptorConfig;
+import aurora.service.exception.IExceptionDescriptor;
 
 public class AuroraScriptEngine {
 	public static final String aurora_core_js = "aurora-core.js";
@@ -73,6 +75,7 @@ public class AuroraScriptEngine {
 		UncertainEngine engine = (UncertainEngine) or
 				.getInstanceOfType(UncertainEngine.class);
 		CompiledScriptCache.createInstanceNE(engine);
+		ScriptUtil.registerExceptionHandle(or);
 	}
 
 	private void preDefine(Context cx, Scriptable scope) {

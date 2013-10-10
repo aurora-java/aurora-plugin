@@ -79,13 +79,13 @@ public class ServerScript extends AbstractEntry {
 			if (resultpath != null)
 				context.putObject(resultpath, res, true);
 		} catch (InterruptException ie) {
-			ActionUtil.raiseApplicationError(runner, registry, ie.getMessage());
+			// ActionUtil.raiseApplicationError(runner, registry, ie.getMessage());
+			throw ie;// InterruptExceptionDescriptor will handle this exception
 		} catch (RhinoException re) {
 			Class<?> clz = re.getClass();
 			if (clz == EcmaError.class || clz == JavaScriptException.class
 					|| clz == EvaluatorException.class) {
 				String fileName = new File(source).getName();
-				System.out.println(fileName);
 				String srcName = re.sourceName();
 				String source_ = fileName;
 				int line = re.lineNumber();
