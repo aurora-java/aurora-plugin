@@ -71,28 +71,32 @@ public class WordExport extends AbstractEntry {
 		ServiceContext service = ServiceContext.createServiceContext(context);
 		CompositeMap model = service.getModel();
 		String templateName =  getTemplate();
+		if(templateName !=null) templateName = uncertain.composite.TextParser.parse(templateName, model);
 		
 		Map dataMap = new HashMap();
 		if(replaces != null){
 			for(Replace replace:replaces){
-				Object data = model.getObject(replace.getPath());
-				if(data instanceof String){
-					List rs = createWordR((String)data);
-					if(rs.size() > 1) {
-						StringBuffer psb = new StringBuffer("<w:p>");
-						Iterator rit = rs.iterator();
-						while(rit.hasNext()){
-							WordR r = (WordR)rit.next();
-							psb.append(r.toXML());
+				String path = replace.getPath();
+				if(path!=null) {
+					Object data = model.getObject(path);
+					if(data instanceof String){
+						List rs = createWordR((String)data);
+						if(rs.size() > 1) {
+							StringBuffer psb = new StringBuffer("<w:p>");
+							Iterator rit = rs.iterator();
+							while(rit.hasNext()){
+								WordR r = (WordR)rit.next();
+								psb.append(r.toXML());
+							}
+							psb.append("</w:p>"); 
+							dataMap.put(replace.getName(),psb);
+						} else {
+							dataMap.put(replace.getName(),data);
+							
 						}
-						psb.append("</w:p>"); 
-						dataMap.put(replace.getName(),psb);
 					}else {
 						dataMap.put(replace.getName(),data);
-						
 					}
-				}else {
-					dataMap.put(replace.getName(),data);
 				}
 			}
 		}
