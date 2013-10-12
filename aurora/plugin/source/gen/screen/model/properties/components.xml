@@ -20,6 +20,7 @@
 		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 		<attribute id="rowspan" style="simple,save,_int" />
 		<attribute id="colspan" style="simple,save,_int" />
+		<attribute id="demonstrate_data" style="containment,save,inner" />
 	</component>
 
 
@@ -220,6 +221,7 @@
 		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 		<attribute id="rowspan" style="simple,save,_int" />
 		<attribute id="colspan" style="simple,save,_int" />
+		<attribute id="demonstrate_data" style="containment,save,inner" />
 	</component>
 	<component type="innerLovService" category="aurora">
 		<attribute id="component_type" style="simple,save,inner" />
@@ -379,6 +381,7 @@
 		<attribute id="fsd_meaning" style="save,inner,_cdata" />
 		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 		<attribute id="grid_column_sortable" style="simple,save,_boolean,inner" />
+		<attribute id="demonstrate_data" style="containment,save,inner" />
 	</component>
 
 	<component type="gridselectioncol" category="inner">
@@ -484,5 +487,13 @@
 		<attribute id="is_underline" style="simple,save,inner,_boolean" />
 		<attribute id="is_italic" style="simple,save,inner,_boolean" />
 		<attribute id="is_bold" style="simple,save,inner,_boolean" />
+	</component>
+	<component type="demonstrate_data" category="inner">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="open_type" style="simple,save,inner" />
+		<attribute id="open_uip_path" style="save,inner,_cdata" />
+		<attribute id="open_message" style="save,inner,_cdata" />
+		<attribute id="demonstrate_ds_name" style="save,inner,_cdata" />
+		<attribute id="demonstrate_data" style="save,inner,_cdata" />
 	</component>
 </components>
