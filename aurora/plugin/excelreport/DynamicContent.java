@@ -200,7 +200,7 @@ public class DynamicContent {
 			this.excelFactory.setCellValue(cell, value);
 			if (column.getCellStyle() != null
 					&& !"".equals(column.getCellStyle()))
-				cell.setCellStyle(excelFactory.styles.get(column.getCellStyle()));
+				cell.setCellStyle(excelFactory.getStyle(column.getCellStyle()));
 		}
 		// CompositeMap map = new CompositeMap();
 		// map.put("rownum", this.rowIndex);
@@ -336,14 +336,14 @@ public class DynamicContent {
 						groupCell.setCellValue(value + " "
 								+ stConfig.getGroupDesc());
 
-					if (ExcelFactory.isNotNull(excelFactory.styles.get(stConfig
+					if (ExcelFactory.isNotNull(excelFactory.getStyle(stConfig
 							.getGroupStyle()))) {
-						groupCell.setCellStyle(excelFactory.styles.get(stConfig
+						groupCell.setCellStyle(excelFactory.getStyle(stConfig
 								.getGroupStyle()));
 					}
-					if (ExcelFactory.isNotNull(excelFactory.styles.get(stConfig
+					if (ExcelFactory.isNotNull(excelFactory.getStyle(stConfig
 							.getFormulaStyle()))) {
-						cell.setCellStyle(excelFactory.styles.get(stConfig
+						cell.setCellStyle(excelFactory.getStyle(stConfig
 								.getFormulaStyle()));
 					}
 					int cellnum = CellReference
@@ -353,10 +353,8 @@ public class DynamicContent {
 						Cell blankCell = row.getCell(i);
 						if (blankCell == null) {
 							blankCell = row.createCell(i);
-							if (ExcelFactory.isNotNull(excelFactory.styles
-									.get(stConfig.getLineStyle()))) {
-								blankCell.setCellStyle(excelFactory.styles
-										.get(stConfig.getLineStyle()));
+							if (ExcelFactory.isNotNull(excelFactory.getStyle(stConfig.getLineStyle()))) {
+								blankCell.setCellStyle(excelFactory.getStyle(stConfig.getLineStyle()));
 							}
 						}
 					}
