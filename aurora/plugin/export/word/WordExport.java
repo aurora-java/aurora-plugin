@@ -62,6 +62,7 @@ public class WordExport extends AbstractEntry {
 		File templateFile = new File(uncertainEngine.getConfigDirectory(),templateName);		
 		
 		Map<String,Object> dataMap = new HashMap<String,Object>();
+		dataMap.put("model", model);
 		if(replaces != null){
 			for(Replace replace:replaces){
 				String path = replace.getPath();
