@@ -611,6 +611,9 @@ public class WordUtils {
 		BigInteger pageHeight = docSectPr.getPgSz().getH();
 		String orientation = para.getOrientation();
 		SectPr sectPr = factory.createSectPr();
+		sectPr.getEGHdrFtrReferences().addAll(docSectPr.getEGHdrFtrReferences());
+		
+		
 		SectPr.PgSz pgSz = factory.createSectPrPgSz();
 		if("portrait".equals(orientation)){			
 			pgSz.setW(pageWidth);
