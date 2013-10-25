@@ -22,8 +22,8 @@ public class TableTc {
 	@XmlAttribute
 	private String fill;
 	
-	@XmlAttribute
-	private String align;
+//	@XmlAttribute
+//	private String align;
 	
 	@XmlAttribute
 	private String vAlign = "center";
@@ -55,13 +55,13 @@ public class TableTc {
 		this.fill = fill;
 	}
 
-	public String getAlign() {
-		return align;
-	}
-
-	public void setAlign(String align) {
-		this.align = align;
-	}
+//	public String getAlign() {
+//		return align;
+//	}
+//
+//	public void setAlign(String align) {
+//		this.align = align;
+//	}
 
 	public String getVAlign() {
 		return vAlign;

@@ -25,10 +25,10 @@ public class Paragraph {
 	private String align;
 	
 	@XmlAttribute
-	private String numId;
+	private Long numId = null;
 	
 	@XmlAttribute
-	private String ilvl;
+	private Long ilvl = null;
 	
 	@XmlAttribute
 	private Boolean toc = false;
@@ -79,23 +79,21 @@ public class Paragraph {
 		this.align = align;
 	}
 
-
-	public String getNumId() {
+	public Long getNumId() {
 		return numId;
 	}
 
-	public void setNumId(String numId) {
+	public void setNumId(Long numId) {
 		this.numId = numId;
 	}
 
-	public String getIlvl() {
+	public Long getIlvl() {
 		return ilvl;
 	}
 
-	public void setIlvl(String ilvl) {
+	public void setIlvl(Long ilvl) {
 		this.ilvl = ilvl;
 	}
-
 
 	public List<Object> getObjects() {
 		return objects;

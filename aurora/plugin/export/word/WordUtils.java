@@ -21,7 +21,6 @@ import javax.xml.namespace.QName;
 import org.docx4j.XmlUtils;
 import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.jaxb.Context;
-import org.docx4j.model.structure.PageDimensions;
 import org.docx4j.model.structure.PageSizePaper;
 import org.docx4j.model.structure.SectionWrapper;
 import org.docx4j.openpackaging.exceptions.InvalidFormatException;
@@ -73,7 +72,6 @@ import org.docx4j.wml.STFldCharType;
 import org.docx4j.wml.STHeightRule;
 import org.docx4j.wml.STHint;
 import org.docx4j.wml.STLineSpacingRule;
-import org.docx4j.wml.STPageOrientation;
 import org.docx4j.wml.STShd;
 import org.docx4j.wml.STTabJc;
 import org.docx4j.wml.STTabTlc;
@@ -94,6 +92,7 @@ import org.docx4j.wml.P.Hyperlink;
 import org.docx4j.wml.PPrBase.NumPr;
 import org.docx4j.wml.PPrBase.NumPr.Ilvl;
 import org.docx4j.wml.PPrBase.NumPr.NumId;
+import org.docx4j.wml.SectPr.PgMar;
 import org.docx4j.wml.TcPrInner.GridSpan;
 
 import aurora.plugin.export.word.wml.Body;
@@ -115,11 +114,43 @@ public class WordUtils {
 	
 	public static final int TWIP_CENTIMETER = 567;
 	
+	private static final String KEY_RUN_NUMID = "KEY_RUN_NUMID";
+	private static final String KEY_TEMPLATE_FILE = "KEY_TEMPLATE_FILE";
+	private static final String KEY_NUMBERING_DEFINITION_PART = "KEY_NUMBERING_DEFINITION_PART";
 	
-	public static WordprocessingMLPackage createWord(Document doc) throws Exception{
+	public static final ThreadLocal threadLocal = new ThreadLocal();
+	
+	private static Object getObject(String key){
+		Map map = (Map)threadLocal.get();		
+		return map.get(key);
+	}
+	
+	private static void putObject(String key,Object value){
+		Map map = (Map)threadLocal.get();
+		map.put(key, value);
+	}
+	
+	public static WordprocessingMLPackage createWord(Document doc,File templateFile) throws Exception{
+		
+		threadLocal.set(new HashMap());
+		putObject(KEY_TEMPLATE_FILE,templateFile);
 		WordprocessingMLPackage wordMLPackage = WordUtils.createWordprocessingMLPackage(doc);
 		MainDocumentPart mdp = wordMLPackage.getMainDocumentPart();
-		ObjectFactory factory = Context.getWmlObjectFactory();
+		ObjectFactory factory = Context.getWmlObjectFactory();		
+				
+		
+		SectPr docSectPr = wordMLPackage.getMainDocumentPart().getJaxbElement().getBody().getSectPr();
+		PgMar pg = factory.createSectPrPgMar();
+		Double top = doc.getTop()*TWIP_CENTIMETER;
+		pg.setTop(BigInteger.valueOf(top.intValue()));
+		Double bottom = doc.getBottom()*TWIP_CENTIMETER;
+		pg.setBottom(BigInteger.valueOf(bottom.intValue()));
+		Double left = doc.getLeft()*TWIP_CENTIMETER;
+		pg.setLeft(BigInteger.valueOf(left.intValue()));
+		Double right = doc.getRight()*TWIP_CENTIMETER;
+		pg.setRight(BigInteger.valueOf(right.intValue()));
+		docSectPr.setPgMar(pg);
+		
 		
 		HeaderPart hp = null;
 		Header header = doc.getHeader();
@@ -167,10 +198,6 @@ public class WordUtils {
 				p = WordUtils.createPara(wordMLPackage,factory,(Paragraph)obj);
 			} else if(obj instanceof Break){
 				p = WordUtils.createPageBreak(factory);
-			} else if(obj instanceof Image){
-				Image img = (Image)obj;
-				File file = new File(img.getSrc());
-				p = WordUtils.createImage(wordMLPackage, factory,null, file);
 			}else if(obj instanceof Table){
 				Table table = (Table)obj;
 				p = WordUtils.createTable(wordMLPackage, factory, table);
@@ -189,6 +216,14 @@ public class WordUtils {
 			mdp.getJaxbElement().getBody().getContent().add(indexOfToc++,WordUtils.createPageBreak(factory));
 		}
 		WordUtils.hideSpellAndGrammaticalErrors(wordMLPackage, factory);
+		
+		if(doc.getReadOnly()) {
+			setReadOnly(wordMLPackage, true);
+		}
+		
+		if(doc.getDebugger()){
+			System.out.println(XmlUtils.marshaltoString(wordMLPackage.getMainDocumentPart().getJaxbElement(), true, true));	
+		}		
 		return wordMLPackage;
 	}
 	/**
@@ -198,9 +233,9 @@ public class WordUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static WordprocessingMLPackage createWord(String xml) throws Exception{		
+	public static WordprocessingMLPackage createWord(String xml,File templateFile) throws Exception{		
 		Document doc = unmarshalXML(xml);		
-		return createWord(doc);
+		return createWord(doc,templateFile);
 		
 		
 	}
@@ -220,10 +255,11 @@ public class WordUtils {
 	 * @throws Exception
 	 */
 	public static WordprocessingMLPackage createWordprocessingMLPackage(Document doc) throws Exception {
-		NumberingDefinitionsPart ndp = new NumberingDefinitionsPart();		
 		WordprocessingMLPackage wordMLPackage =  WordprocessingMLPackage.createPackage(PageSizePaper.valueOf(doc.getPageSize()),doc.getLandscape());
+		NumberingDefinitionsPart ndp = new NumberingDefinitionsPart();		
 		wordMLPackage.getMainDocumentPart().addTargetPart(ndp);
-		ndp.setJaxbElement( (Numbering) XmlUtils.unmarshalString(initialNumbering) );
+		ndp.setJaxbElement( (Numbering) XmlUtils.unmarshalString(initialNumbering));
+		putObject(KEY_NUMBERING_DEFINITION_PART, ndp);
 		return wordMLPackage;
 	}
 	
@@ -567,16 +603,8 @@ public class WordUtils {
 				ind.setFirstLine(BigInteger.valueOf(indFirstLine.intValue()));			
 			}
 			ppr.setInd(ind);
-		}
+		}	
 		
-		String line = para.getLine();
-		String lineRule = para.getLineRule();
-		if(line!=null || lineRule !=null){
-			PPrBase.Spacing space = factory.createPPrBaseSpacing();
-			space.setLine(new BigInteger(line));
-			space.setLineRule(STLineSpacingRule.fromValue(lineRule));
-			ppr.setSpacing(space);
-		}
 		
 		SectPr docSectPr = wordprocessingMLPackage.getMainDocumentPart().getJaxbElement().getBody().getSectPr();	
 		BigInteger pageWidth = docSectPr.getPgSz().getW();
@@ -599,9 +627,24 @@ public class WordUtils {
 		}
 		
 		
-		String numId = para.getNumId();
-		String ilvl = para.getIlvl();
-		if(numId!=null && ilvl !=null){
+		Long numId = para.getNumId();
+		Long ilvl = para.getIlvl();
+		if(numId!=null && ilvl !=null){			
+			Long runNumId = (Long)getObject(KEY_RUN_NUMID);
+			if(runNumId==null){
+				runNumId = numId;
+				putObject(KEY_RUN_NUMID, runNumId);
+			}
+			
+			if(numId > runNumId){				
+				NumberingDefinitionsPart ndp = (NumberingDefinitionsPart)getObject(KEY_NUMBERING_DEFINITION_PART);
+				long rid =0;
+				for(;rid<numId;){
+					rid=ndp.restart(runNumId, 0, 1);
+				}
+				putObject(KEY_RUN_NUMID, numId);
+			}
+			
 			// Create and add <w:numPr>
 		    NumPr numPr =  factory.createPPrBaseNumPr();
 		    ppr.setNumPr(numPr);
@@ -609,12 +652,12 @@ public class WordUtils {
 		    // The <w:ilvl> element
 		    Ilvl ilvlElement = factory.createPPrBaseNumPrIlvl();
 		    numPr.setIlvl(ilvlElement);
-		    ilvlElement.setVal(new BigInteger(ilvl));
+		    ilvlElement.setVal(BigInteger.valueOf(ilvl));
 		    	    
 		    // The <w:numId> element
 		    NumId numIdElement = factory.createPPrBaseNumPrNumId();
 		    numPr.setNumId(numIdElement);
-		    numIdElement.setVal(new BigInteger(numId));
+		    numIdElement.setVal(BigInteger.valueOf(numId));
 		}
 		
 		
@@ -629,6 +672,7 @@ public class WordUtils {
 		
 		List<Object> objs = para.getObjects();
 		int i = 0;
+		boolean hasImg = false;
 		for(Object obj:objs){
 			if(obj instanceof Text){
 				Text text = (Text)obj;
@@ -637,15 +681,30 @@ public class WordUtils {
 				if(para.getToc()){
 					bookmarkRun(p,run,para.getTocBookMark(),1); 
 				}
-//			}else if(obj instanceof Table){
-//				p.getContent().add(WordUtils.createTable(wordprocessingMLPackage, factory, (Table)obj));
 			}else if(obj instanceof Image){
+				hasImg = true;
 				Image img = (Image)obj;
-				File file = new File(img.getSrc());
+				File file;
+				if(Image.PATH_TYPE_RELATIVE.equals(img.getType())){
+					File folder = (File)getObject(KEY_TEMPLATE_FILE);
+					file = folder == null ? new File(img.getSrc()) : new File(folder.getParent(),img.getSrc());
+				}else {
+					file = new File(img.getSrc());
+				}
 				p.getContent().add(WordUtils.createImage(wordprocessingMLPackage, factory,part, file));
 			}
 			
 			i++;
+		}
+		if(!hasImg){
+			String line = para.getLine();
+			String lineRule = para.getLineRule();
+			if(line!=null || lineRule !=null){
+				PPrBase.Spacing space = factory.createPPrBaseSpacing();
+				space.setLine(new BigInteger(line));
+				space.setLineRule(STLineSpacingRule.fromValue(lineRule));
+				ppr.setSpacing(space);
+			}
 		}
 		return p;
 	}
@@ -989,11 +1048,10 @@ public class WordUtils {
 			hdr.getContent().add(p);
 		} 
 		if(p!=null) p.getContent().add(wp.getContent().get(0));
-
+		
+		
+		
 	}
-	
-	
-	
 	
 	
 	static final String initialNumbering = "<w:numbering xmlns:ve=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\">"

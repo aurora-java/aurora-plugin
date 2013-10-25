@@ -1,5 +1,6 @@
 package aurora.plugin.export.word;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -18,6 +19,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.ObjectFactory;
 
 import uncertain.composite.CompositeMap;
+import uncertain.core.UncertainEngine;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
@@ -39,11 +41,13 @@ public class WordExport extends AbstractEntry {
 	protected SectList[] sectLists;
 	private String template = null;
 	private String name = DEFAULT_WORD_NAME;
+	private UncertainEngine uncertainEngine;
 	private WordTemplateProvider provider;
 	
 	
 	public WordExport(IObjectRegistry registry) {
 		provider = (WordTemplateProvider) registry.getInstanceOfType(WordTemplateProvider.class);
+		uncertainEngine = (UncertainEngine) registry.getInstanceOfType(UncertainEngine.class);
 	}
 
 
@@ -55,6 +59,7 @@ public class WordExport extends AbstractEntry {
 		String templateName =  getTemplate();
 		if(templateName !=null) templateName = uncertain.composite.TextParser.parse(templateName, model);
 		if(templateName == null) throw new IllegalArgumentException("template can not be null!");		
+		File templateFile = new File(uncertainEngine.getConfigDirectory(),templateName);		
 		
 		Map<String,Object> dataMap = new HashMap<String,Object>();
 		if(replaces != null){
@@ -93,7 +98,7 @@ public class WordExport extends AbstractEntry {
 			if(out!=null)out.close();
 		}		
 		
-		WordprocessingMLPackage wordMLPackage = WordUtils.createWord(xml);
+		WordprocessingMLPackage wordMLPackage = WordUtils.createWord(xml,templateFile);
 		
 		HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance.getInstance(context);
 		HttpServletResponse response = serviceInstance.getResponse();

@@ -34,17 +34,18 @@ public class Body {
 	}
 	
 	
-//	public static void main(String[] args) { 
-//        try { 
-//            JAXBContext jaxbContext = JAXBContext.newInstance(Body.class); 
-// 
-//            
-//            File file = new File("C:/Users/znjqolf/Desktop/docx4j/template/text.xml");
-//            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); 
-//            Body body = (Body)unmarshaller.unmarshal(new FileInputStream(file)); 
-//        } catch (Exception e) { 
-//            e.printStackTrace(); 
-//        } 
-//    }
+	public static void main(String[] args) { 
+        try { 
+            JAXBContext jaxbContext = JAXBContext.newInstance(Body.class); 
+ 
+            
+            File file = new File("C:/Users/znjqolf/Desktop/docx4j/template/text.xml");
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); 
+            Body body = (Body)unmarshaller.unmarshal(new FileInputStream(file)); 
+            System.out.println(body);  
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        } 
+    }
 
 }

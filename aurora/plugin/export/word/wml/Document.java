@@ -18,8 +18,28 @@ public class Document {
 	@XmlAttribute
 	private String watermark;
 	
+	@XmlAttribute
+	private Boolean debugger = false;
+	
+	@XmlAttribute
+	private Boolean readOnly = false;
+	
+	@XmlAttribute
 	private String pageSize = "A4";
 	
+	@XmlAttribute
+	private Double top = 2.54;
+	
+	@XmlAttribute
+	private Double bottom = 2.54;
+	
+	@XmlAttribute
+	private Double left = 3.17;
+	
+	@XmlAttribute
+	private Double right = 3.17;
+	
+	@XmlAttribute
 	private Boolean landscape = false;
 	
 	private Header header;
@@ -36,19 +56,20 @@ public class Document {
 		this.body = body;
 	}
 	
-//	public static void main(String[] args) { 
-//        try { 
-//            JAXBContext jaxbContext = JAXBContext.newInstance(Document.class); 
-// 
-//            
-//            File file = new File("C:/Users/znjqolf/Desktop/docx4j/template/test.xml");
-//            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); 
-//            Document doc = (Document)unmarshaller.unmarshal(new FileInputStream(file)); 
-// 
-//        } catch (Exception e) { 
-//            e.printStackTrace(); 
-//        } 
-//    }
+	public static void main(String[] args) { 
+        try { 
+            JAXBContext jaxbContext = JAXBContext.newInstance(Document.class); 
+ 
+            
+            File file = new File("C:/Users/znjqolf/Desktop/docx4j/template/test.xml");
+            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller(); 
+            Document doc = (Document)unmarshaller.unmarshal(new FileInputStream(file)); 
+            System.out.println(doc); 
+ 
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        } 
+    }
 
 	public String getWatermark() {
 		return watermark;
@@ -88,5 +109,53 @@ public class Document {
 
 	public void setLandscape(Boolean landscape) {
 		this.landscape = landscape;
+	}
+
+	public Double getTop() {
+		return top;
+	}
+
+	public void setTop(Double top) {
+		this.top = top;
+	}
+
+	public Double getBottom() {
+		return bottom;
+	}
+
+	public void setBottom(Double bottom) {
+		this.bottom = bottom;
+	}
+
+	public Double getLeft() {
+		return left;
+	}
+
+	public void setLeft(Double left) {
+		this.left = left;
+	}
+
+	public Double getRight() {
+		return right;
+	}
+
+	public void setRight(Double right) {
+		this.right = right;
+	}
+
+	public Boolean getReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(Boolean readOnly) {
+		this.readOnly = readOnly;
+	}
+
+	public Boolean getDebugger() {
+		return debugger;
+	}
+
+	public void setDebugger(Boolean debugger) {
+		this.debugger = debugger;
 	} 
 }
