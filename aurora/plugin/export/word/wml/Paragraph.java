@@ -34,6 +34,9 @@ public class Paragraph {
 	private Boolean toc = false;
 	
 	@XmlAttribute
+	private String after = "0";
+	
+	@XmlAttribute
 	private String line = "400";
 	
 	@XmlAttribute
@@ -184,5 +187,13 @@ public class Paragraph {
 
 	public void setOrientation(String orientation) {
 		this.orientation = orientation;
-	} 
+	}
+
+	public String getAfter() {
+		return after;
+	}
+
+	public void setAfter(String after) {
+		this.after = after;
+	}
 }
