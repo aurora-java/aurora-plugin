@@ -38,6 +38,7 @@ import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.BooleanDefaultTrue;
 import org.docx4j.wml.Br;
 import org.docx4j.wml.CTBookmark;
+import org.docx4j.wml.CTBorder;
 import org.docx4j.wml.CTDocProtect;
 import org.docx4j.wml.CTHeight;
 import org.docx4j.wml.CTMarkupRange;
@@ -65,6 +66,7 @@ import org.docx4j.wml.RFonts;
 import org.docx4j.wml.RPr;
 import org.docx4j.wml.STAlgClass;
 import org.docx4j.wml.STAlgType;
+import org.docx4j.wml.STBorder;
 import org.docx4j.wml.STBrType;
 import org.docx4j.wml.STCryptProv;
 import org.docx4j.wml.STDocProtect;
@@ -72,6 +74,9 @@ import org.docx4j.wml.STFldCharType;
 import org.docx4j.wml.STHeightRule;
 import org.docx4j.wml.STHint;
 import org.docx4j.wml.STLineSpacingRule;
+import org.docx4j.wml.STPTabAlignment;
+import org.docx4j.wml.STPTabLeader;
+import org.docx4j.wml.STPTabRelativeTo;
 import org.docx4j.wml.STShd;
 import org.docx4j.wml.STTabJc;
 import org.docx4j.wml.STTabTlc;
@@ -92,6 +97,7 @@ import org.docx4j.wml.P.Hyperlink;
 import org.docx4j.wml.PPrBase.NumPr;
 import org.docx4j.wml.PPrBase.NumPr.Ilvl;
 import org.docx4j.wml.PPrBase.NumPr.NumId;
+import org.docx4j.wml.R.Ptab;
 import org.docx4j.wml.SectPr.PgMar;
 import org.docx4j.wml.TcPrInner.GridSpan;
 
@@ -101,6 +107,8 @@ import aurora.plugin.export.word.wml.Document;
 import aurora.plugin.export.word.wml.Footer;
 import aurora.plugin.export.word.wml.Header;
 import aurora.plugin.export.word.wml.Image;
+import aurora.plugin.export.word.wml.PBdr;
+import aurora.plugin.export.word.wml.PTab;
 import aurora.plugin.export.word.wml.Paragraph;
 import aurora.plugin.export.word.wml.Table;
 import aurora.plugin.export.word.wml.TableTc;
@@ -119,6 +127,7 @@ public class WordUtils {
 	private static final String KEY_NUMBERING_DEFINITION_PART = "KEY_NUMBERING_DEFINITION_PART";
 	
 	public static final ThreadLocal threadLocal = new ThreadLocal();
+	
 	
 	private static Object getObject(String key){
 		Map map = (Map)threadLocal.get();		
@@ -592,6 +601,7 @@ public class WordUtils {
 		String align = para.getAlign();
 		PPr ppr = factory.createPPr();
 		
+		
 		PPrBase.Spacing spacing = factory.createPPrBaseSpacing();
 		spacing.setAfter(new BigInteger(para.getAfter()));		
 		ppr.setSpacing(spacing);
@@ -689,6 +699,23 @@ public class WordUtils {
 				if(para.getToc()){
 					bookmarkRun(p,run,para.getTocBookMark(),1); 
 				}
+			}else if(obj instanceof PTab) {
+				PTab ptab = (PTab)obj;
+				R run = factory.createR();				
+				Ptab pt = factory.createRPtab();
+				pt.setRelativeTo(STPTabRelativeTo.fromValue(ptab.getRelativeTo()));
+				pt.setAlignment(STPTabAlignment.fromValue(ptab.getAlignment()));
+				pt.setLeader(STPTabLeader.fromValue(ptab.getLeader()));
+				run.getContent().add(pt);				
+				p.getContent().add(run);
+			}else if(obj instanceof PBdr) {
+				PBdr pbdr = (PBdr)obj;
+				org.docx4j.wml.PPrBase.PBdr pdr = factory.createPPrBasePBdr();
+				ppr.setPBdr(pdr);
+				createPDBorder(factory,pdr,pbdr.getTop());
+				createPDBorder(factory,pdr,pbdr.getBottom());
+				createPDBorder(factory,pdr,pbdr.getRight());
+				createPDBorder(factory,pdr,pbdr.getLeft());
 			}else if(obj instanceof Image){
 				hasImg = true;
 				Image img = (Image)obj;
@@ -713,6 +740,26 @@ public class WordUtils {
 			}
 		}
 		return p;
+	}
+	
+	
+	private static void createPDBorder(ObjectFactory factory,org.docx4j.wml.PPrBase.PBdr pdr, Object obj){
+		if(obj==null)return;
+		CTBorder ctborder = factory.createCTBorder();
+		PBdr.Border border = (PBdr.Border)obj;
+		ctborder.setVal(STBorder.fromValue(border.getValue()));
+		ctborder.setColor(border.getColor());
+		ctborder.setSz(new BigInteger(border.getSz()));
+		ctborder.setSpace(new BigInteger(border.getSpace()));
+		if(border instanceof PBdr.Top){
+			pdr.setTop(ctborder);
+		}else if(border instanceof PBdr.Left) {
+			pdr.setLeft(ctborder);
+		}else if(border instanceof PBdr.Right) {
+			pdr.setRight(ctborder);
+		}else if(border instanceof PBdr.Bottom) {
+			pdr.setBottom(ctborder);
+		}
 	}
 	
 	
@@ -1054,8 +1101,6 @@ public class WordUtils {
 			hdr.getContent().add(p);
 		} 
 		if(p!=null) p.getContent().add(wp.getContent().get(0));
-		
-		
 		
 	}
 	
