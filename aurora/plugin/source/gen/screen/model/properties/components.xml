@@ -496,4 +496,27 @@
 		<attribute id="demonstrate_ds_name" style="save,inner,_cdata" />
 		<attribute id="demonstrate_data" style="save,inner,_cdata" />
 	</component>
+	
+	<component type="toolbar_button" category="aurora">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="prompt" style="simple,save" />
+		<attribute id="width" style="simple,save,_int" />
+		<attribute id="height" style="simple,save,_int" />
+		<attribute id="type" style="simple,save" />
+		<attribute id="name" style="simple,save" />
+		<attribute id="icon_bytes_data" style="save,inner,_cdata" />
+		<attribute id="title" style="simple,save" />
+		<attribute id="text" style="simple,save" />
+		<attribute id="text_text_style" style="containment,save,inner" />
+		<attribute id="button_clicker" style="containment,save,inner" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
+		<attribute id="rowspan" style="simple,save,_int" />
+		<attribute id="colspan" style="simple,save,_int" />
+		<attribute id="demonstrate_data" style="containment,save,inner" />
+	</component>
 </components>

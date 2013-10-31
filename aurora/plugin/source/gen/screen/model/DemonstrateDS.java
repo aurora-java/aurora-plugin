@@ -4,7 +4,6 @@ public class DemonstrateDS {
 	private String name;
 	private String data;
 
-
 	public DemonstrateDS(String name, String data) {
 		super();
 		this.name = name;
@@ -26,4 +25,6 @@ public class DemonstrateDS {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	
 }
