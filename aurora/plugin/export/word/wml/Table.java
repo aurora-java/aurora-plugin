@@ -20,6 +20,9 @@ public class Table {
 	private String align = "left";
 	
 	@XmlAttribute
+	private Double width;
+	
+	@XmlAttribute
 	private Double indLeft;
 	
 	@XmlElement(name = "tr")
@@ -55,5 +58,13 @@ public class Table {
 
 	public void setIndLeft(Double indLeft) {
 		this.indLeft = indLeft;
+	}
+
+	public Double getWidth() {
+		return width;
+	}
+
+	public void setWidth(Double width) {
+		this.width = width;
 	}
 }

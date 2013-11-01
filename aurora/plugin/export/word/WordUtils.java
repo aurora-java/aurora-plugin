@@ -331,6 +331,15 @@ public class WordUtils {
 			tblPr.setTblInd(w);
 		}
 		
+		Double tblWidth = table.getWidth();
+		if(tblWidth!=null){
+			tblWidth = tblWidth * TWIP_CENTIMETER;
+			TblWidth w = factory.createTblWidth();
+			w.setType("dxa");
+			w.setW(BigInteger.valueOf(tblWidth.intValue()));
+			tblPr.setTblW(w);
+		}
+		
 		
 		Jc jc = factory.createJc();
 		jc.setVal(JcEnumeration.fromValue(table.getAlign()));
@@ -1141,6 +1150,7 @@ public class WordUtils {
 		        + "<w:ind w:left=\"840\" w:hanging=\"840\"/>"
 		      + "</w:pPr>"
 		      + "<w:rPr>"
+		        + "<w:b/>"
 		        + "<w:rFonts w:hint=\"eastAsia\" w:ascii=\"宋体\" w:hAnsi=\"宋体\"/>"
 		        + "<w:color w:val=\"auto\"/>"
 		        + "<w:sz w:val=\"24\"/>"
