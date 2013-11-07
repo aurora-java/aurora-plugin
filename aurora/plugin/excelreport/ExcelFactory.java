@@ -1,5 +1,9 @@
 package aurora.plugin.excelreport;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,45 +11,59 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import uncertain.composite.CompositeMap;
+import uncertain.composite.TextParser;
 
 public class ExcelFactory {
 	Map<String, CellStyle> styles;
 	public final String KEY_CONTENT = "content";
 	public final String KEY_FORMULA = "formula";
 	private CreationHelper createHelper;
-	
+	private String templatePath;
+	private String format;
+
 	Workbook wb = null;
 	CompositeMap context;
 
 	public Workbook getWorkbook() {
 		return wb;
 	}
-	
+
 	public CompositeMap getContext() {
 		return context;
-	}	
+	}
 
 	public void createExcel(CompositeMap context, ExcelReport excelReport)
 			throws Exception {
-		if(excelReport.getSheets()==null)return;	
-		this.context=context;
-		if (ExcelReport.KEY_EXCEL2007_SUFFIX.equalsIgnoreCase(excelReport.getFormat()))
-			wb = new XSSFWorkbook();
-		else
-			wb = new HSSFWorkbook();	
-		createHelper=wb.getCreationHelper();
-		if(excelReport.getStyles()!=null)
+		if (excelReport.getSheets() == null)
+			return;
+		this.context = context;
+		this.format = excelReport.getFormat();
+		this.setTemplatePath(TextParser.parse(excelReport.getTemplate(), context));
+		if (ExcelReport.KEY_EXCEL2007_SUFFIX.equalsIgnoreCase(format)) {
+			if (this.getTemplatePath() != null)
+				wb = new XSSFWorkbook(this.getTemplateInputStream());
+			else
+				wb = new XSSFWorkbook();
+		} else {
+			if (this.getTemplatePath() != null)
+				wb = new HSSFWorkbook(this.getTemplateInputStream());
+			else
+				wb = new HSSFWorkbook();
+		}
+
+		createHelper = wb.getCreationHelper();
+		if (excelReport.getStyles() != null)
 			styles = createStyles(wb, excelReport);
 		for (SheetWrap sheetObj : excelReport.getSheets()) {
 			sheetObj.createSheet(this);
 		}
-		wb.write(excelReport.getOutputStream());		
+		wb.write(excelReport.getOutputStream());
 	}
 
 	private Map<String, CellStyle> createStyles(Workbook wb,
-			ExcelReport excelReport) {		
+			ExcelReport excelReport) {
 		Map<String, CellStyle> styles = new HashMap<String, CellStyle>();
-		CellStyle style;		
+		CellStyle style;
 		for (CellStyleWrap cellStyleObj : excelReport.getStyles()) {
 			style = cellStyleObj.createStyle(wb);
 			styles.put(cellStyleObj.getName(), style);
@@ -60,43 +78,54 @@ public class ExcelFactory {
 		return row;
 	}
 	
+	public static Cell createCell(Row row,int colIndex){
+		Cell cell=row.getCell(colIndex);
+		if(cell==null)
+			cell=row.createCell(colIndex);
+		return cell;
+	}
+
 	public static boolean isNotNull(Object value) {
-		if (value != null&&!"".equals(value))
+		if (value != null && !"".equals(value))
 			return true;
 		else
 			return false;
 	}
-	
-	public CellStyle getStyle(String styleName){		
-		if(this.styles!=null){
-			CellStyle style=this.styles.get(styleName);
+
+	public CellStyle getStyle(String styleName) {
+		if (this.styles != null) {
+			CellStyle style = this.styles.get(styleName);
 			return style;
-		}else{
+		} else {
 			return null;
 		}
 	}
-	
-	public CreationHelper getCreateHelper(){
+
+	public CreationHelper getCreateHelper() {
 		return this.createHelper;
 	}
-	
-	public void setCellValue(Cell cell, Object value){
-		setCellValue(cell,value,null);
+
+	public void setCellValue(Cell cell, Object value) {
+		setCellValue(cell, value, null);
 	}
 
-	public void setCellValue(Cell cell, Object value,String dataType) {
+	public void setCellValue(Cell cell, Object value, String dataType) {
 		if (value == null)
 			return;
-		if(ExcelFactory.isNotNull(dataType)){			
+		if (ExcelFactory.isNotNull(dataType)) {
 			if (CellData.KEY_DATA_TYPE_STRING.equals(dataType))
-				cell.setCellValue(getCreateHelper().createRichTextString(value.toString()));
+				cell.setCellValue(getCreateHelper().createRichTextString(
+						value.toString()));
 			if (CellData.KEY_DATA_TYPE_NUMBER.equals(dataType))
-				cell.setCellValue(Double.valueOf(value.toString()).doubleValue());
+				cell.setCellValue(Double.valueOf(value.toString())
+						.doubleValue());
 			else
-				cell.setCellValue(getCreateHelper().createRichTextString(value.toString()));
-		}else{
+				cell.setCellValue(getCreateHelper().createRichTextString(
+						value.toString()));
+		} else {
 			if (value instanceof String) {
-				cell.setCellValue(getCreateHelper().createRichTextString((String) value));
+				cell.setCellValue(getCreateHelper().createRichTextString(
+						(String) value));
 				return;
 			}
 			if (value instanceof Number) {
@@ -112,4 +141,28 @@ public class ExcelFactory {
 			}
 		}
 	}
+
+	InputStream getTemplateInputStream() {
+		File file = new File(templatePath);
+		if (templatePath.lastIndexOf(this.format) > 0) {
+			try {
+				InputStream is = new FileInputStream(file);
+				return is;
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			throw new RuntimeException(
+					"templatePath and fileName are  inconsistent");
+		}
+	}
+
+	public String getTemplatePath() {
+		return this.templatePath;
+	}
+
+	public void setTemplatePath(String templatePath) {
+		this.templatePath = templatePath;
+	}
+
 }

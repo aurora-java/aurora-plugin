@@ -117,7 +117,7 @@ public class DynamicContent {
 		Row row = ExcelFactory.createRow(this.excelSheet, this.rowIndex);
 		int cellnum = CellReference.convertColStringToIndex(getCell());
 		for (TableColumn column : this.getColumns()) {
-			Cell cell = row.createCell(cellnum++);
+			Cell cell =ExcelFactory.createCell(row, cellnum++);
 			this.excelFactory.setCellValue(cell,
 					TextParser.parse(column.getTitle(), context));
 			style = this.excelFactory.getStyle(column.getTitleStyle());
@@ -135,7 +135,7 @@ public class DynamicContent {
 		Row row = ExcelFactory.createRow(this.excelSheet, ++this.rowIndex);
 		int cellnum = CellReference.convertColStringToIndex(getCell());
 		for (TableColumn column : this.getColumns()) {
-			Cell cell = row.createCell(cellnum++);
+			Cell cell = ExcelFactory.createCell(row, cellnum++);
 			Object value = record.get(column.getField());
 			this.excelFactory.setCellValue(cell, value);
 			if (column.getCellStyle() != null
@@ -230,7 +230,7 @@ public class DynamicContent {
 			}
 
 			if (stConfig.getGroupFormula() != null) {
-				Cell cell = row.createCell(column.getIndex());
+				Cell cell = ExcelFactory.createCell(row,column.getIndex());
 				StringBuffer colBuffer = new StringBuffer("SUBTOTAL(");
 				colBuffer.append(stConfig.getGroupFormula());
 				colBuffer.append(",");
@@ -269,7 +269,7 @@ public class DynamicContent {
 					int groupColumnFildIndex = groupColumn.getIndex();
 					if (field != null && field.equals(column.getField()))
 						groupColumnFildIndex--;
-					Cell groupCell = row.createCell(groupColumnFildIndex);
+					Cell groupCell = ExcelFactory.createCell(row,groupColumnFildIndex);
 					if (is_total)
 						groupCell.setCellValue(stConfig.getTotalDesc());
 					else
@@ -292,7 +292,7 @@ public class DynamicContent {
 					for (int i = 0 + cellnum; i < tIndex; i++) {
 						Cell blankCell = row.getCell(i);
 						if (blankCell == null) {
-							blankCell = row.createCell(i);
+							blankCell = ExcelFactory.createCell(row,i);
 							if (ExcelFactory.isNotNull(excelFactory.getStyle(stConfig.getLineStyle()))) {
 								blankCell.setCellStyle(excelFactory.getStyle(stConfig.getLineStyle()));
 							}

@@ -23,6 +23,7 @@ import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 import uncertain.composite.CompositeLoader;
 import uncertain.composite.CompositeMap;
+import uncertain.composite.TextParser;
 import uncertain.composite.XMLOutputter;
 import uncertain.core.UncertainEngine;
 import uncertain.logging.ILogger;
@@ -36,6 +37,7 @@ public class ExcelReport extends AbstractEntry {
 	String configPath;
 	String fileName;
 	String format;
+	String template;
 	UncertainEngine uncertainEngine;
 	public final static String KEY_EXCEL_REPORT = "excel-report";
 	public final static String KEY_EXCEL2003_SUFFIX = ".xls";
@@ -48,9 +50,10 @@ public class ExcelReport extends AbstractEntry {
 	CompositeMap configObj;
 	boolean enableTask = true;
 	ILogger logger;
+
 	public ExcelReport(UncertainEngine uncertainEngine) {
 		this.uncertainEngine = uncertainEngine;
-		
+
 	}
 
 	public void run(ProcedureRunner runner) throws Exception {
@@ -59,13 +62,14 @@ public class ExcelReport extends AbstractEntry {
 		ExcelReport excelReport = createExcelReport(context);
 		if (excelReport == null)
 			return;
-		String filename = excelReport.getFileName();
+		String filename = TextParser.parse(excelReport.getFileName(), context);
+		this.setFileName(filename);
 		if (filename != null) {
 			if (filename.endsWith(KEY_EXCEL2007_SUFFIX)) {
 				excelReport.setFormat(KEY_EXCEL2007_SUFFIX);
 			} else if (filename.endsWith(KEY_EXCEL2003_SUFFIX)) {
 				excelReport.setFormat(KEY_EXCEL2003_SUFFIX);
-			} else {				
+			} else {
 				throw new IllegalAddException(filename + " illegal suffix");
 			}
 		} else {
@@ -97,23 +101,23 @@ public class ExcelReport extends AbstractEntry {
 				setResponseHeader(response, excelReport);
 				transferOutputStream(response.getOutputStream(),
 						new FileInputStream(tempFile));
-				
+
 			}
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, null, e);
 			throw e;
-		} finally {			
-			if (os != null){
-				try{
+		} finally {
+			if (os != null) {
+				try {
 					os.close();
-				}catch(Exception e){
+				} catch (Exception e) {
 					logger.log(Level.SEVERE, null, e);
 				}
 			}
-			if(!enableTask){
+			if (!enableTask) {
 				stopRunner(runner);
 			}
-		}		
+		}
 	}
 
 	ExcelReport createExcelReport(CompositeMap context) throws IOException,
@@ -251,4 +255,13 @@ public class ExcelReport extends AbstractEntry {
 	public void setEnableTask(boolean enableTask) {
 		this.enableTask = enableTask;
 	}
+
+	public String getTemplate() {
+		return template;
+	}
+
+	public void setTemplate(String template) {
+		this.template = template;
+	}
+
 }
