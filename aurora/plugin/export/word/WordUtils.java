@@ -426,6 +426,21 @@ public class WordUtils {
 	
 	
 	public static R createImage(WordprocessingMLPackage wordprocessingMLPackage, ObjectFactory factory, HeaderPart part, File file) throws Exception {
+		if(file == null || !file.exists()){
+			R run = factory.createR();
+			RPr rpr = factory.createRPr();
+			run.setRPr(rpr);
+			
+			Color color = new Color();
+			color.setVal("#ff0000");
+			rpr.setColor(color);
+			
+			org.docx4j.wml.Text t = factory.createText();	
+			t.setValue("("+file.getCanonicalPath()+")该链接地址图片文件已丢失!");
+			run.getContent().add(t);
+			return run;
+		}
+		
 		
 		InputStream is = null;
 		long length = file.length();
