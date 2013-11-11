@@ -15,6 +15,7 @@ import java.util.UUID;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 
@@ -140,6 +141,14 @@ public class WordUtils {
 	}
 	
 	public static WordprocessingMLPackage createWord(Document doc,File templateFile) throws Exception{
+		if(doc.getDebugger()){
+			JAXBContext jaxbContext = JAXBContext.newInstance(Document.class); 
+			Marshaller marshaller = jaxbContext.createMarshaller(); 
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, "gbk");
+			marshaller.marshal(doc, System.out);
+			System.out.println("");
+		}
 		
 		threadLocal.set(new HashMap());
 		putObject(KEY_TEMPLATE_FILE,templateFile);
@@ -675,7 +684,8 @@ public class WordUtils {
 			Long runNumId = (Long)getObject(KEY_RUN_NUMID);
 			if(runNumId==null){
 				runNumId = numId;
-				putObject(KEY_RUN_NUMID, runNumId);
+//				putObject(KEY_RUN_NUMID, runNumId);
+				putObject(KEY_RUN_NUMID, new Long(1));
 			}
 			
 			if(numId > runNumId){				
