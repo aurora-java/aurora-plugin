@@ -436,7 +436,7 @@ public class WordUtils {
 			rpr.setColor(color);
 			
 			org.docx4j.wml.Text t = factory.createText();	
-			t.setValue("("+file.getCanonicalPath()+")该链接地址图片文件已丢失!");
+			t.setValue("("+file.getAbsolutePath()+")该链接地址图片文件已丢失!");
 			run.getContent().add(t);
 			return run;
 		}
