@@ -27,6 +27,9 @@ public class TableTc {
 	
 	@XmlAttribute
 	private String vAlign = "center";
+	
+	@XmlElement(name = "border")
+	private List<TableTcBorder> borders = new ArrayList<TableTcBorder>();
 
 	@XmlElement(name = "p")
 	private List<Paragraph> paras = new ArrayList<Paragraph>();
@@ -77,5 +80,13 @@ public class TableTc {
 
 	public void setSpan(Integer span) {
 		this.span = span;
+	}
+
+	public List<TableTcBorder> getBorders() {
+		return borders;
+	}
+
+	public void setBorders(List<TableTcBorder> borders) {
+		this.borders = borders;
 	}
 }

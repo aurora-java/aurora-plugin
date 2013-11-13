@@ -101,6 +101,7 @@ import org.docx4j.wml.PPrBase.NumPr.NumId;
 import org.docx4j.wml.R.Ptab;
 import org.docx4j.wml.SectPr.PgMar;
 import org.docx4j.wml.TcPrInner.GridSpan;
+import org.docx4j.wml.TcPrInner.TcBorders;
 
 import aurora.plugin.export.word.wml.Body;
 import aurora.plugin.export.word.wml.Break;
@@ -113,6 +114,7 @@ import aurora.plugin.export.word.wml.PTab;
 import aurora.plugin.export.word.wml.Paragraph;
 import aurora.plugin.export.word.wml.Table;
 import aurora.plugin.export.word.wml.TableTc;
+import aurora.plugin.export.word.wml.TableTcBorder;
 import aurora.plugin.export.word.wml.TableTr;
 import aurora.plugin.export.word.wml.Text;
 import aurora.plugin.export.word.wml.Toc;
@@ -380,6 +382,28 @@ public class WordUtils {
 				
 				
 				TcPr tcPr = factory.createTcPr();
+				
+				if(tblTc.getBorders().size()>0){
+					TcBorders tcB = factory.createTcPrInnerTcBorders();
+					tcPr.setTcBorders(tcB);
+					for (TableTcBorder border : tblTc.getBorders()) {
+						CTBorder ctborder = factory.createCTBorder();
+						ctborder.setVal(STBorder.fromValue(border.getStyle()));
+						ctborder.setSz(new BigInteger(border.getSize()));
+						ctborder.setColor(border.getColor());
+						String type = border.getType();
+						if("top".equalsIgnoreCase(type)){							
+							tcB.setTop(ctborder);
+						}else if("bottom".equalsIgnoreCase(type)){
+							tcB.setBottom(ctborder);
+						}else if("left".equalsIgnoreCase(type)){
+							tcB.setLeft(ctborder);
+						}else if("right".equalsIgnoreCase(type)){
+							tcB.setRight(ctborder);
+						}
+					}
+				}
+				
 				Double width = tblTc.getWidth();
 				if(width!=null){	
 					width = width*TWIP_CENTIMETER;
@@ -684,7 +708,6 @@ public class WordUtils {
 			Long runNumId = (Long)getObject(KEY_RUN_NUMID);
 			if(runNumId==null){
 				runNumId = numId;
-//				putObject(KEY_RUN_NUMID, runNumId);
 				putObject(KEY_RUN_NUMID, new Long(1));
 			}
 			
