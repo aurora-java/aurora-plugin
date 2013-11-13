@@ -23,12 +23,15 @@ public class SheetWrap {
 	ExcelFactory excelFactory;
 	int totalCount = -1;
 
-	public void createSheet(ExcelFactory excelFactory) {
-		this.excelSheet=excelFactory.getWorkbook().getSheetAt(0);
+	public void createSheet(ExcelFactory excelFactory,int sheetNumber) {
+		try{
+			this.excelSheet=excelFactory.getWorkbook().getSheetAt(sheetNumber);
+		}catch(Exception e){			
+		}
 		if(this.excelSheet==null)
 			this.excelSheet = excelFactory.getWorkbook().createSheet(this.getName());
 		else
-			excelFactory.getWorkbook().setSheetName(0, this.getName());
+			excelFactory.getWorkbook().setSheetName(sheetNumber, this.getName());
 		if(this.displayGridlines!=null)
 			this.excelSheet.setDisplayGridlines(this.displayGridlines);		
 		this.excelFactory = excelFactory;

@@ -54,8 +54,9 @@ public class ExcelFactory {
 		createHelper = wb.getCreationHelper();
 		if (excelReport.getStyles() != null)
 			styles = createStyles(wb, excelReport);
+		int count=0;
 		for (SheetWrap sheetObj : excelReport.getSheets()) {
-			sheetObj.createSheet(this);
+			sheetObj.createSheet(this,count++);			
 		}
 		wb.write(excelReport.getOutputStream());
 	}
