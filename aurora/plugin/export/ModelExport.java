@@ -113,12 +113,21 @@ public class ModelExport {
 		ExcelExportImpl excelFactory = new ExcelExportImpl(localMsgProvider);
 		if (!isEnableTask(parameter)) {
 			HttpServletResponse response = ((HttpServiceInstance) svc)
-					.getResponse();
+					.getResponse();			
 			String fileName = parameter.getString(KEY_FILE_NAME, "excel");
+			String userAgent = ((HttpServiceInstance) svc).getRequest().getHeader("User-Agent");
+			if (userAgent != null) {
+				userAgent = userAgent.toLowerCase();
+				if (userAgent.indexOf("msie") != -1) {
+					fileName=new String(fileName.getBytes("GBK"),"ISO-8859-1");
+				}else{
+					fileName=new String(fileName.getBytes("UTF-8"),"ISO-8859-1");
+				}
+			}
 			response.setContentType("application/vnd.ms-excel");
 			response.setCharacterEncoding(KEY_CHARSET);
 			response.setHeader("Content-Disposition", "attachment; filename=\""
-					+ new String(fileName.getBytes(), "ISO-8859-1") + ".xls\"");
+					+ fileName+ ".xls\"");
 			response.setHeader("cache-control", "must-revalidate");
 			response.setHeader("pragma", "public");		
 			

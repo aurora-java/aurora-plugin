@@ -63,10 +63,19 @@ public class TxtOutput implements IResultSetConsumer, IContextAcceptable {
 					.getObjectContext());
 			HttpServletResponse response = ((HttpServiceInstance) svc)
 					.getResponse();
+			String userAgent = ((HttpServiceInstance) svc).getRequest().getHeader("User-Agent");
+			if (userAgent != null) {
+				userAgent = userAgent.toLowerCase();
+				if (userAgent.indexOf("msie") != -1) {
+					fileName=new String(fileName.getBytes("GBK"),"ISO-8859-1");
+				}else{
+					fileName=new String(fileName.getBytes("UTF-8"),"ISO-8859-1");
+				}
+			}
 			response.setContentType("text/plain");
 			response.setCharacterEncoding(ENCODING);
 			response.setHeader("Content-Disposition", "attachment; filename=\""
-					+ new String(fileName.getBytes(), "ISO-8859-1") + ".txt\"");
+					+ fileName + ".txt\"");
 			pw = response.getWriter();
 		} catch (IOException e) {
 			if (pw != null)

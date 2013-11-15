@@ -13,6 +13,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.logging.Level;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.dom4j.IllegalAddException;
@@ -98,7 +99,7 @@ public class ExcelReport extends AbstractEntry {
 				ServiceInstance svc = ServiceInstance.getInstance(context);
 				HttpServletResponse response = ((HttpServiceInstance) svc)
 						.getResponse();
-				setResponseHeader(response, excelReport);
+				setResponseHeader(((HttpServiceInstance) svc).getRequest(),response, excelReport);
 				transferOutputStream(response.getOutputStream(),
 						new FileInputStream(tempFile));
 
@@ -174,17 +175,27 @@ public class ExcelReport extends AbstractEntry {
 		}
 	}
 
-	void setResponseHeader(HttpServletResponse response, ExcelReport excelReport)
-			throws UnsupportedEncodingException {
+	void setResponseHeader(HttpServletRequest request,HttpServletResponse response, ExcelReport excelReport)
+			throws UnsupportedEncodingException {		
+				
 		if (KEY_EXCEL2007_SUFFIX.equals(format)) {
 			response.setContentType(KEY_EXCEL2007_MIME);
 		} else {
 			response.setContentType(KEY_EXCEL2003_MIME);
 		}
 		try {
+			String userAgent = request.getHeader("User-Agent");
+			String filename=excelReport.getFileName();
+			if (userAgent != null) {
+				userAgent = userAgent.toLowerCase();
+				if (userAgent.indexOf("msie") != -1) {
+					filename=new String(filename.getBytes("GBK"),"ISO-8859-1");
+				}else{
+					filename=new String(filename.getBytes("UTF-8"),"ISO-8859-1");
+				}
+			}	
 			response.setHeader("Content-Disposition", "attachment; filename=\""
-					+ new String(excelReport.getFileName().getBytes(),
-							"ISO-8859-1") + "\"");
+					+ filename + "\"");
 			response.setHeader("cache-control", "must-revalidate");
 			response.setHeader("pragma", "public");
 		} catch (UnsupportedEncodingException e) {

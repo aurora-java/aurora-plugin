@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -316,8 +317,8 @@ public class ExcelOutput implements IResultSetConsumer, IContextAcceptable {
 		ServiceInstance svc = ServiceInstance.getInstance(this.ServiceContext
 				.getObjectContext());	
 		HttpServletResponse response = ((HttpServiceInstance) svc)
-				.getResponse();
-		setResponseHeader(response);
+				.getResponse();		
+		setResponseHeader(((HttpServiceInstance) svc).getRequest(),response);
 		OutputStream out = null;
 		try {
 			this.ServiceContext.putBoolean("responseWrite", true);
@@ -347,14 +348,23 @@ public class ExcelOutput implements IResultSetConsumer, IContextAcceptable {
 	public Object getResult() {
 		return null;
 	}
-	void setResponseHeader(HttpServletResponse response){
+	void setResponseHeader(HttpServletRequest request,HttpServletResponse response){
 		response.setContentType(excelBean.getMimeType());
 		response.setCharacterEncoding(XML_ENCODING);
 		response.setHeader("cache-control", "must-revalidate");
 		response.setHeader("pragma", "public");
 		try {
+			String userAgent = request.getHeader("User-Agent");
+			if (userAgent != null) {
+				userAgent = userAgent.toLowerCase();
+				if (userAgent.indexOf("msie") != -1) {
+					fileName=new String(fileName.getBytes("GBK"),"ISO-8859-1");
+				}else{
+					fileName=new String(fileName.getBytes("UTF-8"),"ISO-8859-1");
+				}
+			}
 			response.setHeader("Content-Disposition", "attachment; filename=\""
-					+ new String(fileName.getBytes(), "ISO-8859-1") +excelBean.getFileExtension()+"\"");
+					+ fileName +excelBean.getFileExtension()+"\"");
 		} catch (UnsupportedEncodingException e) {
 			mLogger.log(Level.SEVERE, e.getMessage());
 			throw new RuntimeException(e);

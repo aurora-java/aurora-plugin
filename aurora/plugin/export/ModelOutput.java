@@ -180,7 +180,16 @@ public class ModelOutput {
 			String fileName = parameter.getString(KEY_FILE_NAME, "excel");
 			response.setContentType("application/vnd.ms-excel");
 			response.setCharacterEncoding(KEY_CHARSET);
-			response.setHeader("Content-Disposition", "attachment; filename=\"" + new String(fileName.getBytes(), "ISO-8859-1") + ".xls\"");
+			String userAgent = ((HttpServiceInstance) svc).getRequest().getHeader("User-Agent");
+			if (userAgent != null) {
+				userAgent = userAgent.toLowerCase();
+				if (userAgent.indexOf("msie") != -1) {
+					fileName=new String(fileName.getBytes("GBK"),"ISO-8859-1");
+				}else{
+					fileName=new String(fileName.getBytes("UTF-8"),"ISO-8859-1");
+				}
+			}
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".xls\"");
 			response.setHeader("cache-control", "must-revalidate");
 			response.setHeader("pragma", "public");	
 			excelFactory.createExcel(getExportData(context), getColumnConfig(context), response.getOutputStream(), (CompositeMap) context
