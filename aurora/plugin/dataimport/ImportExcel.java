@@ -84,7 +84,9 @@ public class ImportExcel extends AbstractEntry {
 					mUncertainEngine.getObjectRegistry(), dataSourceName);
 			conn = sqlServiceContext.getNamedConnection(dataSourceName);
 		}
-
+		if(dataSourceName==null&&conn==null){
+			conn=sqlServiceContext.getConnection();
+		}
 		
 
 		FileItemFactory factory = new DiskFileItemFactory();
