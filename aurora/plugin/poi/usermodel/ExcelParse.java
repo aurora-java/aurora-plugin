@@ -2,6 +2,7 @@ package aurora.plugin.poi.usermodel;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -73,12 +74,7 @@ public class ExcelParse {
 					if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
 						try {
 							Double.parseDouble(cell.toString());
-							if(cell.toString().endsWith(".0")){
-								Long a=new Double(cell.getNumericCellValue()).longValue();
-								value=a.toString();
-							}else{
-								value = Double.toString(cell.getNumericCellValue());
-							}
+							value=BigDecimal.valueOf(cell.getNumericCellValue()).toPlainString();							
 						} catch (Exception e) {
 							if (cell.getDateCellValue() != null)
 								value = df.format(cell.getDateCellValue());
@@ -111,8 +107,8 @@ public class ExcelParse {
 				maxCellNum=maxCellNum-indexcount;
 			}
 			record.putInt("maxCell", maxCellNum);
-			if (is_write)
-				importProcessor.saveLine(record, i);
+//			if (is_write)
+//				importProcessor.saveLine(record, i);
 		}
 	}
 }
