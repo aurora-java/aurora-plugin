@@ -7,11 +7,18 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.ServletContext;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import aurora.service.ServiceInstance;
+import aurora.service.http.HttpServiceInstance;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
+import uncertain.core.UncertainEngine;
 
 public class ExcelFactory {
 	Map<String, CellStyle> styles;
@@ -20,6 +27,7 @@ public class ExcelFactory {
 	private CreationHelper createHelper;
 	private String templatePath;
 	private String format;
+	UncertainEngine uncertainEngine;
 
 	Workbook wb = null;
 	CompositeMap context;
@@ -37,8 +45,9 @@ public class ExcelFactory {
 		if (excelReport.getSheets() == null)
 			return;
 		this.context = context;
+		this.uncertainEngine=excelReport.uncertainEngine;
 		this.format = excelReport.getFormat();
-		this.setTemplatePath(TextParser.parse(excelReport.getTemplate(), context));
+		this.setTemplatePath(excelReport.getTemplate());
 		if (ExcelReport.KEY_EXCEL2007_SUFFIX.equalsIgnoreCase(format)) {
 			if (this.getTemplatePath() != null)
 				wb = new XSSFWorkbook(this.getTemplateInputStream());
@@ -163,7 +172,18 @@ public class ExcelFactory {
 	}
 
 	public void setTemplatePath(String templatePath) {
-		this.templatePath = templatePath;
+		if(templatePath==null)return;
+		String path=TextParser.parse(templatePath, context);
+		File file=new File(path);
+		if(!file.exists()){
+			ServletContext sc=(ServletContext)this.uncertainEngine.getObjectRegistry().getInstanceOfType(ServletContext.class);
+			path=sc.getRealPath(path);			
+			file=new File(path);
+			if(file.exists()){
+				this.templatePath=file.getAbsolutePath();
+			}		
+		}else{
+			this.templatePath = file.getAbsolutePath();
+		}		
 	}
-
 }
