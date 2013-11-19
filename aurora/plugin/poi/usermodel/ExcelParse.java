@@ -85,7 +85,6 @@ public class ExcelParse {
 							if (DateUtil.isCellDateFormatted(cell)) {
 								if (cell.getDateCellValue() != null)
 									value = df.format(cell.getDateCellValue());
-								System.out.println(value);
 							} else {
 								value = BigDecimal
 										.valueOf(cellValue.getNumberValue())
