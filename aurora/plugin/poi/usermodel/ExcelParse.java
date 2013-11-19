@@ -107,8 +107,8 @@ public class ExcelParse {
 				maxCellNum=maxCellNum-indexcount;
 			}
 			record.putInt("maxCell", maxCellNum);
-//			if (is_write)
-//				importProcessor.saveLine(record, i);
+			if (is_write)
+				importProcessor.saveLine(record, i);
 		}
 	}
 }
