@@ -107,13 +107,15 @@ public class DynamicContent {
 		return this.rowIndex;
 	}
 
-	void createTableTitle(CompositeMap context) {
-		if (!this.getDisplayTitle())
-			return;
+	void createTableTitle(CompositeMap context) {		
 		if (this.getColumns() == null)
 			return;
 		CellStyle style;
 		this.rowIndex = getRow();
+		if (!this.getDisplayTitle()){
+			this.rowIndex--;
+			return;
+		}
 		Row row = ExcelFactory.createRow(this.excelSheet, this.rowIndex);
 		int cellnum = CellReference.convertColStringToIndex(getCell());
 		for (TableColumn column : this.getColumns()) {
