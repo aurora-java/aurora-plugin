@@ -11,7 +11,9 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import aurora.service.ServiceInstance;
@@ -66,6 +68,12 @@ public class ExcelFactory {
 		int count=0;
 		for (SheetWrap sheetObj : excelReport.getSheets()) {
 			sheetObj.createSheet(this,count++);			
+		}
+		if (this.getTemplatePath() != null){
+			if(wb instanceof HSSFWorkbook)  
+				HSSFFormulaEvaluator.evaluateAllFormulaCells(wb);  
+	        else if(wb instanceof XSSFWorkbook)  
+	        	XSSFFormulaEvaluator.evaluateAllFormulaCells((XSSFWorkbook)wb); 
 		}
 		wb.write(excelReport.getOutputStream());
 	}
