@@ -30,7 +30,7 @@ public class ImportExcel extends AbstractEntry {
 	public static final String XLSX_KEY = ".xlsx";
 	public static final String CSV_KEY = ".csv";
 	public static final String TXT_KEY = ".txt";
-	String maxFileSize=null;
+	String maxFileSize = null;
 	public String fileName;
 	public String separator = ",";
 	public String header_id;
@@ -48,6 +48,7 @@ public class ImportExcel extends AbstractEntry {
 	CallableStatement lineCstm = null;
 	boolean is_first = true;
 	int count = 0;
+	int maxcell;
 
 	public ImportExcel(UncertainEngine uncertainEngine) {
 		mUncertainEngine = uncertainEngine;
@@ -84,41 +85,26 @@ public class ImportExcel extends AbstractEntry {
 					mUncertainEngine.getObjectRegistry(), dataSourceName);
 			conn = sqlServiceContext.getNamedConnection(dataSourceName);
 		}
-		if(dataSourceName==null&&conn==null){
-			conn=sqlServiceContext.getConnection();
+		if (dataSourceName == null && conn == null) {
+			conn = sqlServiceContext.getConnection();
 		}
-		
 
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload up = new ServletFileUpload(factory);
-		long fileSizeMaxLong=10*1024*1024;
-		if(this.getMaxFileSize()!=null)			
-			fileSizeMaxLong=Long.parseLong(this.getMaxFileSize());
+		long fileSizeMaxLong = 10 * 1024 * 1024;
+		if (this.getMaxFileSize() != null)
+			fileSizeMaxLong = Long.parseLong(this.getMaxFileSize());
 		up.setSizeMax(fileSizeMaxLong);
 		List items = up.parseRequest(serviceInstance.getRequest());
 		Iterator i = items.iterator();
-		try {
-			while (i.hasNext()) {
-				FileItem fileItem = (FileItem) i.next();
-				if (!fileItem.isFormField()) {
-					fileName = fileItem.getName();
-					saveHead();
-					String suffix = fileName.substring(fileName
-							.lastIndexOf("."));
-					parseFile(fileItem.getInputStream(), suffix.toLowerCase(),
-							this);
-				}
-			}
-			System.out.println("导入行数:" + count);
-			if (this.lineCstm != null)
-				lineCstm.executeBatch();
-		} finally {
-			if (this.lineCstm != null) {
-				try {
-					lineCstm.close();
-				} catch (Exception e) {
-
-				}
+		while (i.hasNext()) {
+			FileItem fileItem = (FileItem) i.next();
+			if (!fileItem.isFormField()) {
+				fileName = fileItem.getName();
+				saveHead();
+				String suffix = fileName.substring(fileName.lastIndexOf("."));
+				parseFile(fileItem.getInputStream(), suffix.toLowerCase(), this);
+				executeBatchUpdate();
 			}
 		}
 	}
@@ -207,71 +193,56 @@ public class ImportExcel extends AbstractEntry {
 	}
 
 	public void saveLine(CompositeMap data, int rownum) throws SQLException {
-		boolean is_new =data.getBoolean("is_new", false);
+		boolean is_new = data.getBoolean("is_new", false);
 		count++;
-		if (data.getLong("maxCell") == null)
+		if (validateData(data))
 			return;
-		int maxcell = data.getInt("maxCell");
-		boolean is_null = true;
+		if (is_first || is_new) {
+			executeBatchUpdate();
+			generateSql();
+			is_first = false;
+			count=0;
+		}
+		addBatchUpdate(data, rownum);
+		if (count % 1000 == 0){
+			executeBatchUpdate();
+			count=0;
+		}
+	}
 
+	boolean validateData(CompositeMap data) {
+		boolean isValidate = true;
+		if (data.getLong("maxCell") == null)
+			return isValidate;
+		if (maxcell != data.getInt("maxCell")) {
+			maxcell = data.getInt("maxCell");
+			this.is_first = true;
+		}
 		for (int i = 0; i < maxcell; i++) {
 			String valueString = data.getString("C" + i);
 			if (valueString != null && !"".equals(valueString)) {
-				is_null = false;
+				isValidate = false;
 				break;
 			}
 		}
-		// 过滤空行
-		if (is_null)
-			return;
-		if (is_first||is_new) {
-			is_first = false;
-			StringBuffer lineSql = new StringBuffer(
-					"fnd_interface_load_pkg.ins_fnd_interface_lines(?,?,?,?,?,?,?");
-			for (int i = 0; i < maxcell; i++) {
-				lineSql.append(",?");
-			}
-			lineSql.append(")");
-			if(this.lineCstm!=null){
-				try{
-					this.lineCstm.executeBatch();					
-				}finally{
-					try {
-						lineCstm.close();
-					} catch (Exception e) {
+		return isValidate;
+	}
 
-					}
-					this.lineCstm=null;
-				}
-			}
-			this.lineCstm = conn.prepareCall("{call " + lineSql + "}");
-		}
-
-		lineCstm.setLong(1, new Long(header_id));
-		lineCstm.setNull(2, java.sql.Types.VARCHAR);
-		lineCstm.setNull(3, java.sql.Types.VARCHAR);
-		lineCstm.setString(4, user_id);
-		lineCstm.setLong(5, rownum);
-//		lineCstm.setNull(6, java.sql.Types.VARCHAR);
-		String sheetName = data.getString("sheetName");
-		if (sheetName == null)
-			lineCstm.setNull(6, java.sql.Types.VARCHAR);
-		else
-			lineCstm.setString(6,sheetName);
-		lineCstm.setNull(7, java.sql.Types.NUMERIC);
-		String valueString;
+	void generateSql() throws SQLException {
+		StringBuffer lineSql = new StringBuffer(
+				"fnd_interface_load_pkg.ins_fnd_interface_lines(?,?,?,?,?,?,?");
 		for (int i = 0; i < maxcell; i++) {
-			valueString = data.getString("C" + i);
-			if (valueString == null)
-				lineCstm.setNull(8 + i, java.sql.Types.VARCHAR);
-			else
-				lineCstm.setString(8 + i, valueString);
-		}		
-		lineCstm.addBatch();
-		if (count % 1000 == 0) {
+			lineSql.append(",?");
+		}
+		lineSql.append(")");
+		this.lineCstm = conn.prepareCall("{call " + lineSql + "}");
+	}
+
+	void executeBatchUpdate() throws SQLException {
+		if (lineCstm != null) {
 			try {
-				is_first = true;
 				lineCstm.executeBatch();
+				is_first = true;
 			} finally {
 				if (this.lineCstm != null) {
 					try {
@@ -282,6 +253,38 @@ public class ImportExcel extends AbstractEntry {
 					this.lineCstm = null;
 				}
 			}
+		}
+	}
+
+	void addBatchUpdate(CompositeMap data, int rownum) throws SQLException {
+		try {
+			lineCstm.setLong(1, new Long(header_id));
+			lineCstm.setNull(2, java.sql.Types.VARCHAR);
+			lineCstm.setNull(3, java.sql.Types.VARCHAR);
+			lineCstm.setString(4, user_id);
+			lineCstm.setLong(5, rownum);
+			String sheetName = data.getString("sheetName");
+			if (sheetName == null)
+				lineCstm.setNull(6, java.sql.Types.VARCHAR);
+			else
+				lineCstm.setString(6, sheetName);
+			lineCstm.setNull(7, java.sql.Types.NUMERIC);
+			String valueString;
+			for (int i = 0; i < maxcell; i++) {
+				valueString = data.getString("C" + i);
+				if (valueString == null)
+					lineCstm.setNull(8 + i, java.sql.Types.VARCHAR);
+				else
+					lineCstm.setString(8 + i, valueString);
+			}
+			lineCstm.addBatch();
+		} catch (SQLException e) {
+			if (lineCstm != null)
+				try {
+					lineCstm.close();
+				} catch (SQLException ex) {
+				}
+			throw e;
 		}
 	}
 
@@ -363,10 +366,12 @@ public class ImportExcel extends AbstractEntry {
 
 	public void setMaxFileSize(String maxFileSize) {
 		this.maxFileSize = maxFileSize;
-	}	
-	public static void main(String[] args) throws Exception{
-		ImportExcel importExcel=new ImportExcel(null);
-		InputStream is=new FileInputStream("/Volumes/MacintoshHD/download/财务报表测试_07112.xlsx");
-		importExcel.parseFile(is, ".xlsx", importExcel);
+	}
+
+	public static void main(String[] args) throws Exception {
+		ImportExcel importExcel = new ImportExcel(null);
+		InputStream is = new FileInputStream(
+				"/Volumes/MacintoshHD/download/a.xls");
+		importExcel.parseFile(is, ".xls", importExcel);
 	}
 }
