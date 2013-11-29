@@ -53,14 +53,13 @@ public class ExcelParse {
 		int l = sheet.getLastRowNum();
 		if (sheet.getRow(0) == null)
 			return;
-		int maxCellNum = sheet.getRow(0).getLastCellNum();
-		System.out.println("导入文件sheet(" + sheetName + ")最后一行是：" + (l + 1));
+//		System.out.println("导入文件sheet(" + sheetName + ")最后一行是：" + (l + 1));
 		boolean is_write = false;
 		boolean is_new = true;
 		for (int i = 0; i <= l; i++) {
 			row = sheet.getRow(i);
 			if (row == null)
-				break;
+				continue;
 			record = new CompositeMap("record");
 			record.putBoolean("is_new", is_new);
 			is_new = false;
@@ -70,6 +69,8 @@ public class ExcelParse {
 				record.putString("sheetName", "sheetName");
 			} else
 				record.putString("sheetName", sheetName);
+			int maxCellNum = row.getLastCellNum();
+
 			for (int j = 0; j < maxCellNum; j++) {
 				String value = null;
 				cell = row.getCell(j);
