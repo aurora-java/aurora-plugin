@@ -7,7 +7,6 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.logging.Level;
 
 import org.apache.ibatis.jdbc.ScriptRunner;
