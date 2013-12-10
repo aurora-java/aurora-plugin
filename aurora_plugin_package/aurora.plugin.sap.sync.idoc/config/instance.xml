@@ -3,6 +3,9 @@
 	<u:instances>
 		<u:configurable-instance configFile="idoc.config">
 			<u:description>实现SAP IDOC接口</u:description>
+			<u:required-instances>
+				<u:type typeName="javax.sql.DataSource" />
+			</u:required-instances>
 		</u:configurable-instance>				
 	</u:instances>
 </u:instance-config>
