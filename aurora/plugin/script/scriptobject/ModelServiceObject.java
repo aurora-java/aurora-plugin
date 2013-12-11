@@ -1,6 +1,7 @@
 package aurora.plugin.script.scriptobject;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Map;
 
 import uncertain.composite.CompositeMap;
@@ -18,6 +19,8 @@ import aurora.javascript.Context;
 import aurora.javascript.Function;
 import aurora.javascript.NativeObject;
 import aurora.javascript.ScriptableObject;
+import aurora.service.exception.ExceptionDescriptorConfig;
+import aurora.service.exception.IExceptionDescriptor;
 
 public class ModelServiceObject extends ScriptableObject {
 
@@ -49,6 +52,19 @@ public class ModelServiceObject extends ScriptableObject {
 		model = TextParser.parse(model, context);
 		try {
 			service = svcFactory.getModelService(model, context);
+			try {
+				// to make sure exception can be handled in script. ( the
+				// modelservice will always has
+				// a exception-descriptor)
+				Field f = service.getClass().getDeclaredField(
+						"mExceptionProcessor");
+				f.setAccessible(true);
+				if (f.get(service) == null)
+					f.set(service, ScriptUtil.getObjectRegistry(context)
+							.getInstanceOfType(IExceptionDescriptor.class));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			serviceContext = service.getServiceContext();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -116,23 +132,24 @@ public class ModelServiceObject extends ScriptableObject {
 		return new CompositeMap();
 	}
 
-	public void jsFunction_execute(Object parameter) {
+	public void jsFunction_execute(Object parameter) throws Exception {
 		jsFunction_executeDml(parameter, "Execute");
 	}
 
-	public void jsFunction_insert(Object parameter) {
+	public void jsFunction_insert(Object parameter) throws Exception {
 		jsFunction_executeDml(parameter, "Insert");
 	}
 
-	public void jsFunction_update(Object parameter) {
+	public void jsFunction_update(Object parameter) throws Exception {
 		jsFunction_executeDml(parameter, "Update");
 	}
 
-	public void jsFunction_delete(Object parameter) {
+	public void jsFunction_delete(Object parameter) throws Exception {
 		jsFunction_executeDml(parameter, "Delete");
 	}
 
-	public CompositeMapObject jsFunction_queryAsMap(Object parameter) {
+	public CompositeMapObject jsFunction_queryAsMap(Object parameter)
+			throws Exception {
 		if (!ScriptUtil.isValid(parameter))
 			parameter = context.getChild("parameter");
 		try {
@@ -142,29 +159,29 @@ public class ModelServiceObject extends ScriptableObject {
 			map.setData(data);
 			return map;
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw e;
 		} finally {
 			jsSet_option(null);
 		}
 	}
 
 	public CompositeMapObject jsFunction_queryIntoMap(CompositeMapObject root,
-			Object parameter) {
+			Object parameter) throws Exception {
 		if (!(root instanceof CompositeMapObject))
-			throw new RuntimeException("invalid root");
+			throw new Exception("invalid root");
 		if (!ScriptUtil.isValid(parameter))
 			parameter = context.getChild("parameter");
 		try {
 			service.queryIntoMap(convert(parameter), desc, root.getData());
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw e;
 		} finally {
 			jsSet_option(null);
 		}
 		return root;
 	}
 
-	public void jsFunction_query() {
+	public void jsFunction_query() throws Exception {
 		try {
 			ServiceOption so = (ServiceOption) context
 					.get(SqlServiceContext.KEY_SERVICE_OPTION);
@@ -176,7 +193,7 @@ public class ModelServiceObject extends ScriptableObject {
 			}
 			service.query();
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw e;
 		} finally {
 			jsSet_option(null);
 		}
@@ -196,14 +213,16 @@ public class ModelServiceObject extends ScriptableObject {
 	 * 
 	 * @param operation
 	 *            Update,Insert,Execute,Delete
+	 * @throws Exception
 	 */
-	public void jsFunction_executeDml(Object parameter, String operation) {
+	public void jsFunction_executeDml(Object parameter, String operation)
+			throws Exception {
 		try {
 			if (!ScriptUtil.isValid(parameter))
 				parameter = context.getChild("parameter");
 			service.executeDml(convert(parameter), operation);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw e;
 		} finally {
 			jsSet_option(null);
 		}
