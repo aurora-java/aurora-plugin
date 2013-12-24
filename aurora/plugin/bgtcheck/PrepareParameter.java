@@ -1,4 +1,4 @@
-package aurora.plugin.bgtcheck.dataimport;
+package aurora.plugin.bgtcheck;
 
 import uncertain.datatype.DataType;
 

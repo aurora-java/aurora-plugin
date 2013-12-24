@@ -1,36 +1,124 @@
-package aurora.plugin.bgtcheck.dataimport;
+package aurora.plugin.bgtcheck.executecheck;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
-
-import aurora.database.DBUtil;
-import aurora.database.FetchDescriptor;
-import aurora.database.ResultSetLoader;
-import aurora.database.rsconsumer.CompositeMapCreator;
-import aurora.database.service.SqlServiceContext;
-import aurora.service.ServiceThreadLocal;
 
 import uncertain.composite.CompositeMap;
 import uncertain.datatype.IntegerType;
 import uncertain.datatype.StringType;
 import uncertain.logging.ILogger;
 import uncertain.ocm.IObjectRegistry;
+import aurora.plugin.bgtcheck.DatabaseTool;
+import aurora.plugin.bgtcheck.PrepareParameter;
 
-public class DatabaseTool {
+public class DataBaseActions extends DatabaseTool{
 
-	private IObjectRegistry mRegistry;
-	private ILogger logger;
-
-	public DatabaseTool(IObjectRegistry registry, ILogger logger) {
-		this.mRegistry = registry;
-		this.logger = logger;
+	public static Map<String,String> TABLE_FIELDS = new HashMap<String,String>();
+	
+	public DataBaseActions(IObjectRegistry registry, ILogger logger) {
+		super(registry, logger);
 	}
 	
+	public CompositeMap getBatchs() throws SQLException{
+		StringBuffer prepareSQL = new StringBuffer();
+		prepareSQL.append("     select t.parent_batch_id,t.batch_id");
+		prepareSQL.append("       from td_batch_hierarchy t");
+		prepareSQL.append(" start with t.parent_batch_id = 0");
+		prepareSQL.append(" connect by prior t.batch_id = t. parent_batch_id");
+		try {
+			CompositeMap result = sqlQueryWithParas(mRegistry, prepareSQL.toString(), null);
+			return result;
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "execute sql:" + prepareSQL + " failed.", e);
+			throw new SQLException(e);
+		}  
+	}
 	
+	public CompositeMap getBatchs(int batch_id) throws SQLException{
+		StringBuffer prepareSQL = new StringBuffer();
+		prepareSQL.append("     select t.parent_batch_id, t.batch_id");
+		prepareSQL.append("        from td_batch_hierarchy t");
+		prepareSQL.append(" start with t.batch_id = ?");
+		prepareSQL.append(" connect by prior t.parent_batch_id = t. batch_id");
+		PrepareParameter[] paras = new PrepareParameter[1];
+		int i=0;
+		paras[i++] = new PrepareParameter(new IntegerType(), batch_id);
+		try {
+			CompositeMap result = sqlQueryWithParas(mRegistry, prepareSQL.toString(), paras);
+			return result;
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "execute sql:" + prepareSQL + " failed.", e);
+			throw new SQLException(e);
+		}  
+	}
+	
+	public CompositeMap getBatchTables(int batch_id) throws SQLException{
+		StringBuffer prepareSQL = new StringBuffer();
+		prepareSQL.append("select table_name from td_batch_tables t where t.batch_id = ?");
+		PrepareParameter[] paras = new PrepareParameter[1];
+		int i=0;
+		paras[i++] = new PrepareParameter(new IntegerType(), batch_id);
+		try {
+			CompositeMap result = sqlQueryWithParas(mRegistry, prepareSQL.toString(), paras);
+			return result;
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "execute sql:" + prepareSQL + " failed.", e);
+			throw new SQLException(e);
+		}  
+	}
+	
+	public void copyDataToTable(int batch_id,String tableName) throws SQLException {
+		String td_table_name = queryTdTable(tableName);
+		if(td_table_name == null || "".equals(td_table_name))
+			throw new IllegalArgumentException("Can not find "+tableName+"'s td_table_name.");
+		String fields = getFields(tableName);
+		String prepareSQL = "insert into "+tableName+"("+fields+") select "+fields+" from "+td_table_name+" t where t.batch_id = ?";
+		PrepareParameter[] paras = new PrepareParameter[1];
+		int i=0;
+		paras[i++] = new PrepareParameter(new IntegerType(), batch_id);
+		try {
+			sqlExecuteWithParas(mRegistry, prepareSQL, paras);
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "execute sql:" + prepareSQL + " failed.", e);
+			throw new SQLException(e);
+		}
+	}
+	
+	public String getFields(String table_name) throws SQLException{
+		String fields_cache = TABLE_FIELDS.get(table_name.toLowerCase());
+		if(fields_cache != null)
+			return fields_cache;
+		
+		StringBuffer prepareSQL = new StringBuffer();
+		StringBuffer fields = new StringBuffer("");
+		prepareSQL.append("select t.column_name  from user_tab_columns t where upper(t.table_name) = upper(?)");
+		PrepareParameter[] paras = new PrepareParameter[1];
+		int i=0;
+		paras[i++] = new PrepareParameter(new StringType(), table_name);
+		try {
+			CompositeMap result = sqlQueryWithParas(mRegistry, prepareSQL.toString(), paras);
+			if (result != null) {
+				List<CompositeMap> childList = result.getChilds();
+				if (childList != null) {
+					boolean firstField = true;
+					for (CompositeMap record : childList) {
+						String seperator = firstField?"":",";
+						fields.append(seperator).append(record.getString("column_name"));
+						if(firstField)
+							firstField = false;
+					}
+				}
+			}
+			TABLE_FIELDS.put(table_name.toLowerCase(), fields.toString());
+			return fields.toString();
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "execute sql:" + prepareSQL + " failed.", e);
+			throw new SQLException(e);
+		}
+	}
 
 	public int generateBatchId(String batchCode, String batchName, String batchFullName) throws SQLException {
 		int batch_id = generateBatchId();
@@ -130,7 +218,7 @@ public class DatabaseTool {
 			throw new SQLException(e);
 		}
 	}
-	private String queryTdTable(String tableName) throws SQLException {
+	public String queryTdTable(String tableName) throws SQLException {
 		String td_table_name = null;
 		String prepareSQL = "select td_table_name from td_tables t where t.table_name=?";
 		try {
@@ -175,65 +263,5 @@ public class DatabaseTool {
 			logger.log(Level.SEVERE, "execute sql:" + prepareSQL + " failed.", e);
 			throw new SQLException(e);
 		}
-	}
-	
-	
-	
-
-	public static Connection getContextConnection(IObjectRegistry registry) throws SQLException {
-		CompositeMap context = ServiceThreadLocal.getCurrentThreadContext();
-		if (context == null)
-			throw new IllegalStateException("Can not get context from ServiceThreadLocal!");
-		SqlServiceContext sqlServiceContext = SqlServiceContext.createSqlServiceContext(context);
-		Connection conn = sqlServiceContext.getNamedConnection(null);
-		if (conn == null) {
-			sqlServiceContext.initConnection(registry, null);
-			conn = sqlServiceContext.getNamedConnection(null);
-		}
-		return conn;
-	}
-
-	private CompositeMap sqlQueryWithParas(IObjectRegistry registry, String prepareSQL, PrepareParameter[] prepareParameters) throws Exception {
-		ResultSet resultSet = null;
-		CompositeMap result = new CompositeMap("result");
-		PreparedStatement st = null;
-		try {
-			Connection conn = getContextConnection(registry);
-			st = conn.prepareStatement(prepareSQL);
-			if (prepareParameters != null) {
-				for (int i = 0; i < prepareParameters.length; i++) {
-					PrepareParameter parameter = prepareParameters[i];
-					parameter.getDataType().setParameter(st, i + 1, parameter.getValue());
-				}
-			}
-			resultSet = st.executeQuery();
-			ResultSetLoader mRsLoader = new ResultSetLoader();
-			mRsLoader.setFieldNameCase(Character.LOWERCASE_LETTER);
-			FetchDescriptor desc = FetchDescriptor.fetchAll();
-			CompositeMapCreator compositeCreator = new CompositeMapCreator(result);
-			mRsLoader.loadByResultSet(resultSet, desc, compositeCreator);
-		} finally {
-			DBUtil.closeStatement(st);
-		}
-		return result;
-	}
-
-	private boolean sqlExecuteWithParas(IObjectRegistry registry, String prepareSQL, PrepareParameter[] prepareParameters) throws SQLException {
-		PreparedStatement st = null;
-		boolean success = false;
-		try {
-			Connection conn = getContextConnection(registry);
-			st = conn.prepareStatement(prepareSQL);
-			if (prepareParameters != null) {
-				for (int i = 0; i < prepareParameters.length; i++) {
-					PrepareParameter parameter = prepareParameters[i];
-					parameter.getDataType().setParameter(st, i + 1, parameter.getValue());
-				}
-			}
-			success = st.execute();
-		} finally {
-			DBUtil.closeStatement(st);
-		}
-		return success;
 	}
 }

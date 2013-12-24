@@ -18,6 +18,7 @@ import uncertain.logging.ILogger;
 import uncertain.logging.LoggingContext;
 import uncertain.ocm.IObjectRegistry;
 import aurora.datasource.DataSourceConfig;
+import aurora.plugin.bgtcheck.DatabaseTool;
 
 
 public class IbatisScriptRunner {

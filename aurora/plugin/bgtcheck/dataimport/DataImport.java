@@ -22,7 +22,7 @@ public class DataImport extends AbstractEntry {
 
 	private ILogger logger;
 	private IbatisScriptRunner scriptRunner;
-	private DatabaseTool dbTool;
+	private DataBaseActions dbActions;
 
 	private String sqlFileRootPath;
 
@@ -44,7 +44,7 @@ public class DataImport extends AbstractEntry {
 			throw new IllegalArgumentException("sqlFileRootPath:" + sqlFileRootPath + " not exists!");
 		if (!rootDirectory.isDirectory())
 			throw new IllegalArgumentException("sqlFileRootPath:" + sqlFileRootPath + " is not directory!");
-		dbTool = new DatabaseTool(mRegistry, logger);
+		dbActions = new DataBaseActions(mRegistry, logger);
 
 		execute(0, rootDirectory);
 	}
@@ -57,7 +57,7 @@ public class DataImport extends AbstractEntry {
 		if (sqlFileList.size() == 0 && subDirList.size() == 0)
 			return;
 		int batch_id = generateBatchId(rootDirectory);
-		dbTool.insert_td_batch_hierarchy(batch_id, parent_batch_id);
+		dbActions.insert_td_batch_hierarchy(batch_id, parent_batch_id);
 		handleSQLFile(batch_id, sqlFileList);
 		handleSubDir(batch_id, subDirList);
 
@@ -77,7 +77,7 @@ public class DataImport extends AbstractEntry {
 			fileCode = matcher.group(1);
 			fileDesc = matcher.group(2);
 		}
-		int batch_id = dbTool.generateBatchId(fileCode, fileDesc, fileName);
+		int batch_id = dbActions.generateBatchId(fileCode, fileDesc, fileName);
 		return batch_id;
 	}
 
@@ -102,10 +102,10 @@ public class DataImport extends AbstractEntry {
 				tableName = matcher.group(1);
 				fileDesc = matcher.group(2);
 			}
-			dbTool.insert_td_batch_tables(batch_id, tableName, fileDesc, fileNameWithoutExtension);
-			dbTool.deleteTable(tableName);
+			dbActions.insert_td_batch_tables(batch_id, tableName, fileDesc, fileNameWithoutExtension);
+			dbActions.deleteTable(tableName);
 			scriptRunner.executeSQL(sqlFile);
-			dbTool.copyDataToTdTable(batch_id, tableName);
+			dbActions.copyDataToTdTable(batch_id, tableName);
 		}
 
 	}
