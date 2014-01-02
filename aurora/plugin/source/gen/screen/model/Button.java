@@ -86,8 +86,9 @@ public class Button extends AuroraComponent {
 	// super.setBounds(bounds);
 	// }
 
-	public boolean isStdButton() {
-		return Arrays.asList(std_types).indexOf(getButtonType()) > 0;
+	private boolean isStdButton() {
+		return Button.BUTTON.equals(this.getComponentType())
+				&& Arrays.asList(std_types).indexOf(getButtonType()) > 0;
 	}
 
 	public String getButtonType() {

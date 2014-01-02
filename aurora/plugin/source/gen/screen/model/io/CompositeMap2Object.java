@@ -21,6 +21,7 @@ public class CompositeMap2Object implements KEYS {
 			return (ScreenBody) xml2Object;
 		return new ScreenBody();
 	}
+
 	public AuroraComponent createObject(CompositeMap rootMap) {
 		AuroraComponent xml2Object = this.xml2Object(rootMap);
 		return xml2Object;
@@ -48,15 +49,20 @@ public class CompositeMap2Object implements KEYS {
 				if ((((DefaultPropertyDescriptor) pd).getStyle() & IPropertyDescriptor._int) != 0) {
 					value = cmap.getInt(propId);
 				}
-				setPropertyValue(propId, value);
+				setPropertyValue(pd, value);
 			}
 		}
 
-		private void setPropertyValue(String propId, Object value) {
+		private void setPropertyValue(IPropertyDescriptor pd, Object value) {
+			DefaultPropertyDescriptor dpd = (DefaultPropertyDescriptor) pd;
+
+			if (value == null || "".equals(value)) {
+				value = dpd.getDefaultValue();
+			}
 			if (value == null || "".equals(value)) {
 				return;
 			}
-			component.setPropertyValue(propId, value);
+			component.setPropertyValue(dpd.getStringId(), value);
 		}
 
 		public void reference(IPropertyDescriptor pd) {
@@ -75,7 +81,7 @@ public class CompositeMap2Object implements KEYS {
 				if (child != null) {
 					AuroraComponent value = createInstance(child);
 					if (value != null)
-						setPropertyValue(propId, value);
+						setPropertyValue(pd, value);
 				}
 			}
 		}
@@ -96,7 +102,7 @@ public class CompositeMap2Object implements KEYS {
 				}
 			}
 			if (value.isEmpty() == false)
-				setPropertyValue(propId,
+				setPropertyValue(pd,
 						value.toArray(new AuroraComponent[value.size()]));
 		}
 
@@ -116,7 +122,7 @@ public class CompositeMap2Object implements KEYS {
 				}
 			}
 			if (value.isEmpty() == false)
-				setPropertyValue(propId, value);
+				setPropertyValue(pd, value);
 		}
 
 		public void containment(IPropertyDescriptor pd) {
@@ -135,7 +141,7 @@ public class CompositeMap2Object implements KEYS {
 						.getChildByAttrib(PROPERTYE_ID, propId);
 				if (child != null) {
 					AuroraComponent value = xml2Object(child);
-					setPropertyValue(propId, value);
+					setPropertyValue(pd, value);
 				}
 			}
 		}
@@ -157,7 +163,7 @@ public class CompositeMap2Object implements KEYS {
 				}
 			}
 			if (value.isEmpty() == false)
-				setPropertyValue(propId,
+				setPropertyValue(pd,
 						value.toArray(new AuroraComponent[value.size()]));
 
 		}
@@ -192,15 +198,15 @@ public class CompositeMap2Object implements KEYS {
 				}
 			}
 			if (acs.isEmpty() == false)
-				setPropertyValue(propId, acs);
+				setPropertyValue(pd, acs);
 			if (bs.isEmpty() == false)
-				setPropertyValue(propId, bs);
+				setPropertyValue(pd, bs);
 			if (fs.isEmpty() == false)
-				setPropertyValue(propId, fs);
+				setPropertyValue(pd, fs);
 			if (is.isEmpty() == false)
-				setPropertyValue(propId, is);
+				setPropertyValue(pd, is);
 			if (ss.isEmpty() == false)
-				setPropertyValue(propId, ss);
+				setPropertyValue(pd, ss);
 
 		}
 
@@ -209,7 +215,7 @@ public class CompositeMap2Object implements KEYS {
 			CompositeMap child = cmap.getChildByAttrib(CDATA_NODE,
 					PROPERTYE_ID, propId);
 			if (child != null) {
-				setPropertyValue(propId, child.getText());
+				setPropertyValue(pd, child.getText());
 			}
 		}
 	}

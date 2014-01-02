@@ -5,6 +5,8 @@ public class DefaultPropertyDescriptor implements IPropertyDescriptor {
 	private String description;
 	private String displayName;
 	private int style;
+	
+	private String defaultValue;
 
 	public DefaultPropertyDescriptor(String id, int style) {
 		this(id, id, style);
@@ -46,6 +48,14 @@ public class DefaultPropertyDescriptor implements IPropertyDescriptor {
 
 	public void setStyle(int style) {
 		this.style = style;
+	}
+
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+
+	public void setDefaultValue(String defaultValue) {
+		this.defaultValue = defaultValue;
 	}
 
 }
