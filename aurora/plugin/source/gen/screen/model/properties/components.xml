@@ -510,6 +510,7 @@
 		<attribute id="is_underline" style="simple,save,inner,_boolean" />
 		<attribute id="is_italic" style="simple,save,inner,_boolean" />
 		<attribute id="is_bold" style="simple,save,inner,_boolean" />
+		<attribute id="text_alignment" style="simple,save,_int" />
 	</component>
 	<component type="demonstrate_data" category="inner">
 		<attribute id="component_type" style="simple,save,inner" />

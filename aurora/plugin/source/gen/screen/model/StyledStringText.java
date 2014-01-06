@@ -1,6 +1,8 @@
 package aurora.plugin.source.gen.screen.model;
 
 public class StyledStringText extends AuroraComponent {
+	public static final String TEXT_ALIGNMENT = "text_alignment";
+
 	private static final String STYLED_STRING_TEXT = "styled_string_text";
 
 	private static final String IS_BOLD = "is_bold";
@@ -199,4 +201,13 @@ public class StyledStringText extends AuroraComponent {
 		// this.underlineStyle = underlineStyle;
 		this.setPropertyValue(UNDERLINE_STYLE, underlineStyle);
 	}
+	
+	public int getAlignment(){
+		return this.getIntegerPropertyValue(TEXT_ALIGNMENT);
+	}
+	public void setAlignment(int s){
+		this.setPropertyValue(TEXT_ALIGNMENT, s);
+	}
+	
+
 }
