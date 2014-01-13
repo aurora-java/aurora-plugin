@@ -4,6 +4,8 @@ package aurora.plugin.source.gen.screen.model;
 
 public class QueryFormBody extends BOX {
 
+	public static final String FORM_BODY = "formBody";
+
 	/**
 	 * 
 	 */
@@ -11,7 +13,7 @@ public class QueryFormBody extends BOX {
 
 	public QueryFormBody() {
 		super();
-		setComponentType("formBody");
+		setComponentType(FORM_BODY);
 		setCol(1);
 	}
 

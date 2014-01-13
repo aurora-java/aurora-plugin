@@ -1,17 +1,17 @@
 package aurora.plugin.source.gen.screen.model;
 
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
-import aurora.plugin.source.gen.screen.model.properties.IPropertyDescriptor;
 
 
 public class Navbar extends AuroraComponent {
 
+	public static final String NAVBAR = "navbar";
 	static final long serialVersionUID = 1;
 //	private String navbarType = Grid.NAVBAR_NONE;
 
 	public Navbar() {
 		this.setSize(1, 25);
-		this.setComponentType("navbar");
+		this.setComponentType(NAVBAR);
 		this.setNavBarType(Grid.NAVBAR_NONE);
 	}
 

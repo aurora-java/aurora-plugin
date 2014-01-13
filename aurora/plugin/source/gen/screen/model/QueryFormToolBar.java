@@ -7,13 +7,14 @@ import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties
 
 public class QueryFormToolBar extends HBox implements PropertyChangeListener {
 
+	public static final String FORM_TOOLBAR = "formToolbar";
 	private HBox hBox = new HBox();
 	private Button btnQuery = new Button();
 	private Button btnMore = new Button();
 
 	public QueryFormToolBar() {
 		super();
-		setComponentType("formToolbar");
+		setComponentType(FORM_TOOLBAR);
 		addChild(hBox);
 		btnQuery.setText("查询");
 		btnMore.setText("更多");

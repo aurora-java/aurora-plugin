@@ -13,6 +13,7 @@ import aurora.plugin.source.gen.screen.model.properties.ComponentProperties;
 //import aurora.ide.meta.gef.editors.property.StringPropertyDescriptor;
 
 public class QueryForm extends BOX {
+	public static final String QUERY_FORM = "queryForm";
 	/**
 	 * 
 	 */
@@ -28,7 +29,7 @@ public class QueryForm extends BOX {
 	private ContainerHolder resultTargetContainer = null;
 
 	public QueryForm() {
-		this.setComponentType("queryForm");
+		this.setComponentType(QUERY_FORM);
 		Dataset ds = new Dataset();
 		ds.setComponentType(Dataset.QUERYDATASET);
 		this.setDataset(ds);

@@ -393,6 +393,7 @@
 		<attribute id="fsd_meaning" style="save,inner,_cdata" />
 		<attribute id="fsd_data_from" style="save,inner,_cdata" />
 		<attribute id="grid_column_sortable" style="simple,save,_boolean,inner" />
+		<attribute id="grid_column_alignment" style="simple,save" />
 		<attribute id="demonstrate_data" style="containment,save,inner" />
 		<attribute id="fsd_component_type" style="simple,save" defaultValue="fsd_input"/>
 	</component>

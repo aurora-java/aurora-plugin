@@ -117,4 +117,5 @@ public interface ComponentInnerProperties {
 	String GRID_COLUMN_SORTABLE = "grid_column_sortable";
 	String ICON_BYTES_DATA_DEO = ComponentInnerProperties.ICON_BYTES_DATA
 			+ "_deo";
+	String GRID_COLUMN_ALIGNMENT = "grid_column_alignment";
 }
