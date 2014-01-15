@@ -140,10 +140,13 @@ public class SchedulerConfig implements IGlobalInstance {
 		}
 	}
 
-	public void onShutdown() throws SchedulerException {
+	public void onShutdown() throws SchedulerException, InterruptedException {
 		// System.out.println("Quartz scheduler shutdown");
 		logger.info("Quartz scheduler shutdown");
-		scheduler.shutdown();
+		scheduler.shutdown(true);
+//		while(!scheduler.isShutdown()){
+//			Thread.sleep(1000);
+//		}
 	}
 
 }
