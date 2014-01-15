@@ -110,6 +110,7 @@ public class ExecuteCheck extends AbstractEntry {
 			// ServiceInvoker.invokeProcedureWithTransaction(name, proc,
 			// serviceFactory, context);
 			Connection connection = DatabaseTool.getContextConnection(mRegistry);
+			connection.commit();
 			ServiceInvoker.invokeProcedureWithTransaction(name, proc, serviceFactory, fakeContext, connection);
 			// connection.commit();
 		} catch (Exception ex) {
