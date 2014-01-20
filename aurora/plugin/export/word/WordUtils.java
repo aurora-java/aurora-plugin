@@ -102,6 +102,7 @@ import org.docx4j.wml.R.Ptab;
 import org.docx4j.wml.SectPr.PgMar;
 import org.docx4j.wml.TcPrInner.GridSpan;
 import org.docx4j.wml.TcPrInner.TcBorders;
+import org.docx4j.wml.TcPrInner.VMerge;
 
 import aurora.plugin.export.word.wml.Body;
 import aurora.plugin.export.word.wml.Break;
@@ -428,6 +429,13 @@ public class WordUtils {
 					gs.setVal(new BigInteger(span.toString()));
 					tcPr.setGridSpan(gs);
 				}
+				
+				String vMerge = tblTc.getVMerge();
+				if(vMerge!=null){
+					VMerge vm = factory.createTcPrInnerVMerge();
+					vm.setVal(vMerge);
+					tcPr.setVMerge(vm);				
+				}	
 				
 				String vAlign = tblTc.getVAlign();
 				if(vAlign!=null){

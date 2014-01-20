@@ -22,6 +22,9 @@ public class TableTc {
 	@XmlAttribute
 	private String fill;
 	
+	@XmlAttribute
+	private String vMerge;
+	
 //	@XmlAttribute
 //	private String align;
 	
@@ -88,5 +91,13 @@ public class TableTc {
 
 	public void setBorders(List<TableTcBorder> borders) {
 		this.borders = borders;
+	}
+
+	public String getVMerge() {
+		return vMerge;
+	}
+
+	public void setVMerge(String merge) {
+		vMerge = merge;
 	}
 }
