@@ -3,4 +3,5 @@
   <package-mapping packageName="aurora.plugin.export"/>
   <class-mapping className="aurora.plugin.poi.ExcelOutput" elementName="output-excel" nameSpace="http://www.aurora-framework.org/application"/>
   <class-mapping className="aurora.plugin.export.TxtOutput" elementName="output-txt" nameSpace="http://www.aurora-framework.org/application"/>
+  <class-mapping className="aurora.plugin.export.Base64ImgExport" elementName="base64-export" nameSpace="http://www.aurora-framework.org/application"/>
 </class-registry>
