@@ -520,6 +520,16 @@
 		<attribute id="open_message" style="save,inner,_cdata" />
 		<attribute id="demonstrate_ds_name" style="save,inner,_cdata" />
 		<attribute id="demonstrate_data" style="save,inner,_cdata" />
+		<attribute id="bind_component" style="containment,save,inner,list" />
+	</component>
+	
+	<component type="bind_component" category="inner">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="for_query" style="simple,save,inner,_boolean" />
+		<attribute id="for_display" style="simple,save,inner,_boolean" />
+		<attribute id="for_query_editor" style="simple,save,inner" />
+		<attribute id="column_prompt" style="save,inner,_cdata" />
+		<attribute id="bind_model" style="reference,save,inner" />
 	</component>
 	
 	<component type="toolbar_button" category="aurora">
