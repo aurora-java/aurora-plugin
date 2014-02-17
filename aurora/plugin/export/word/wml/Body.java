@@ -21,7 +21,8 @@ public class Body {
         @XmlElementRef(name = "p", type = Paragraph.class),
         @XmlElementRef(name = "br",type = Break.class),
         @XmlElementRef(name = "toc",type = Toc.class),
-        @XmlElementRef(name = "tbl",type = Table.class)
+        @XmlElementRef(name = "tbl",type = Table.class),
+        @XmlElementRef(name = "chunk",type = AltChunk.class)
     })
 	private List<Object> paras = new ArrayList<Object>();
 

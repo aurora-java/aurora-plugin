@@ -28,6 +28,7 @@ import org.docx4j.openpackaging.exceptions.InvalidFormatException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.Part;
 import org.docx4j.openpackaging.parts.PartName;
+import org.docx4j.openpackaging.parts.WordprocessingML.AltChunkType;
 import org.docx4j.openpackaging.parts.WordprocessingML.BinaryPartAbstractImage;
 import org.docx4j.openpackaging.parts.WordprocessingML.DocumentSettingsPart;
 import org.docx4j.openpackaging.parts.WordprocessingML.FooterPart;
@@ -104,6 +105,7 @@ import org.docx4j.wml.TcPrInner.GridSpan;
 import org.docx4j.wml.TcPrInner.TcBorders;
 import org.docx4j.wml.TcPrInner.VMerge;
 
+import aurora.plugin.export.word.wml.AltChunk;
 import aurora.plugin.export.word.wml.Body;
 import aurora.plugin.export.word.wml.Break;
 import aurora.plugin.export.word.wml.Document;
@@ -222,6 +224,9 @@ public class WordUtils {
 			}else if(obj instanceof Table){
 				Table table = (Table)obj;
 				p = WordUtils.createTable(wordMLPackage, factory, table);
+			}else if(obj instanceof AltChunk){
+				AltChunk chunk = (AltChunk)obj;
+				WordUtils.createChunk(mdp,chunk);
 			}
 			if(p!=null) mdp.getJaxbElement().getBody().getContent().add(p);
 		}
@@ -267,6 +272,23 @@ public class WordUtils {
 		Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 		Document doc = (Document) unmarshaller.unmarshal(new StringReader(xml));
 		return doc;
+	}
+	
+	/**
+	 * 功能描述：创建chunk对象
+	 * @throws Exception 
+	 */
+	public static void createChunk(MainDocumentPart mdp, AltChunk chunk) throws Exception{
+		String html = chunk.getText(),type = chunk.getType();
+		if(html!=null&&type!=null){
+			StringBuilder sb = new StringBuilder();
+			sb.append("<html><body>").append(html).append("</body></html>");
+			AltChunkType altType = null;
+			if("html".equals(type)){
+				altType = AltChunkType.Html;
+			}			
+			if(altType!=null) mdp.addAltChunk(altType, sb.toString().getBytes()); 
+		}
 	}
 
 	
