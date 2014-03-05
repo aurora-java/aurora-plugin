@@ -102,15 +102,19 @@ public class TableColumn {
 	public void setMerged(boolean merged) {
 		this.merged = merged;
 	}
-	public boolean isSubtotalSelf(){
-		SubtotalConfig[] configs=this.getGroups();
-		if(configs!=null){
-			for(SubtotalConfig config:configs){
-				String[] fields=config.getGroupField().split(",");
-				for(String field:fields){
-					if(field.equals(this.getField()))
-						return true;
-				}				
+
+	public boolean isSubtotalSelf() {
+		SubtotalConfig[] configs = this.getGroups();
+		if (configs != null) {
+			for (SubtotalConfig config : configs) {
+				String groupField = config.getGroupField();
+				if (groupField != null) {
+					String[] fields = groupField.split(",");
+					for (String field : fields) {
+						if (field.equals(this.getField()))
+							return true;
+					}
+				}
 			}
 		}
 		return false;
