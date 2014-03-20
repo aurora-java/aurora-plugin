@@ -83,8 +83,18 @@ public class FontWrap {
 		if (this.getHeight() != null)
 			font.setFontHeightInPoints(Double.valueOf(this.getHeight())
 					.shortValue());
-		if (this.getUnderline() != null)
-			font.setUnderline(Byte.valueOf(this.getUnderline()).byteValue());
+		if (this.getUnderline() != null){
+			String type=this.getUnderline();
+			if("SINGLE_ACCOUNTING".equalsIgnoreCase(type)){
+				font.setUnderline(Font.U_SINGLE_ACCOUNTING);
+			}else if("DOUBLE_ACCOUNTING".equalsIgnoreCase(type)){
+				font.setUnderline(Font.U_DOUBLE_ACCOUNTING);
+			}else if("DOUBLE".equalsIgnoreCase(type)){
+				font.setUnderline(Font.U_DOUBLE);
+			}else{
+				font.setUnderline(Font.U_SINGLE);
+			}			
+		}			
 		if (this.getBold())
 			font.setBoldweight(Font.BOLDWEIGHT_BOLD);
 		if (this.getItalic())
