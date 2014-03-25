@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
-import aurora.plugin.source.gen.screen.model.properties.ComponentProperties;
 
 abstract public class Container extends AuroraComponent implements
 		IDatasetDelegate {

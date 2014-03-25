@@ -116,7 +116,7 @@ public class BOX extends RowCol {
 	public boolean isResponsibleChild(AuroraComponent component) {
 		if (component instanceof Grid)
 			return true;
-		if (component instanceof ToolbarButton || component instanceof Toolbar || component instanceof Navbar
+		if (component instanceof Toolbar || component instanceof Navbar
 				|| component instanceof GridColumn)
 			return false;
 		if (component instanceof TabItem)

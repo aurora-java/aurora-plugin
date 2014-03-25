@@ -9,7 +9,7 @@ import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties
 
 public class ScreenBody extends Container {
 	public static final int DLabelWidth = 80;
-	private static Class<?>[] unsupported = { ToolbarButton.class, Toolbar.class, Navbar.class,
+	private static Class<?>[] unsupported = { Toolbar.class, Navbar.class,
 			GridColumn.class, TabItem.class };
 
 	private List<String> unBindModels = new ArrayList<String>();
