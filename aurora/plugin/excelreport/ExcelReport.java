@@ -94,7 +94,7 @@ public class ExcelReport extends AbstractEntry {
 			context.putObject("/parameter/@file_path", fileAbsolutePath, true);
 			context.putObject("/parameter/@file_name",
 					excelReport.getFileName(), true);
-			os = new FileOutputStream(fileAbsolutePath);
+			os = new FileOutputStream(excelFile);
 			excelReport.setOutputStream(os);
 			new ExcelFactory().createExcel(context, excelReport);
 			if (!enableTaskBoolean) {
