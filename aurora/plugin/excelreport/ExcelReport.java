@@ -80,21 +80,19 @@ public class ExcelReport extends AbstractEntry {
 		}
 		File tempFile = null;
 		try {
-			if (!enableTaskBoolean) {
-				tempFile = File.createTempFile("excelreport",
-						excelReport.getFormat());
-				os = new FileOutputStream(tempFile);
-			} else {
-				IObjectRegistry or = this.uncertainEngine.getObjectRegistry();
-				IReportTask excelTask = (IReportTask) or
-						.getInstanceOfType(IReportTask.class);
-				String fileFullPath = excelTask.getReportDir() + "/" + "excel"
+			String fileAbsolutePath;
+			IObjectRegistry or = this.uncertainEngine.getObjectRegistry();
+			IReportTask excelTask = (IReportTask) or.getInstanceOfType(IReportTask.class);
+			if(excelTask!=null){
+				fileAbsolutePath = excelTask.getReportDir() + "/" + "excel"
 						+ System.currentTimeMillis() + excelReport.getFormat();
-				os = new FileOutputStream(fileFullPath);
-				context.putObject("/parameter/@file_path", fileFullPath, true);
-				context.putObject("/parameter/@file_name",
-						excelReport.getFileName(), true);
+			}else{
+				fileAbsolutePath=File.createTempFile("excelreport",excelReport.getFormat()).getAbsolutePath();
 			}
+			context.putObject("/parameter/@file_path", fileAbsolutePath, true);
+			context.putObject("/parameter/@file_name",
+					excelReport.getFileName(), true);
+			os = new FileOutputStream(fileAbsolutePath);
 			excelReport.setOutputStream(os);
 			new ExcelFactory().createExcel(context, excelReport);
 			if (!enableTaskBoolean) {
