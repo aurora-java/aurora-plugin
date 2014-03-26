@@ -78,16 +78,18 @@ public class ExcelReport extends AbstractEntry {
 		} else {
 			throw new IllegalAddException("fileName attribute is undefined");
 		}
-		File tempFile = null;
 		try {
+			File excelFile;
 			String fileAbsolutePath;
 			IObjectRegistry or = this.uncertainEngine.getObjectRegistry();
 			IReportTask excelTask = (IReportTask) or.getInstanceOfType(IReportTask.class);
 			if(excelTask!=null){
 				fileAbsolutePath = excelTask.getReportDir() + "/" + "excel"
 						+ System.currentTimeMillis() + excelReport.getFormat();
+				excelFile=new File(fileAbsolutePath);
 			}else{
-				fileAbsolutePath=File.createTempFile("excelreport",excelReport.getFormat()).getAbsolutePath();
+				excelFile=File.createTempFile("excelreport",excelReport.getFormat());
+				fileAbsolutePath=excelFile.getAbsolutePath();
 			}
 			context.putObject("/parameter/@file_path", fileAbsolutePath, true);
 			context.putObject("/parameter/@file_name",
@@ -101,7 +103,7 @@ public class ExcelReport extends AbstractEntry {
 						.getResponse();
 				setResponseHeader(((HttpServiceInstance) svc).getRequest(),response, excelReport);
 				transferOutputStream(response.getOutputStream(),
-						new FileInputStream(tempFile));
+						new FileInputStream(excelFile));
 
 			}
 		} catch (Exception e) {
