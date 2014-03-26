@@ -49,7 +49,8 @@ public class ExcelReport extends AbstractEntry {
 	public CellStyleWrap[] styles;
 	public SheetWrap[] sheets;
 	CompositeMap configObj;
-	boolean enableTask = true;
+	boolean enableTaskBoolean;
+	String enableTask="true";
 	ILogger logger;
 
 	public ExcelReport(UncertainEngine uncertainEngine) {
@@ -59,6 +60,7 @@ public class ExcelReport extends AbstractEntry {
 
 	public void run(ProcedureRunner runner) throws Exception {
 		CompositeMap context = runner.getContext();
+		enableTaskBoolean=Boolean.parseBoolean(TextParser.parse(enableTask, context));
 		logger = LoggingContext.getLogger(context, "aurora.plugin.excelreport");
 		ExcelReport excelReport = createExcelReport(context);
 		if (excelReport == null)
@@ -78,7 +80,7 @@ public class ExcelReport extends AbstractEntry {
 		}
 		File tempFile = null;
 		try {
-			if (!enableTask) {
+			if (!enableTaskBoolean) {
 				tempFile = File.createTempFile("excelreport",
 						excelReport.getFormat());
 				os = new FileOutputStream(tempFile);
@@ -95,7 +97,7 @@ public class ExcelReport extends AbstractEntry {
 			}
 			excelReport.setOutputStream(os);
 			new ExcelFactory().createExcel(context, excelReport);
-			if (!enableTask) {
+			if (!enableTaskBoolean) {
 				ServiceInstance svc = ServiceInstance.getInstance(context);
 				HttpServletResponse response = ((HttpServiceInstance) svc)
 						.getResponse();
@@ -115,7 +117,7 @@ public class ExcelReport extends AbstractEntry {
 					logger.log(Level.SEVERE, null, e);
 				}
 			}
-			if (!enableTask) {
+			if (!enableTaskBoolean) {
 				stopRunner(runner);
 			}
 		}
@@ -259,11 +261,11 @@ public class ExcelReport extends AbstractEntry {
 		this.configObj = configObj;
 	}
 
-	public boolean getEnableTask() {
+	public String getEnableTask() {
 		return enableTask;
 	}
 
-	public void setEnableTask(boolean enableTask) {
+	public void setEnableTask(String enableTask) {
 		this.enableTask = enableTask;
 	}
 
