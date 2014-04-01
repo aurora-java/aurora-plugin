@@ -81,7 +81,7 @@ public class SheetWrap {
 				cell.setCellStyle(cellStyle);
 			}
 			if (cellConfig.getRange() != null) {
-				this.excelSheet.addMergedRegion(CellRangeAddress
+				ExcelFactory.mergedRegion(this.excelSheet, CellRangeAddress
 						.valueOf(cellConfig.getRange()));
 			}
 			if (CellData.KEY_FORMULA.equals(cellConfig.getType())) {

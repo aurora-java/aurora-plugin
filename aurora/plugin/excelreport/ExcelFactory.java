@@ -11,6 +11,8 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
@@ -193,5 +195,45 @@ public class ExcelFactory {
 		}else{
 			this.templatePath = file.getAbsolutePath();
 		}		
+	}
+	
+	public static void mergedRegion(Sheet sheet,CellRangeAddress range){
+		mergedRegion(sheet,range.getFirstRow(),range.getLastRow(),range.getFirstColumn(),range.getLastColumn());
+	}
+	
+	public  static void mergedRegion(Sheet sheet,int firstRow,int lastRow,int firstColumn,int lastColumn){
+		if(firstRow>lastRow||firstColumn>lastColumn)
+			return;
+		Row row;
+		Cell cell;
+		int colIndex;
+		int rowIndex;
+		for(int i=0;i+firstRow<=lastRow;i++){
+			rowIndex=i+firstRow;
+			row=sheet.getRow(rowIndex);
+			if(row!=null){
+				for(int j=0;j+firstColumn<=lastColumn;j++){
+					colIndex=j+firstColumn;
+					if(i!=0||j!=0){
+						cell=row.getCell(colIndex);
+						if(cell!=null)
+							cell.setCellType(Cell.CELL_TYPE_BLANK);
+					}
+				}
+			}
+		}
+		
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("$");
+		buffer.append(CellReference.convertNumToColString(firstColumn));
+		buffer.append("$");
+		buffer.append(firstRow+1);
+		buffer.append(":");
+		buffer.append("$");
+		buffer.append(CellReference.convertNumToColString(lastColumn));
+		buffer.append("$");
+		buffer.append(lastRow+1);
+		sheet.addMergedRegion(CellRangeAddress.valueOf(buffer
+				.toString()));
 	}
 }

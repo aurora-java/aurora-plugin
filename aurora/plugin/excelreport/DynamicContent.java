@@ -347,20 +347,8 @@ public class DynamicContent {
 			TableColumn tableColumn = this.getColumnsMap().get(levelName);
 			if (!tableColumn.getMerged())
 				break;
-			String colString = CellReference.convertNumToColString(tableColumn
-					.getIndex());
-			StringBuffer buffer = new StringBuffer();
-			buffer.append("$");
-			buffer.append(colString);
-			buffer.append("$");
-			buffer.append(firstLine);
-			buffer.append(":");
-			buffer.append("$");
-			buffer.append(colString);
-			buffer.append("$");
-			buffer.append(endLine);
-			this.excelSheet.addMergedRegion(CellRangeAddress.valueOf(buffer
-					.toString()));
+			int colIndex=tableColumn.getIndex();
+			ExcelFactory.mergedRegion(this.excelSheet, firstLine-1, endLine-1, colIndex, colIndex);		
 		}
 	}
 
