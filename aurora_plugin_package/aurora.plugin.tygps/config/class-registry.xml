@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-registry>
+  <package-mapping packageName="aurora.plugin.tygps"/>
+  <class-mapping className="aurora.plugin.tygps.GpsTracker" elementName="gps-tracker" nameSpace="http://www.aurora-framework.org/application"/>
+
+</class-registry>
