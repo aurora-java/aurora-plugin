@@ -6,8 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,6 +21,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 
+import org.apache.commons.io.FileUtils;
 import org.docx4j.XmlUtils;
 import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.jaxb.Context;
@@ -86,6 +89,8 @@ import org.docx4j.wml.STVerticalJc;
 import org.docx4j.wml.SectPr;
 import org.docx4j.wml.Tabs;
 import org.docx4j.wml.Tbl;
+import org.docx4j.wml.TblGrid;
+import org.docx4j.wml.TblGridCol;
 import org.docx4j.wml.TblPr;
 import org.docx4j.wml.TblWidth;
 import org.docx4j.wml.Tc;
@@ -354,7 +359,8 @@ public class WordUtils {
 		Tbl tbl = factory.createTbl();
 		
 		TblPr tblPr = factory.createTblPr();
-		tbl.setTblPr(tblPr);
+		tbl.setTblPr(tblPr);		
+		
 		
 		Double indLeft = table.getIndLeft();
 		if(indLeft!=null){
@@ -386,6 +392,8 @@ public class WordUtils {
 			tblPr.setTblStyle(tblStyle);			
 		}
 		
+		int columnSize = 0;
+		List list = null;
 		for (TableTr tblTr : table.getTrs()) {
 			Tr tr = factory.createTr();
 			tbl.getContent().add(tr);
@@ -399,13 +407,13 @@ public class WordUtils {
 			trPr.getCnfStyleOrDivIdOrGridBefore().add(trHeightElement);			
 			tr.setTrPr(trPr);
 			
+			if(tblTr.getTcs().size()>columnSize) {
+				list = 	tblTr.getTcs();			
+			}
 			for (TableTc tblTc : tblTr.getTcs()) {
 				Tc tc = factory.createTc();
-				tr.getContent().add(tc);	
-				
-				
-				TcPr tcPr = factory.createTcPr();
-				
+				tr.getContent().add(tc);			
+				TcPr tcPr = factory.createTcPr();				
 				if(tblTc.getBorders().size()>0){
 					TcBorders tcB = factory.createTcPrInnerTcBorders();
 					tcPr.setTcBorders(tcB);
@@ -470,8 +478,21 @@ public class WordUtils {
 				for (Paragraph para : tblTc.getParas()) {
 					tc.getContent().add(WordUtils.createPara(wordMLPackage,factory,para));
 				}
-			}			
-		}		
+			}
+		}
+		
+		if(list!=null){
+			TblGrid tblGrid = factory.createTblGrid();
+			Iterator it = list.iterator();
+			while(it.hasNext()){
+				TableTc tblTc = (TableTc)it.next();
+				TblGridCol col = factory.createTblGridCol();
+				Double wd = tblTc.getWidth()*TWIP_CENTIMETER;
+	            col.setW(BigInteger.valueOf(wd.longValue()));
+	            tblGrid.getGridCol().add(col);
+			}
+			tbl.setTblGrid(tblGrid);
+		}
 		return tbl;
 	}
 	
@@ -485,6 +506,26 @@ public class WordUtils {
 			i++;
 		}
 		return -1;
+	}
+	
+	public static R createImage(WordprocessingMLPackage wordprocessingMLPackage, ObjectFactory factory, HeaderPart part, byte[] bytes) throws Exception {
+		
+		BinaryPartAbstractImage imagePart;
+		if(part!=null) {
+			imagePart = BinaryPartAbstractImage.createImagePart(wordprocessingMLPackage,part, bytes);
+		}else {
+			imagePart = BinaryPartAbstractImage.createImagePart(wordprocessingMLPackage, bytes);
+		}
+		
+			
+        Inline inline = imagePart.createImageInline(null, null, 0, 1, false);
+        
+        // Now add the inline in w:p/w:r/w:drawing
+		org.docx4j.wml.R  run = factory.createR();      
+		org.docx4j.wml.Drawing drawing = factory.createDrawing();		
+		run.getContent().add(drawing);		
+		drawing.getAnchorOrInline().add(inline);		
+		return run;
 	}
 	
 	
@@ -525,22 +566,7 @@ public class WordUtils {
 			if(is!=null) is.close();
 		}
 		
-		BinaryPartAbstractImage imagePart;
-		if(part!=null) {
-			imagePart = BinaryPartAbstractImage.createImagePart(wordprocessingMLPackage,part, bytes);
-		}else {
-			imagePart = BinaryPartAbstractImage.createImagePart(wordprocessingMLPackage, bytes);
-		}
-		
-			
-        Inline inline = imagePart.createImageInline(null, null, 0, 1, false);
-        
-        // Now add the inline in w:p/w:r/w:drawing
-		org.docx4j.wml.R  run = factory.createR();      
-		org.docx4j.wml.Drawing drawing = factory.createDrawing();		
-		run.getContent().add(drawing);		
-		drawing.getAnchorOrInline().add(inline);		
-		return run;
+		return createImage(wordprocessingMLPackage,factory,part,bytes);
 	}
 	
 	public static JAXBElement getWrappedFldChar(FldChar fldchar) {
@@ -548,7 +574,7 @@ public class WordUtils {
 	}
 	
 	public static Hyperlink createHyperlink(String name, String anchor) throws JAXBException {
-		String hpl = "<w:hyperlink xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" w:anchor=\""+anchor+"\"><w:r><w:t>"+name+"</w:t></w:r><w:r> <w:tab /> </w:r><w:fldSimple w:instr=\"PAGEREF "+anchor+"\"> <w:r> <w:t></w:t> </w:r> </w:fldSimple> </w:hyperlink>";
+		String hpl = "<w:hyperlink xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" w:anchor=\""+anchor+"\"><w:r><w:rPr><w:rFonts w:hint=\"eastAsia\" w:ascii=\"SimSun\" w:hAnsi=\"SimSun\"/><w:color w:val=\"000000\"/><w:sz w:val=\"24\"/><w:szCs w:val=\"24\"/></w:rPr><w:t>"+name+"</w:t></w:r><w:r> <w:tab /> </w:r><w:fldSimple w:instr=\"PAGEREF "+anchor+"\"> <w:r> <w:t></w:t> </w:r> </w:fldSimple> </w:hyperlink>";
 		return (Hyperlink)XmlUtils.unmarshalString(hpl);
 	}
 	
@@ -558,6 +584,7 @@ public class WordUtils {
 		t.setValue("目    录");
 		R  run = factory.createR();
 		run.getContent().add(t);
+		
 		
 		org.docx4j.wml.Jc jc = factory.createJc();
 		jc.setVal(JcEnumeration.CENTER);
@@ -569,9 +596,14 @@ public class WordUtils {
 		
 		org.docx4j.wml.RFonts rf = new org.docx4j.wml.RFonts();
 		rf.setHint(STHint.EAST_ASIA);
-		rf.setAscii("宋体");
-		rf.setHAnsi("宋体");
+		rf.setAscii("SimSun");
+		rf.setHAnsi("SimSun");
 		rPr.setRFonts(rf);
+		
+		HpsMeasure sz = new HpsMeasure();
+		sz.setVal(new BigInteger("36"));
+		rPr.setSz(sz);
+		rPr.setSzCs(sz);
 		
 		BooleanDefaultTrue bdt = Context.getWmlObjectFactory().createBooleanDefaultTrue();
 		rPr.setBCs(bdt);
@@ -640,7 +672,9 @@ public class WordUtils {
 		Br breakObj = new Br();  
         breakObj.setType(STBrType.PAGE);  
         P p = factory.createP();  
-        p.getContent().add(breakObj); 
+        R run = factory.createR();
+        run.getContent().add(breakObj);
+        p.getContent().add(run); 
         return p;
 	}
 	
@@ -806,14 +840,23 @@ public class WordUtils {
 			}else if(obj instanceof Image){
 				hasImg = true;
 				Image img = (Image)obj;
-				File file;
+				File file = null;
 				if(Image.PATH_TYPE_RELATIVE.equals(img.getType())){
 					File folder = (File)getObject(KEY_TEMPLATE_FILE);
 					file = folder == null ? new File(img.getSrc()) : new File(folder.getParent(),img.getSrc());
-				}else {
+					p.getContent().add(WordUtils.createImage(wordprocessingMLPackage, factory,part, file));
+				} else if(Image.PATH_TYPE_ABSOLUTE.equals(img.getType())) {
 					file = new File(img.getSrc());
+					p.getContent().add(WordUtils.createImage(wordprocessingMLPackage, factory,part, file));
+				} else if(Image.PATH_TYPE_URL.equals(img.getType())) {
+					file = File.createTempFile("url_img", ".tmp");
+					try{
+						FileUtils.copyURLToFile(new URL(img.getSrc()), file);
+						p.getContent().add(WordUtils.createImage(wordprocessingMLPackage, factory,part, file));
+					}finally {
+						FileUtils.forceDelete(file);
+					}
 				}
-				p.getContent().add(WordUtils.createImage(wordprocessingMLPackage, factory,part, file));
 			}
 			
 			i++;
@@ -1210,7 +1253,7 @@ public class WordUtils {
 	      + "</w:pPr>"
 	      + "<w:rPr>"
 	        + "<w:b/>"
-	        + "<w:rFonts w:hint=\"eastAsia\" w:ascii=\"宋体\" w:hAnsi=\"宋体\"/>"
+	        + "<w:rFonts w:hint=\"eastAsia\" w:ascii=\"SimSun\" w:hAnsi=\"SimSun\"/>"
 	        + "<w:color w:val=\"auto\"/>"
 	        + "<w:sz w:val=\"24\"/>"
 	        + "<w:szCs w:val=\"24\"/>"
@@ -1229,7 +1272,7 @@ public class WordUtils {
 		      + "</w:pPr>"
 		      + "<w:rPr>"
 		        + "<w:b/>"
-		        + "<w:rFonts w:hint=\"eastAsia\" w:ascii=\"宋体\" w:hAnsi=\"宋体\"/>"
+		        + "<w:rFonts w:hint=\"eastAsia\" w:ascii=\"SimSun\" w:hAnsi=\"SimSun\"/>"
 		        + "<w:color w:val=\"auto\"/>"
 		        + "<w:sz w:val=\"24\"/>"
 		        + "<w:szCs w:val=\"24\"/>"
