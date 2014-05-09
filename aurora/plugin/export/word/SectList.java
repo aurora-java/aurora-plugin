@@ -13,6 +13,7 @@ public class SectList {
 	private String tocTitleField = "toctitle";
 	private String alignField = "align";
 	private String type = "type";
+	private String numId = "1";
 	
 	public String getType() {
 		return type;
@@ -37,6 +38,12 @@ public class SectList {
 	}
 	public void setIdField(String idField) {
 		this.idField = idField;
+	}
+	public String getNumId() {
+		return numId;
+	}
+	public void setNumId(String numId) {
+		this.numId = numId;
 	}
 	public String getTextField() {
 		return textField;

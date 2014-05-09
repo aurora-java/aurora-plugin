@@ -167,8 +167,9 @@ public class WordExport extends AbstractEntry {
 			String indFirstLine = item.getString(list.getIndFirstLineField());
 			if(indFirstLine!=null) sb.append(" indFirstLine=\"").append(indFirstLine).append("\"");
 			String ilvl = item.getString(list.getIlvlField());
+			String numId = list.getIlvlField();
 			if(ilvl!=null) {
-				sb.append(" numId=\"1\" ilvl=\"").append(ilvl).append("\"");
+				sb.append(" numId=\""+numId+"\" ilvl=\"").append(ilvl).append("\"");
 			}
 			
 			sb.append(">");

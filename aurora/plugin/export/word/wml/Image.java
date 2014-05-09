@@ -16,8 +16,11 @@ public class Image {
 	@XmlTransient
 	public static final String PATH_TYPE_ABSOLUTE = "absolute";
 	
+	@XmlTransient
+	public static final String PATH_TYPE_URL = "url";
+	
 	@XmlAttribute
-	private String src;
+	private String src = PATH_TYPE_ABSOLUTE;
 	
 	@XmlAttribute
 	private String type = PATH_TYPE_RELATIVE;
