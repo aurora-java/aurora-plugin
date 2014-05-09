@@ -15,7 +15,7 @@ public class Text {
 	private Boolean bold = false;
 	
 	@XmlAttribute
-	private String fontFamily = "宋体";
+	private String fontFamily = "SimSun";
 	
 	@XmlAttribute
 	private String fontSize = "24";
