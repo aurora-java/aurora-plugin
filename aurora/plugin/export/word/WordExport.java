@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 
+import org.docx4j.Docx4J;
+import org.docx4j.convert.out.FOSettings;
 import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.io.SaveToZipFile;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -36,11 +38,14 @@ import freemarker.template.Template;
 public class WordExport extends AbstractEntry {
 	
 	private static final String DEFAULT_WORD_NAME = "untitle.docx";
+	private static final String TYPE_WORD = "word";
+	private static final String TYPE_PDF = "pdf";
 	
 	protected Replace[] replaces;
 	protected SectList[] sectLists;
 	private String template = null;
 	private String name = DEFAULT_WORD_NAME;
+	private String type = TYPE_WORD;
 	private UncertainEngine uncertainEngine;
 	private WordTemplateProvider provider;
 	
@@ -107,18 +112,30 @@ public class WordExport extends AbstractEntry {
 		response.setHeader("pragma", "public");	
 		response.setHeader("Content-disposition", "attachment;" + processFileName(serviceInstance.getRequest(),getName()));
 		response.setCharacterEncoding("utf-8");
-		response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-
-		
-		
-		OutputStream res_out = null;
-		try {
-			res_out = response.getOutputStream();
-			SaveToZipFile saver = new SaveToZipFile(wordMLPackage);
-			saver.save(res_out);
-		} finally {
-			if(res_out!=null)res_out.close();
+		if(TYPE_WORD.equals(getType())) {
+			response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+			OutputStream res_out = null;
+			try {
+				res_out = response.getOutputStream();
+				SaveToZipFile saver = new SaveToZipFile(wordMLPackage);
+				saver.save(res_out);
+			} finally {
+				if(res_out!=null)res_out.close();
+			}
+		}else if(TYPE_PDF.equals(getType())){
+			response.setContentType("application/pdf");
+			OutputStream res_out = null;
+			try {
+				res_out = response.getOutputStream();
+				FOSettings foSettings = Docx4J.createFOSettings();
+				foSettings.setWmlPackage(wordMLPackage);
+				Docx4J.toFO(foSettings, res_out, Docx4J.FLAG_NONE);
+			} finally {
+				if(res_out!=null)res_out.close();
+			}
+			
 		}
+		
 		
 		ProcedureRunner preRunner=runner;
 		while(preRunner.getCaller()!=null){
@@ -213,6 +230,16 @@ public class WordExport extends AbstractEntry {
 
 	public void setSectLists(SectList[] lists) {
 		this.sectLists = lists;
+	}
+
+
+	public String getType() {
+		return type;
+	}
+
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 }
