@@ -408,6 +408,7 @@ public class WordUtils {
 			tr.setTrPr(trPr);
 			
 			if(tblTr.getTcs().size()>columnSize) {
+				columnSize = tblTr.getTcs().size();
 				list = 	tblTr.getTcs();			
 			}
 			for (TableTc tblTc : tblTr.getTcs()) {
