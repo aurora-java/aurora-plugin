@@ -488,8 +488,11 @@ public class WordUtils {
 			while(it.hasNext()){
 				TableTc tblTc = (TableTc)it.next();
 				TblGridCol col = factory.createTblGridCol();
-				Double wd = tblTc.getWidth()*TWIP_CENTIMETER;
-	            col.setW(BigInteger.valueOf(wd.longValue()));
+				Double wd = tblTc.getWidth();
+				if(wd!=null){
+					wd = tblTc.getWidth()*TWIP_CENTIMETER;
+		            col.setW(BigInteger.valueOf(wd.longValue()));
+				}				
 	            tblGrid.getGridCol().add(col);
 			}
 			tbl.setTblGrid(tblGrid);
