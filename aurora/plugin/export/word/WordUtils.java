@@ -490,7 +490,7 @@ public class WordUtils {
 				TblGridCol col = factory.createTblGridCol();
 				Double wd = tblTc.getWidth();
 				if(wd!=null){
-					wd = tblTc.getWidth()*TWIP_CENTIMETER;
+					wd = wd*TWIP_CENTIMETER;
 		            col.setW(BigInteger.valueOf(wd.longValue()));
 				}				
 	            tblGrid.getGridCol().add(col);
