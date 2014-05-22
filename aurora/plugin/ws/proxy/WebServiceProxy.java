@@ -115,15 +115,9 @@ public class WebServiceProxy extends HttpServlet {
 		logger.config("request Full:" + LINE_SEPARATOR + soapContent);
 		if (soapContent == null || "".equals(soapContent))
 			return;
-//		CompositeLoader cl = new CompositeLoader();
 		try {
-//			CompositeMap soap = cl.loadFromString(soapContent, "UTF-8");
-//			CompositeMap body = (CompositeMap) soap.getChild(BODY.getLocalName());
-//			logger.config("request body:" + LINE_SEPARATOR + body.toXML());
 			String targetUrl = getTargetUrl(request);
 			logger.config("targetUrl:" + targetUrl);
-//			String targetSoap = getSoapContent(body);
-//			logger.config("targetSoap:" + targetSoap);
 			Map headers = getRequestHeader(request, context);
 			String userPassword = getUserPassword(request);
 			logger.config("userPassword:" + userPassword);
@@ -138,17 +132,12 @@ public class WebServiceProxy extends HttpServlet {
 
 	private String getUserPassword(HttpServletRequest request) {
 		return request.getHeader("user");
-//				body.getChild("user").getText();
 	}
 
 	private String getTargetUrl(HttpServletRequest request) {
 		return request.getHeader("targetUrl");
-//				body.getChild("targetUrl").getText();
 	}
 
-	private String getSoapContent(CompositeMap body) {
-		return body.getChild("content").getText();
-	}
 
 	private Map getRequestHeader(HttpServletRequest request, CompositeMap context) {
 		CompositeMap req_map = context.getChild("request");
@@ -192,21 +181,14 @@ public class WebServiceProxy extends HttpServlet {
 					httpUrlConnection.setRequestProperty(headerName, headerValue);
 				}
 			}
-
-			// httpUrlConnection.setRequestProperty("SOAPAction",
-			// "urn:anonOutInOp");
-			// httpUrlConnection.setRequestProperty("Content-Type",
-			// "text/xml; charset=UTF-8");
 			addAuthorization(httpUrlConnection, userPassword, logger);
 			httpUrlConnection.connect();
 			OutputStream os = httpUrlConnection.getOutputStream();
 			OutputStreamWriter writer = new OutputStreamWriter(os, "UTF-8");
-			// writer.write("<?xml version='1.0' encoding='UTF-8'?>");
 			writer.write(soap);
 			writer.flush();
 			writer.close();
 			String soapResponse = null;
-			// CompositeMap soap = null;
 			CompositeLoader cl = new CompositeLoader();
 			// http status ok
 			if (HttpURLConnection.HTTP_OK == httpUrlConnection.getResponseCode()) {
@@ -236,8 +218,6 @@ public class WebServiceProxy extends HttpServlet {
 	private void onCreateSuccessResponse(HttpServletResponse response, String soapResponse, ILogger logger) throws IOException {
 		prepareResponse(response);
 		PrintWriter out = response.getWriter();
-		// out.append("<?xml version='1.0' encoding='UTF-8'?>").append(LINE_SEPARATOR);
-		// logger.config("response content:" + LINE_SEPARATOR + soapResponse);
 		out.print(soapResponse);
 		out.flush();
 		out.close();
@@ -279,13 +259,6 @@ public class WebServiceProxy extends HttpServlet {
 		httpUrlConnection.setRequestProperty("Authorization", null);
 		if (userPassword == null)
 			return;
-		// String fullText = userPassword.getUserName() + ":" +
-		// userPassword.getPassword();
-		// logger.config("plan user/password:" + fullText);
-		// String decodeText = "Basic " + new
-		// String(Base64.encode(fullText.getBytes()));
-		// logger.config("decode user/password:" + decodeText);
-		// httpUrlConnection.setRequestProperty("Authorization", decodeText);
 		httpUrlConnection.setRequestProperty("Authorization", userPassword);
 	}
 
