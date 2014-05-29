@@ -12,6 +12,9 @@ import javax.xml.bind.annotation.XmlValue;
 public class Text {
 	
 	@XmlAttribute
+	private Boolean fldCharType = false;
+	
+	@XmlAttribute
 	private Boolean bold = false;
 	
 	@XmlAttribute
@@ -105,6 +108,14 @@ public class Text {
 
 	public void setItalic(Boolean italic) {
 		this.italic = italic;
+	}
+
+	public Boolean getFldCharType() {
+		return fldCharType;
+	}
+
+	public void setFldCharType(Boolean fldCharType) {
+		this.fldCharType = fldCharType;
 	}
 
 }

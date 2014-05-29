@@ -117,6 +117,7 @@ import aurora.plugin.export.word.wml.Document;
 import aurora.plugin.export.word.wml.Footer;
 import aurora.plugin.export.word.wml.Header;
 import aurora.plugin.export.word.wml.Image;
+import aurora.plugin.export.word.wml.NumberingChunk;
 import aurora.plugin.export.word.wml.PBdr;
 import aurora.plugin.export.word.wml.PTab;
 import aurora.plugin.export.word.wml.Paragraph;
@@ -167,7 +168,7 @@ public class WordUtils {
 		ObjectFactory factory = Context.getWmlObjectFactory();		
 				
 		
-		SectPr docSectPr = wordMLPackage.getMainDocumentPart().getJaxbElement().getBody().getSectPr();
+		SectPr docSectPr = wordMLPackage.getMainDocumentPart().getContents().getBody().getSectPr();
 		PgMar pg = factory.createSectPrPgMar();
 		Double top = doc.getTop()*TWIP_CENTIMETER;
 		pg.setTop(BigInteger.valueOf(top.intValue()));
@@ -188,7 +189,7 @@ public class WordUtils {
 		
 		Footer footer = doc.getFooter();
 		if(footer!=null){
-			WordUtils.addFooter(factory, wordMLPackage);
+			WordUtils.addFooter(factory, wordMLPackage, footer.getPara());
 		}
 		
 		String watermark = doc.getWatermark();
@@ -233,18 +234,18 @@ public class WordUtils {
 				AltChunk chunk = (AltChunk)obj;
 				WordUtils.createChunk(mdp,chunk);
 			}
-			if(p!=null) mdp.getJaxbElement().getBody().getContent().add(p);
+			if(p!=null) mdp.getContents().getBody().getContent().add(p);
 		}
 		
 		//create TOC
 		if(indexOfToc!= -1 && !tocs.isEmpty()){	
-			mdp.getJaxbElement().getBody().getContent().add(indexOfToc++,WordUtils.createTOCHead(factory));	
-			mdp.getJaxbElement().getBody().getContent().add(indexOfToc++,WordUtils.createTOCStart(factory));				
+			mdp.getContents().getBody().getContent().add(indexOfToc++,WordUtils.createTOCHead(factory));	
+			mdp.getContents().getBody().getContent().add(indexOfToc++,WordUtils.createTOCStart(factory));				
 			for (Map toc : tocs) {
-				mdp.getJaxbElement().getBody().getContent().add(indexOfToc++,WordUtils.createTOC(factory,toc));					
+				mdp.getContents().getBody().getContent().add(indexOfToc++,WordUtils.createTOC(factory,toc));					
 			}
-			mdp.getJaxbElement().getBody().getContent().add(indexOfToc++,WordUtils.createTOCEnd(factory));
-			mdp.getJaxbElement().getBody().getContent().add(indexOfToc++,WordUtils.createPageBreak(factory));
+			mdp.getContents().getBody().getContent().add(indexOfToc++,WordUtils.createTOCEnd(factory));
+			mdp.getContents().getBody().getContent().add(indexOfToc++,WordUtils.createPageBreak(factory));
 		}
 		WordUtils.hideSpellAndGrammaticalErrors(wordMLPackage, factory);
 		
@@ -253,7 +254,7 @@ public class WordUtils {
 		}
 		
 		if(doc.getDebugger()){
-			System.out.println(XmlUtils.marshaltoString(wordMLPackage.getMainDocumentPart().getJaxbElement(), true, true));	
+			System.out.println(XmlUtils.marshaltoString(wordMLPackage.getMainDocumentPart().getContents(), true, true));	
 		}		
 		return wordMLPackage;
 	}
@@ -306,7 +307,12 @@ public class WordUtils {
 		WordprocessingMLPackage wordMLPackage =  WordprocessingMLPackage.createPackage(PageSizePaper.valueOf(doc.getPageSize()),doc.getLandscape());
 		NumberingDefinitionsPart ndp = new NumberingDefinitionsPart();		
 		wordMLPackage.getMainDocumentPart().addTargetPart(ndp);
-		ndp.setJaxbElement( (Numbering) XmlUtils.unmarshalString(initialNumbering));
+		String numbering = initialNumbering;
+		NumberingChunk nc = doc.getNumberingChunk();
+		if(nc!=null){
+			if(nc.getText()!=null) numbering = nc.getText();
+		}
+		ndp.setJaxbElement( (Numbering) XmlUtils.unmarshalString(numbering));
 		putObject(KEY_NUMBERING_DEFINITION_PART, ndp);
 		return wordMLPackage;
 	}
@@ -354,7 +360,7 @@ public class WordUtils {
 	public static Tbl createTable(WordprocessingMLPackage wordMLPackage, ObjectFactory factory, Table table) throws Exception{
 		
 		
-//		SectPr docSectPr = wordMLPackage.getMainDocumentPart().getJaxbElement().getBody().getSectPr();
+//		SectPr docSectPr = wordMLPackage.getMainDocumentPart().getContents().getBody().getSectPr();
 //		int pageWidth = docSectPr.getPgSz().getW().intValue();
 		Tbl tbl = factory.createTbl();
 		
@@ -512,7 +518,7 @@ public class WordUtils {
 		return -1;
 	}
 	
-	public static R createImage(WordprocessingMLPackage wordprocessingMLPackage, ObjectFactory factory, HeaderPart part, byte[] bytes) throws Exception {
+	public static R createImage(WordprocessingMLPackage wordprocessingMLPackage, ObjectFactory factory, Part part, byte[] bytes) throws Exception {
 		
 		BinaryPartAbstractImage imagePart;
 		if(part!=null) {
@@ -533,7 +539,7 @@ public class WordUtils {
 	}
 	
 	
-	public static R createImage(WordprocessingMLPackage wordprocessingMLPackage, ObjectFactory factory, HeaderPart part, File file) throws Exception {
+	public static R createImage(WordprocessingMLPackage wordprocessingMLPackage, ObjectFactory factory, Part part, File file) throws Exception {
 		if(file == null || !file.exists()){
 			R run = factory.createR();
 			RPr rpr = factory.createRPr();
@@ -628,7 +634,7 @@ public class WordUtils {
 		R r12 = factory.createR();
 		org.docx4j.wml.Text txt = new org.docx4j.wml.Text();
 		txt.setSpace("preserve");
-		txt.setValue("TOC \\o \"1-3\" \\h \\z \\u \\h");
+		txt.setValue("TOC \\o \"1-3\" \\h \\z \\u \\n");
 		r12.getContent().add(factory.createRInstrText(txt));
 		p1.getContent().add(r12);
 
@@ -719,7 +725,7 @@ public class WordUtils {
 	}
 	
 	
-	public static P createPara(WordprocessingMLPackage wordprocessingMLPackage, ObjectFactory factory, HeaderPart part, Paragraph para) throws Exception{
+	public static P createPara(WordprocessingMLPackage wordprocessingMLPackage, ObjectFactory factory, Part part, Paragraph para) throws Exception{
 		P  p = factory.createP();
 		Double indFirstLine = para.getIndFirstLine();
 		Double indLeft = para.getIndLeft();
@@ -746,7 +752,7 @@ public class WordUtils {
 		}	
 		
 		
-		SectPr docSectPr = wordprocessingMLPackage.getMainDocumentPart().getJaxbElement().getBody().getSectPr();	
+		SectPr docSectPr = wordprocessingMLPackage.getMainDocumentPart().getContents().getBody().getSectPr();	
 		BigInteger pageWidth = docSectPr.getPgSz().getW();
 		BigInteger pageHeight = docSectPr.getPgSz().getH();
 		String orientation = para.getOrientation();
@@ -819,8 +825,14 @@ public class WordUtils {
 		for(Object obj:objs){
 			if(obj instanceof Text){
 				Text text = (Text)obj;
+				if(text.getFldCharType()){
+					addFieldBegin(factory,p);
+				}
 				R run = createRun(factory,text);
 				p.getContent().add(run);
+				if(text.getFldCharType()){
+					addFieldEnd(factory,p);
+				}
 				if(para.getToc()){
 					bookmarkRun(p,run,para.getTocBookMark(),1); 
 				}
@@ -991,7 +1003,6 @@ public class WordUtils {
         return headerPart;
 	}
 	
-	
 	/**
 	 * add Footer
 	 * 
@@ -1000,30 +1011,37 @@ public class WordUtils {
 	 * @param para
 	 * @throws Exception
 	 */
-	public static void addFooter(ObjectFactory factory,WordprocessingMLPackage wordprocessingMLPackage) throws Exception{
-		FooterPart footer = new FooterPart(new PartName("/word/myfooter.xml"));
+	public static void addFooter(ObjectFactory factory,WordprocessingMLPackage wordprocessingMLPackage, Paragraph para) throws Exception{
+		
+		FooterPart footer = new FooterPart();
 		footer.setPackage(wordprocessingMLPackage); 
 		Ftr ftr = factory.createFtr();
-    	
-		P p = factory.createP();
-		addFieldBegin(factory,p);
+		P p = null;
+		if(para!=null){
+			p = createPara(wordprocessingMLPackage,factory,footer,para);
+		}else {
+			p = factory.createP();
+			addFieldBegin(factory,p);
+			org.docx4j.wml.Jc jc = factory.createJc();
+			jc.setVal(JcEnumeration.CENTER);
+			PPr ppr = factory.createPPr();
+			ppr.setJc(jc);
+			p.setPPr(ppr);
+	    	
+	        R run = factory.createR();
+	        org.docx4j.wml.Text txt = new org.docx4j.wml.Text();
+	        txt.setSpace("preserve");
+	        txt.setValue(" PAGE   \\* MERGEFORMAT ");
+	        run.getContent().add(factory.createRInstrText(txt));
+	        p.getContent().add(run);
+	        addFieldEnd(factory,p);
+		}
 		
-		
-    	org.docx4j.wml.Jc jc = factory.createJc();
-		jc.setVal(JcEnumeration.CENTER);
-		PPr ppr = factory.createPPr();
-		ppr.setJc(jc);
-		p.setPPr(ppr);
-    	
-        R run = factory.createR();
-        org.docx4j.wml.Text txt = new org.docx4j.wml.Text();
-        txt.setSpace("preserve");
-        txt.setValue(" PAGE   \\* MERGEFORMAT ");
-        run.getContent().add(factory.createRInstrText(txt));
-        p.getContent().add(run);
-        addFieldEnd(factory,p);
+        
     	
         ftr.getContent().add(p);
+        
+        
         footer.setJaxbElement(ftr); 
     	
 		Relationship relationship = wordprocessingMLPackage.getMainDocumentPart().addTargetPart(footer);
@@ -1041,6 +1059,57 @@ public class WordUtils {
         footerReference.setType(HdrFtrRef.DEFAULT);
         sectPr.getEGHdrFtrReferences().add(footerReference);
 	}
+	
+	
+//	/**
+//	 * add Footer
+//	 * 
+//	 * @param factory
+//	 * @param wordprocessingMLPackage
+//	 * @param para
+//	 * @throws Exception
+//	 */
+//	public static void addFooter(ObjectFactory factory,WordprocessingMLPackage wordprocessingMLPackage) throws Exception{
+//		FooterPart footer = new FooterPart(new PartName("/word/myfooter.xml"));
+//		footer.setPackage(wordprocessingMLPackage); 
+//		Ftr ftr = factory.createFtr();
+//    	
+//		P p = factory.createP();
+//		addFieldBegin(factory,p);
+//		
+//		
+//    	org.docx4j.wml.Jc jc = factory.createJc();
+//		jc.setVal(JcEnumeration.CENTER);
+//		PPr ppr = factory.createPPr();
+//		ppr.setJc(jc);
+//		p.setPPr(ppr);
+//    	
+//        R run = factory.createR();
+//        org.docx4j.wml.Text txt = new org.docx4j.wml.Text();
+//        txt.setSpace("preserve");
+//        txt.setValue(" PAGE   \\* MERGEFORMAT ");
+//        run.getContent().add(factory.createRInstrText(txt));
+//        p.getContent().add(run);
+//        addFieldEnd(factory,p);
+//    	
+//        ftr.getContent().add(p);
+//        footer.setJaxbElement(ftr); 
+//    	
+//		Relationship relationship = wordprocessingMLPackage.getMainDocumentPart().addTargetPart(footer);
+//		List<SectionWrapper> sections = wordprocessingMLPackage.getDocumentModel().getSections();
+// 
+//        SectPr sectPr = sections.get(sections.size() - 1).getSectPr();
+//        if (sectPr==null ) {
+//            sectPr = factory.createSectPr();
+//            wordprocessingMLPackage.getMainDocumentPart().addObject(sectPr);
+//            sections.get(sections.size() - 1).setSectPr(sectPr);
+//        }
+// 
+//        FooterReference footerReference = factory.createFooterReference();
+//        footerReference.setId(relationship.getId());
+//        footerReference.setType(HdrFtrRef.DEFAULT);
+//        sectPr.getEGHdrFtrReferences().add(footerReference);
+//	}
 	
     /**
      * Every fields needs to be delimited by complex field characters. This method
@@ -1087,7 +1156,7 @@ public class WordUtils {
 			headerPart.setJaxbElement(hdr); 
 			relationship =  wordprocessingMLPackage.getMainDocumentPart().addTargetPart(headerPart);	
 		}else {
-			hdr = headerPart.getJaxbElement();			
+			hdr = headerPart.getContents();			
 		}
 		addWaterMarkToP(hdr,factory,wordprocessingMLPackage, headerPart,watermark);
 		List<SectionWrapper> sections = wordprocessingMLPackage.getDocumentModel().getSections();
@@ -1125,7 +1194,7 @@ public class WordUtils {
 		if(ds == null){
 			ds = new DocumentSettingsPart();
 		}
-		CTSettings cs = ds.getJaxbElement();
+		CTSettings cs = ds.getContents();
 		if(cs == null){
 			cs = factory.createCTSettings();
 		}
