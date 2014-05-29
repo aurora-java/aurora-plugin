@@ -2,6 +2,7 @@ package aurora.plugin.tygps;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -66,7 +67,20 @@ public class GpsTracker extends AbstractEntry {
 		            if("true".equals(success)){
 		            	CompositeMap result = root.getChild("result");
 		            	if(result!=null){
-		            		model.addChilds(result.getChilds());
+		            		List records = new ArrayList();
+		            		List list = result.getChilds();
+		            		if(list!=null){
+		            			Iterator it = list.iterator();
+		            			while(it.hasNext()){
+		            				CompositeMap record = (CompositeMap)it.next();
+		            				String error = record.getString("err");
+		            				if(error==null){
+		            					records.add(record);
+		            				}
+		            			}
+		            		}
+		            		
+		            		model.addChilds(records);
 		            	}
 		            	if("true".equals(debugger)) {
 							LoggingContext.getLogger(context,GpsTracker.class.getCanonicalName()).log(model.toXML());
