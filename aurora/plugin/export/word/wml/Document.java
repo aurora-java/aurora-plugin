@@ -47,6 +47,8 @@ public class Document {
 	private Footer footer;
 	
 	private Body body;
+	
+	private NumberingChunk numberingChunk;
 
 	public Body getBody() {
 		return body;
@@ -157,5 +159,13 @@ public class Document {
 
 	public void setDebugger(Boolean debugger) {
 		this.debugger = debugger;
-	} 
+	}
+
+	public NumberingChunk getNumberingChunk() {
+		return numberingChunk;
+	}
+
+	public void setNumberingChunk(NumberingChunk numberingChunk) {
+		this.numberingChunk = numberingChunk;
+	}
 }
