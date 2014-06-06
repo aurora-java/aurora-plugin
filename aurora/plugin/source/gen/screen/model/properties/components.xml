@@ -483,6 +483,20 @@
 	</component>
 	
 	<!--custom component-->
+	<component type="custom_tree" category="custom">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="width" style="simple,save,_int" />
+		<attribute id="height" style="simple,save,_int" />
+		<attribute id="fsd_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
+		<attribute id="fsd_page_name" style="save,inner,_cdata" />
+		<attribute id="fsd_logic" style="save,inner,_cdata" />
+		<attribute id="fsd_meaning" style="save,inner,_cdata" />
+		<attribute id="fsd_data_from" style="save,inner,_cdata" />
+		<attribute id="rowspan" style="simple,save,_int" />
+		<attribute id="colspan" style="simple,save,_int" />
+		<attribute id="fsd_component_type" style="simple,save" defaultValue="fsd_input"/>
+	</component>
 	<component type="custom_icon" category="custom">
 		<attribute id="component_type" style="simple,save,inner" />
 		<attribute id="width" style="simple,save,_int" />
