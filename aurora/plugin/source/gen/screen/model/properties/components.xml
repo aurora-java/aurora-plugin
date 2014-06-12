@@ -487,15 +487,29 @@
 		<attribute id="component_type" style="simple,save,inner" />
 		<attribute id="width" style="simple,save,_int" />
 		<attribute id="height" style="simple,save,_int" />
+		<attribute id="checked_tree" style="simple,save,inner,_boolean" />
+		<attribute id="rowspan" style="simple,save,_int" />
+		<attribute id="colspan" style="simple,save,_int" />
+		<attribute id="component_children" style="containment,save,inner,list" />
 		<attribute id="fsd_desc" style="save,inner,_cdata" />
 		<attribute id="fsd_page_desc" style="save,inner,_cdata" />
 		<attribute id="fsd_page_name" style="save,inner,_cdata" />
 		<attribute id="fsd_logic" style="save,inner,_cdata" />
 		<attribute id="fsd_meaning" style="save,inner,_cdata" />
 		<attribute id="fsd_data_from" style="save,inner,_cdata" />
-		<attribute id="rowspan" style="simple,save,_int" />
-		<attribute id="colspan" style="simple,save,_int" />
 		<attribute id="fsd_component_type" style="simple,save" defaultValue="fsd_input"/>
+	</component>
+	
+	<component type="custom_tree_container_node" category="custom">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="component_children" style="containment,save,inner,list" />
+		<attribute id="tree_container_expand" style="simple,save,inner,_boolean" />
+		<attribute id="prompt" style="save,inner,_cdata" />
+	</component>
+	
+	<component type="custom_tree_node" category="custom">
+		<attribute id="component_type" style="simple,save,inner" />
+		<attribute id="prompt" style="save,inner,_cdata" />
 	</component>
 	<component type="custom_icon" category="custom">
 		<attribute id="component_type" style="simple,save,inner" />

@@ -1,6 +1,5 @@
 package aurora.plugin.source.gen.screen.model;
 
-import aurora.plugin.source.gen.screen.model.properties.IPropertyDescriptor;
 
 
 public class VBox extends BOX {

@@ -1,43 +1,51 @@
 package aurora.plugin.source.gen.screen.model;
 
-import aurora.plugin.source.gen.screen.model.properties.ComponentInnerProperties;
+public class CustomTree extends BOX {
 
-public class CustomTree extends AuroraComponent {
-
+	public static final String CHECKED_TREE = "checked_tree";
 	public static final String CUSTOM_ICON = "custom_tree";
-	
-	private CustomTreeContainerNode root = new CustomTreeContainerNode(true);
+
 
 	public CustomTree() {
-		this.setSize(150, 100);
+		this.setSize(200, 180);
 		this.setComponentType(CUSTOM_ICON);
-		this.setPrompt(this.getComponentType());
+		this.setPrompt("Tree");
+		this.setLabelWidth(0);
 	}
 
-	public String getIconByteData() {
-		String string = this
-				.getStringPropertyValue(ComponentInnerProperties.ICON_BYTES_DATA);
-		// if ("".equals(string)) {
-		// // return DEFAULT_ICON;
-		// string = DEFAULT_DATA;
-		// }
-		// byte[] _byteArray = AuroraImagesUtils.toBytes(string);
-		// return _byteArray;
-		return "";
+	public boolean isResponsibleChild(AuroraComponent component) {
+		if (component instanceof CustomTreeNode
+				|| component instanceof CustomTreeContainerNode)
+			return true;
+		return false;
+	}
+	
+
+	public int getHeadHight() {
+		return 5;
 	}
 
-	public void setIconByteData(String bytes) {
-		// this.setPropertyValue(ComponentInnerProperties.ICON_BYTES_DATA,
-		// AuroraImagesUtils.toString(bytes));
-		this.setPropertyValue(ComponentInnerProperties.ICON_BYTES_DATA, bytes);
+	@Override
+	final public int getRow() {
+		return 100000;
 	}
 
-	public CustomTreeContainerNode getRoot() {
-		return root;
+	@Override
+	final public void setRow(int row) {
+		// always Integer.MAX_VALUE
 	}
 
-	public void setRoot(CustomTreeContainerNode root) {
-		this.root = root;
+	@Override
+	final public int getCol() {
+		// always 1
+		return 1;
 	}
 
+	@Override
+	final public void setCol(int col) {
+		// always 1
+	}
+	public boolean isCheckedTree(){
+		return getBooleanPropertyValue(CHECKED_TREE);
+	}
 }

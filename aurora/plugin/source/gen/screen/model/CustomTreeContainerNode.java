@@ -1,56 +1,34 @@
 package aurora.plugin.source.gen.screen.model;
 
-import java.util.ArrayList;
-import java.util.List;
 
-public class CustomTreeContainerNode extends CustomTreeNode {
+public class CustomTreeContainerNode extends Container  {
 
 	public static final String CUSTOM_ICON = "custom_tree_container_node";
+	
+	public static final String CONTAINER_EXPAND = "tree_container_expand";
 
-	private List<CustomTreeNode> nodes = new ArrayList<CustomTreeNode>();
-
-	private boolean isRoot;
-
-	private boolean isExpand;
 	
 	public boolean isExpand() {
-		return isExpand;
+		return this.getBooleanPropertyValue(CONTAINER_EXPAND);
 	}
 
 	public void setExpand(boolean isExpand) {
-		this.isExpand = isExpand;
+		this.setPropertyValue(CONTAINER_EXPAND, isExpand);
 	}
 
 	public CustomTreeContainerNode() {
-		this.setSize(150, 100);
+		this.setSize(100, 24);
 		this.setComponentType(CUSTOM_ICON);
-		this.setPrompt(this.getComponentType());
+		this.setPrompt("Folder");
 	}
 
-	public CustomTreeContainerNode(boolean isRoot) {
-		this();
-		this.isRoot = isRoot;
-	}
 
-	public void addNode(CustomTreeNode node) {
-		nodes.add(node);
+	public void addNode(AuroraComponent node) {
+		this.addChild(node);
 	}
 	
-	public void removeNode(CustomTreeNode node) {
-		nodes.add(node);
+	public void removeNode(AuroraComponent node) {
+		this.removeChild(node);
 	}
-
-	public List<CustomTreeNode> getNodes() {
-		return nodes;
-	}
-
-	public boolean isRoot() {
-		return isRoot;
-	}
-
-	public void setRoot(boolean isRoot) {
-		this.isRoot = isRoot;
-	}
-	
 
 }
