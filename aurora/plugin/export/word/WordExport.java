@@ -46,6 +46,7 @@ public class WordExport extends AbstractEntry {
 	private String template = null;
 	private String name = DEFAULT_WORD_NAME;
 	private String type = TYPE_WORD;
+	private String savePath = null;
 	private UncertainEngine uncertainEngine;
 	private WordTemplateProvider provider;
 	
@@ -106,42 +107,57 @@ public class WordExport extends AbstractEntry {
 		
 		WordprocessingMLPackage wordMLPackage = WordUtils.createWord(xml,templateFile);
 		
-		HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance.getInstance(context);
-		HttpServletResponse response = serviceInstance.getResponse();
-		response.setHeader("cache-control", "must-revalidate");
-		response.setHeader("pragma", "public");	
-		response.setHeader("Content-disposition", "attachment;" + processFileName(serviceInstance.getRequest(),getName()));
-		response.setCharacterEncoding("utf-8");
-		if(TYPE_WORD.equals(getType())) {
-			response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-			OutputStream res_out = null;
-			try {
-				res_out = response.getOutputStream();
-				SaveToZipFile saver = new SaveToZipFile(wordMLPackage);
-				saver.save(res_out);
-			} finally {
-				if(res_out!=null)res_out.close();
-			}
-		}else if(TYPE_PDF.equals(getType())){
-			response.setContentType("application/pdf");
-			OutputStream res_out = null;
-			try {
-				res_out = response.getOutputStream();
+		String name = uncertain.composite.TextParser.parse(getName(), model);
+		
+		String savePath = getSavePath();
+		if(savePath!=null){
+			File destPdf = new File(savePath,name);
+			if(TYPE_WORD.equals(getType())) {
+				wordMLPackage.save(destPdf);
+			}else if(TYPE_PDF.equals(getType())){
 				FOSettings foSettings = Docx4J.createFOSettings();
 				foSettings.setWmlPackage(wordMLPackage);
-				Docx4J.toFO(foSettings, res_out, Docx4J.FLAG_NONE);
-			} finally {
-				if(res_out!=null)res_out.close();
+				OutputStream os = new java.io.FileOutputStream(destPdf);
+				Docx4J.toFO(foSettings, os, Docx4J.FLAG_NONE);
 			}
-			
+		}else {
+			HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance.getInstance(context);
+			HttpServletResponse response = serviceInstance.getResponse();
+			response.setHeader("cache-control", "must-revalidate");
+			response.setHeader("pragma", "public");	
+			response.setHeader("Content-disposition", "attachment;" + processFileName(serviceInstance.getRequest(),name));
+			response.setCharacterEncoding("utf-8");
+			if(TYPE_WORD.equals(getType())) {
+				response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+				OutputStream res_out = null;
+				try {
+					res_out = response.getOutputStream();
+					wordMLPackage.save(res_out);
+//					SaveToZipFile saver = new SaveToZipFile(wordMLPackage);
+//					saver.save(res_out);
+				} finally {
+					if(res_out!=null)res_out.close();
+				}
+			}else if(TYPE_PDF.equals(getType())){
+				response.setContentType("application/pdf");
+				OutputStream res_out = null;
+				try {
+					res_out = response.getOutputStream();
+					FOSettings foSettings = Docx4J.createFOSettings();
+					foSettings.setWmlPackage(wordMLPackage);
+					Docx4J.toFO(foSettings, res_out, Docx4J.FLAG_NONE);
+				} finally {
+					if(res_out!=null)res_out.close();
+				}
+				
+			}
+			ProcedureRunner preRunner=runner;
+			while(preRunner.getCaller()!=null){
+				preRunner=preRunner.getCaller();
+				preRunner.stop();
+			}
 		}
 		
-		
-		ProcedureRunner preRunner=runner;
-		while(preRunner.getCaller()!=null){
-			preRunner=preRunner.getCaller();
-			preRunner.stop();
-		}	
 	}
 	
 	
@@ -240,6 +256,16 @@ public class WordExport extends AbstractEntry {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+
+	public String getSavePath() {
+		return savePath;
+	}
+
+
+	public void setSavePath(String savePath) {
+		this.savePath = savePath;
 	}
 
 }
