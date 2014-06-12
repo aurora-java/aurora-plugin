@@ -505,11 +505,13 @@
 		<attribute id="component_children" style="containment,save,inner,list" />
 		<attribute id="tree_container_expand" style="simple,save,inner,_boolean" />
 		<attribute id="prompt" style="save,inner,_cdata" />
+		<attribute id="prompt_text_style" style="containment,save,inner" />
 	</component>
 	
 	<component type="custom_tree_node" category="custom">
 		<attribute id="component_type" style="simple,save,inner" />
 		<attribute id="prompt" style="save,inner,_cdata" />
+		<attribute id="prompt_text_style" style="containment,save,inner" />
 	</component>
 	<component type="custom_icon" category="custom">
 		<attribute id="component_type" style="simple,save,inner" />
