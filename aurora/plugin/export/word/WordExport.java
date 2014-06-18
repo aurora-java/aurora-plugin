@@ -109,7 +109,7 @@ public class WordExport extends AbstractEntry {
 		
 		String name = uncertain.composite.TextParser.parse(getName(), model);
 		
-		String savePath = getSavePath();
+		String savePath = getSavePath(model);
 		if(savePath!=null){
 			File destPdf = new File(savePath,name);
 			if(TYPE_WORD.equals(getType())) {
@@ -259,8 +259,8 @@ public class WordExport extends AbstractEntry {
 	}
 
 
-	public String getSavePath() {
-		return savePath;
+	public String getSavePath(CompositeMap model) {
+		return uncertain.composite.TextParser.parse(savePath,model);
 	}
 
 
