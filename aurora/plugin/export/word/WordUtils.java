@@ -144,10 +144,6 @@ public class WordUtils {
 	
 	private static final ThreadLocal threadLocal = new ThreadLocal();
 	
-	static {
-		threadLocal.set(new HashMap());		
-	}
-	
 	
 	public static Object getObject(String key){
 		Map map = (Map)threadLocal.get();		
@@ -156,6 +152,10 @@ public class WordUtils {
 	
 	public static void putObject(String key,Object value){
 		Map map = (Map)threadLocal.get();
+		if(map==null){
+			map = new HashMap();
+			threadLocal.set(map);	
+		}
 		map.put(key, value);
 	}
 	
