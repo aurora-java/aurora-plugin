@@ -1,15 +1,24 @@
 package aurora.plugin.export.word.wml;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 
+import aurora.plugin.export.word.WordUtils;
+
 @XmlRootElement(name = "t")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Text {
+	
+
+	private static final ArrayList<String> wordFonts = new ArrayList<String>(Arrays.asList("宋体","黑体","微软雅黑"));
+	private static final ArrayList<String> pdfFonts = new ArrayList<String>(Arrays.asList("SimSun","SimHei","Microsoft YaHei"));
 	
 	@XmlAttribute
 	private Boolean fldCharType = false;
@@ -55,6 +64,13 @@ public class Text {
 
 
 	public String getFontFamily() {
+		if(WordUtils.TYPE_WORD.equals(WordUtils.getObject(WordUtils.EXPORT_TYPE))){
+			int index = pdfFonts.indexOf(fontFamily);
+			if(index!=-1) fontFamily = wordFonts.get(index);
+		}else if(WordUtils.TYPE_PDF.equals(WordUtils.getObject(WordUtils.EXPORT_TYPE))){
+			int index = wordFonts.indexOf(fontFamily);
+			if(index!=-1) fontFamily = pdfFonts.get(index);
+		}
 		return fontFamily;
 	}
 

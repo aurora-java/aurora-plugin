@@ -134,19 +134,27 @@ public class WordUtils {
 	
 	public static final int TWIP_CENTIMETER = 567;
 	
+	public static final String TYPE_WORD = "word";
+	public static final String TYPE_PDF = "pdf";
+	public static final String EXPORT_TYPE = "KEY_EXPORT_TYPE";
+	
 	private static final String KEY_RUN_NUMID = "KEY_RUN_NUMID";
 	private static final String KEY_TEMPLATE_FILE = "KEY_TEMPLATE_FILE";
 	private static final String KEY_NUMBERING_DEFINITION_PART = "KEY_NUMBERING_DEFINITION_PART";
 	
-	public static final ThreadLocal threadLocal = new ThreadLocal();
+	private static final ThreadLocal threadLocal = new ThreadLocal();
+	
+	static {
+		threadLocal.set(new HashMap());		
+	}
 	
 	
-	private static Object getObject(String key){
+	public static Object getObject(String key){
 		Map map = (Map)threadLocal.get();		
 		return map.get(key);
 	}
 	
-	private static void putObject(String key,Object value){
+	public static void putObject(String key,Object value){
 		Map map = (Map)threadLocal.get();
 		map.put(key, value);
 	}
@@ -161,7 +169,7 @@ public class WordUtils {
 			System.out.println("");
 		}
 		
-		threadLocal.set(new HashMap());
+//		threadLocal.set(new HashMap());
 		putObject(KEY_TEMPLATE_FILE,templateFile);
 		WordprocessingMLPackage wordMLPackage = WordUtils.createWordprocessingMLPackage(doc);
 		MainDocumentPart mdp = wordMLPackage.getMainDocumentPart();
@@ -923,6 +931,7 @@ public class WordUtils {
 		String fontFamily = text.getFontFamily();
 		RFonts rf = new RFonts();
 		rf.setHint(STHint.EAST_ASIA);
+		rf.setEastAsia(fontFamily);
 		rf.setAscii(fontFamily);
 		rf.setHAnsi(fontFamily);
 		rpr.setRFonts(rf);

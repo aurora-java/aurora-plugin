@@ -38,14 +38,12 @@ import freemarker.template.Template;
 public class WordExport extends AbstractEntry {
 	
 	private static final String DEFAULT_WORD_NAME = "untitle.docx";
-	private static final String TYPE_WORD = "word";
-	private static final String TYPE_PDF = "pdf";
 	
 	protected Replace[] replaces;
 	protected SectList[] sectLists;
 	private String template = null;
 	private String name = DEFAULT_WORD_NAME;
-	private String type = TYPE_WORD;
+	private String type = WordUtils.TYPE_WORD;
 	private String savePath = null;
 	private UncertainEngine uncertainEngine;
 	private WordTemplateProvider provider;
@@ -104,17 +102,17 @@ public class WordExport extends AbstractEntry {
 		} finally {
 			if(out!=null)out.close();
 		}		
-		
+		WordUtils.putObject(WordUtils.EXPORT_TYPE, getType());
 		WordprocessingMLPackage wordMLPackage = WordUtils.createWord(xml,templateFile);
 		
 		String name = uncertain.composite.TextParser.parse(getName(), model);
 		
-		String savePath = getSavePath(model);
+		String savePath = getSavePath();
 		if(savePath!=null){
-			File destPdf = new File(savePath,name);
-			if(TYPE_WORD.equals(getType())) {
+			File destPdf = new File(uncertain.composite.TextParser.parse(savePath,model),name);
+			if(WordUtils.TYPE_WORD.equals(getType())) {
 				wordMLPackage.save(destPdf);
-			}else if(TYPE_PDF.equals(getType())){
+			}else if(WordUtils.TYPE_PDF.equals(getType())){
 				FOSettings foSettings = Docx4J.createFOSettings();
 				foSettings.setWmlPackage(wordMLPackage);
 				OutputStream os = new java.io.FileOutputStream(destPdf);
@@ -127,7 +125,7 @@ public class WordExport extends AbstractEntry {
 			response.setHeader("pragma", "public");	
 			response.setHeader("Content-disposition", "attachment;" + processFileName(serviceInstance.getRequest(),name));
 			response.setCharacterEncoding("utf-8");
-			if(TYPE_WORD.equals(getType())) {
+			if(WordUtils.TYPE_WORD.equals(getType())) {
 				response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 				OutputStream res_out = null;
 				try {
@@ -138,7 +136,7 @@ public class WordExport extends AbstractEntry {
 				} finally {
 					if(res_out!=null)res_out.close();
 				}
-			}else if(TYPE_PDF.equals(getType())){
+			}else if(WordUtils.TYPE_PDF.equals(getType())){
 				response.setContentType("application/pdf");
 				OutputStream res_out = null;
 				try {
@@ -259,8 +257,8 @@ public class WordExport extends AbstractEntry {
 	}
 
 
-	public String getSavePath(CompositeMap model) {
-		return uncertain.composite.TextParser.parse(savePath,model);
+	public String getSavePath() {
+		return savePath;
 	}
 
 
