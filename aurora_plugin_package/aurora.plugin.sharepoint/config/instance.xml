@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<u:instance-config xmlns:u="uncertain.pkg">
+	<u:instances>
+		<u:configurable-instance configFile="sharepoint.config">
+			<u:description>附件存储在SharePoint</u:description>
+			<u:implement-types>
+				<u:type typeName="aurora.plugin.sharepoint.SharePointConfig" />
+			</u:implement-types>
+		</u:configurable-instance>
+	</u:instances>
+</u:instance-config>
