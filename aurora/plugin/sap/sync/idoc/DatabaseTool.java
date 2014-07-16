@@ -321,7 +321,8 @@ public class DatabaseTool {
 					String parent_segment_name = filedMapsRs.getString(1);
 					String segmentField = filedMapsRs.getString(2);
 					String tableField = filedMapsRs.getString(3);
-					insert_sql.append("," + tableField);
+//					insert_sql.append("," + tableField);
+					insert_sql.append(",'" + tableField+"'");//避免..last_update_date,/BEV1/NEDEPFREE,..这种字段命名会出现问题
 					String segmentName = parent_segment_name != null ? parent_segment_name : segment_name;
 					String value = getSegmentFieldValue(contentNode, segmentName, segmentField);
 					values_sql.append(",?");
