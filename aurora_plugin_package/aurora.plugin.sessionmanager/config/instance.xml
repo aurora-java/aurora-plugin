@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<u:instance-config xmlns:u="uncertain.pkg">
+	<u:instances>
+		<u:configurable-instance configFile="singleSession.config">
+			<u:description>单用户单会话</u:description>
+			<u:implement-types>
+				<u:type typeName="aurora.plugin.sessionmanager.ExpiredSessionRegistry" />
+			</u:implement-types>
+		</u:configurable-instance>
+	</u:instances>
+</u:instance-config>
