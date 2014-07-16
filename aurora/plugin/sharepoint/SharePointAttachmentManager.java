@@ -27,6 +27,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import uncertain.composite.CompositeMap;
 import uncertain.exception.BuiltinExceptionFactory;
+import uncertain.logging.ILogger;
 import uncertain.logging.LoggingContext;
 import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.AbstractEntry;
@@ -62,6 +63,7 @@ public class SharePointAttachmentManager extends AbstractEntry {
 	private IObjectRegistry registry;
 	private SharePointConfig spConfig;
 	private DatabaseServiceFactory databasefactory;
+	private ILogger logger;
 
 	public SharePointAttachmentManager(IObjectRegistry registry) {
 		this.registry = registry;
@@ -85,6 +87,7 @@ public class SharePointAttachmentManager extends AbstractEntry {
 
 	public void run(ProcedureRunner runner) throws Exception {
 		CompositeMap context = runner.getContext();
+		logger = LoggingContext.getLogger(context, this.getClass().getCanonicalName());
 		String actionType = getActionType();
 		if ("upload".equalsIgnoreCase(actionType)) {
 			doUpload(context);
@@ -276,7 +279,11 @@ public class SharePointAttachmentManager extends AbstractEntry {
 		CompositeMap params = service.getParameter();
 		String user_name = (String) params.getObject("@user_name");
 		String destUrl = (String) params.getObject("@destUrl");
+		logger.config("user_name:"+user_name);
+		logger.config("source destUrl:"+destUrl);
+		
 		destUrl = fixDestUrl(destUrl);
+		logger.config("result destUrl:"+destUrl);
 
 		FileItemFactory factory = new DiskFileItemFactory();
 		ServletFileUpload up = new ServletFileUpload(factory);

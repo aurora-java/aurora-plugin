@@ -35,7 +35,6 @@ import uncertain.exception.BuiltinExceptionFactory;
 import uncertain.logging.ILogger;
 import uncertain.logging.LoggingContext;
 import uncertain.ocm.AbstractLocatableObject;
-import uncertain.ocm.IObjectRegistry;
 import aurora.service.ServiceThreadLocal;
 
 import com.microsoft.schemas.sharepoint.Copy;
@@ -54,7 +53,6 @@ public class SharePointConfig extends AbstractLocatableObject implements ILifeCy
 	public static QName LISTS_QNAME = new QName("http://schemas.microsoft.com/sharepoint/soap/", "Lists");
 
 	public static String DEFAULT_SYSTEM = "Aurora";
-	private IObjectRegistry objectRegisty;
 
 	private String userName;
 	private String password;
@@ -67,16 +65,14 @@ public class SharePointConfig extends AbstractLocatableObject implements ILifeCy
 	private String listsOperationFullPath;
 	private String sourceSystem;
 
+	private boolean useJax = false;
+
 	private static ListsSoap listsSoap;
 	private static CopySoap copySoap;
 
 	private ConcurrentLinkedQueue<String> existsFolder = new ConcurrentLinkedQueue<String>();
 	private long cacheFolderLength = 1000;
 	private CompositeMap spLists = new CompositeMap();
-	
-	public SharePointConfig(IObjectRegistry registry){
-		this.objectRegisty = registry;
-	}
 
 	@Override
 	public boolean startup() {
@@ -174,6 +170,18 @@ public class SharePointConfig extends AbstractLocatableObject implements ILifeCy
 		this.cacheFolderLength = cacheFolderLength;
 	}
 
+	public boolean getUseJax() {
+		return useJax;
+	}
+
+	public boolean isUseJax() {
+		return useJax;
+	}
+
+	public void setUseJax(boolean useJax) {
+		this.useJax = useJax;
+	}
+
 	public byte[] fileToBytes(File file) throws IOException {
 
 		ByteArrayOutputStream ous = null;
@@ -192,19 +200,18 @@ public class SharePointConfig extends AbstractLocatableObject implements ILifeCy
 		return ous.toByteArray();
 	}
 
-	public byte[] inputStreamToBytes(InputStream ios) throws IOException {
-		ByteArrayOutputStream ous = null;
+	public byte[] inputStreamToBytes(InputStream is) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
-			byte[] buffer = new byte[4096];
-			ous = new ByteArrayOutputStream();
-			int read = 0;
-			while ((read = ios.read(buffer)) != -1)
-				ous.write(buffer, 0, read);
+			int i = -1;
+			while ((i = is.read()) != -1) {
+				baos.write(i);
+			}
 		} finally {
-			close(ous);
-			close(ios);
+			close(is);
+			close(baos);
 		}
-		return ous.toByteArray();
+		return baos.toByteArray();
 	}
 
 	public static Node createSharePointCAMLNode(String theXML) throws Exception {
@@ -258,15 +265,15 @@ public class SharePointConfig extends AbstractLocatableObject implements ILifeCy
 			e.printStackTrace();
 		}
 	}
-	
-	private void checkCacheFolderLength(){
-		while(existsFolder.size()>cacheFolderLength){
+
+	private void checkCacheFolderLength() {
+		while (existsFolder.size() > cacheFolderLength) {
 			existsFolder.poll();
 		}
 	}
 
 	public void addFolder(String folder) {
-		if(existsFolder.contains(folder))
+		if (existsFolder.contains(folder))
 			return;
 		checkCacheFolderLength();
 		existsFolder.add(folder);
@@ -313,7 +320,7 @@ public class SharePointConfig extends AbstractLocatableObject implements ILifeCy
 		}
 		return listsSoap;
 	}
-	
+
 	public CopySoap getCopySoap() throws Exception {
 		if (copySoap == null) {
 			synchronized (this) {
@@ -323,11 +330,12 @@ public class SharePointConfig extends AbstractLocatableObject implements ILifeCy
 		}
 		return copySoap;
 	}
-	
-	public ILogger getLogger(String topic){
+
+	public ILogger getLogger(String topic) {
 		CompositeMap context = ServiceThreadLocal.getCurrentThreadContext();
-		return LoggingContext.getLogger(context,topic);
+		return LoggingContext.getLogger(context, topic);
 	}
+
 	public void writeResult(Object result, OutputStream stream) throws Exception {
 		if (result == null) {
 			return;
@@ -344,12 +352,13 @@ public class SharePointConfig extends AbstractLocatableObject implements ILifeCy
 		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 		transformer.transform(new DOMSource(e.getOwnerDocument()), new StreamResult(new OutputStreamWriter(stream, "UTF-8")));
 	}
+
 	public String parseResult(Object response) throws Exception {
 		if (response == null)
 			return null;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintStream pw = new PrintStream(baos);
-		writeResult(response,pw);
+		writeResult(response, pw);
 		pw.close();
 		return baos.toString();
 	}

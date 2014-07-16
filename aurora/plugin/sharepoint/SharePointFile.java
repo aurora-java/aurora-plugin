@@ -63,11 +63,11 @@ public class SharePointFile {
 	 * folderPath  :c1/c2
 	 * fileName    :test.txt
 	 */
-	private String init(String fileFullPath){
+	private void init(String fileFullPath){
 		String appLocation = spConfig.getAppLocation();
 		int appLocationIndex = fileFullPath.indexOf(appLocation) + appLocation.length() + 1;// +1 remove /
 		if(appLocationIndex<=appLocation.length())
-			return null;
+			return;
 		int folderPathIndex = fileFullPath.indexOf("/", appLocationIndex);
 		listUrl = fileFullPath.substring(appLocationIndex, folderPathIndex);
 		listName = spConfig.getListName(listUrl);
@@ -76,7 +76,7 @@ public class SharePointFile {
 		int endIndex = fileFullPath.lastIndexOf("/");
 		folderPath = fileFullPath.substring(folderPathIndex+1, endIndex);
 		fileName = fileFullPath.substring(endIndex+1);
-		return folderPath;
+		return;
 	}
 	
 }

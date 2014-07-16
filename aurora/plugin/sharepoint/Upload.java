@@ -7,6 +7,8 @@ import java.util.List;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 
+import sun.misc.BASE64Encoder;
+import uncertain.composite.CompositeMap;
 import uncertain.logging.ILogger;
 
 import com.microsoft.schemas.sharepoint.CopyErrorCode;
@@ -23,6 +25,10 @@ import com.microsoft.schemas.sharepoint.UpdateListItemsResponse.UpdateListItemsR
 
 public class Upload {
 
+	public static String UPLOAD_SUCCESS = "Success";
+	public static String CREATE_FOLDER_SUCCESS = "0x00000000";
+	public static String FOLDER_EXISTS = "0x8107090d";
+
 	private SharePointConfig spConfig;
 	private SharePointFile spFile;
 	private ILogger logger;
@@ -30,7 +36,8 @@ public class Upload {
 	private byte[] fileContent;
 	private String sourceSystemUser;
 	private String sourceSystem;
-	private List<String> folders = new LinkedList<String>();
+	private LinkedList<String> folders = new LinkedList<String>();
+
 
 	public Upload(SharePointConfig spConfig, SharePointFile spFile, byte[] fileContent, String sourceSystem, String sourceSystemUser) {
 		this.spConfig = spConfig;
@@ -42,23 +49,34 @@ public class Upload {
 	}
 
 	public void execute() throws Exception {
-		java.net.CookieManager cm = new java.net.CookieManager();
-		java.net.CookieHandler.setDefault(cm);
-		Authenticator.setDefault(new SharepointAuthenticator(spConfig));
-		String folderPath = spFile.getFolderPath();
-		createFolder(folderPath);
-		String fileFullPath = spFile.getFileFullPath();
-		uploadFile(fileFullPath, fileContent, sourceSystem, sourceSystemUser);
+		if (spConfig.isUseJax()) {
+			java.net.CookieManager cm = new java.net.CookieManager();
+			java.net.CookieHandler.setDefault(cm);
+			Authenticator.setDefault(new SharepointAuthenticator(spConfig));
+			String folderPath = spFile.getFolderPath();
+			createFolder(folderPath);
+			String fileFullPath = spFile.getFileFullPath();
+			uploadFileByJAX(fileFullPath, fileContent, sourceSystem, sourceSystemUser);
+		} else {
+			String folderPath = spFile.getFolderPath();
+			createFolder(folderPath);
+			String fileFullPath = spFile.getFileFullPath();
+			uploadFile(fileFullPath, fileContent, sourceSystem, sourceSystemUser);
+		}
 	}
 
 	private void createFolder(String folderPath) throws Exception {
 		if (spConfig.isFolderExists(folderPath))
 			return;
 		String listName = spFile.getListName();
-		createFolder(listName, folderPath);
+		if (spConfig.isUseJax()) {
+			createFolderByJAX(listName, folderPath);
+		} else {
+			createFolder(listName, folderPath);
+		}
 	}
 
-	public void createFolder(String listName, String folderPath) throws Exception {
+	public void createFolderByJAX(String listName, String folderPath) throws Exception {
 		String user_name = spConfig.getUserName();
 		String pass_word = spConfig.getPassword();
 		String list_asmx_url = spConfig.getListsOperationFullPath();
@@ -92,6 +110,50 @@ public class Upload {
 		printResponse(result);
 	}
 
+	public void createFolder(String listName, String folderPath) throws Exception {
+		String user_name = spConfig.getUserName();
+		String pass_word = spConfig.getPassword();
+		String list_asmx_url = spConfig.getListsOperationFullPath();
+		
+		String currentFolder = "";
+		String[] nextFolder = folderPath.split("/");
+		for (int i = 0; i < nextFolder.length; i++) {
+			if (i == 0) {
+				currentFolder = currentFolder + nextFolder[i];
+			} else {
+				currentFolder = currentFolder + "/" + nextFolder[i];
+			}
+			folders.add(currentFolder);
+		}
+
+		WebServiceUtil webServiceUtil = new WebServiceUtil(user_name, pass_word);
+		CompositeMap requestBody = UpdateListItems.createFolders(listName, folders);
+		logger.config("request:"+requestBody.toXML());
+		CompositeMap response_node = webServiceUtil.request(list_asmx_url, UpdateListItems.SOAP_ACTION, requestBody);
+		logger.config("response:"+response_node.toXML());
+		// /UpdateListItemsResponse/UpdateListItemsResult/Results
+		CompositeMap results = (CompositeMap) response_node.getObject("UpdateListItemsResult/Results");
+		if (results == null)
+			return;
+		List<CompositeMap> resultList = results.getChilds();
+		int length = resultList.size();
+		if (length <= 0)
+			return;
+		CompositeMap lastResult = resultList.get(length - 1);
+		CompositeMap errorCode_node = lastResult.getChild("ErrorCode");
+		String errorCode = errorCode_node.getText();
+		logger.info("errorCode:" + errorCode_node);
+
+		if (CREATE_FOLDER_SUCCESS.equals(errorCode) || FOLDER_EXISTS.equals(errorCode))
+			return;
+		CompositeMap errorText_node = lastResult.getChild("ErrorText");
+
+		String errorMessage = errorText_node.getText();
+
+		throw new RuntimeException(errorMessage);
+
+	}
+
 	private void printResponse(UpdateListItemsResult result) throws Exception {
 		List<Object> resultList = result.getContent();
 		if (resultList == null || resultList.size() == 0)
@@ -100,12 +162,12 @@ public class Upload {
 		logger.info("createFolder:" + spConfig.parseResult(content));
 	}
 
-	private void uploadFile(String fileFullPath, byte[] fileContent, String sourceSystem, String sourceSystemUser) throws Exception {
+	private void uploadFileByJAX(String fileFullPath, byte[] fileContent, String sourceSystem, String sourceSystemUser) throws Exception {
 
 		String user_name = spConfig.getUserName();
 		String pass_word = spConfig.getPassword();
 		String copy_asmx_url = spConfig.getCopyOperationFullPath();
-
+		
 		CopySoap copySoap = spConfig.getCopySoap();
 		BindingProvider bp = (BindingProvider) copySoap;
 		bp.getRequestContext().put(BindingProvider.USERNAME_PROPERTY, user_name);
@@ -145,4 +207,39 @@ public class Upload {
 		}
 
 	}
+
+	private void uploadFile(String fileFullPath, byte[] fileContent, String sourceSystem, String sourceSystemUser) throws Exception {
+
+		String user_name = spConfig.getUserName();
+		String pass_word = spConfig.getPassword();
+		String copy_asmx_url = spConfig.getCopyOperationFullPath();
+		
+		WebServiceUtil webServiceUtil = new WebServiceUtil(user_name, pass_word);
+		BASE64Encoder base64 = new BASE64Encoder();
+		String stream = base64.encode(fileContent);
+
+		CompositeMap requestBody = CopyIntoItems.uploadFile(fileFullPath, sourceSystem, sourceSystemUser, stream);
+//		logger.config("request:"+requestBody.toXML());
+		CompositeMap response_node = webServiceUtil.request(copy_asmx_url, CopyIntoItems.SOAP_ACTION, requestBody);
+		logger.config("response:"+response_node.toXML());
+		// /CopyIntoItemsResponse/Results/
+		CompositeMap results = (CompositeMap) response_node.getObject("Results");
+		if (results == null)
+			return;
+		List<CompositeMap> resultList = results.getChilds();
+		if (resultList == null)
+			return;
+		int length = resultList.size();
+		if (length <= 0)
+			return;
+		CompositeMap lastResult = resultList.get(length - 1);
+		String errorCode = lastResult.getString("ErrorCode");
+		logger.info("errorCode:" + errorCode);
+
+		if (UPLOAD_SUCCESS.equals(errorCode))
+			return;
+		String errorMessage = lastResult.getString("ErrorMessage");
+		throw new RuntimeException(errorMessage);
+	}
+
 }
