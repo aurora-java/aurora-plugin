@@ -25,6 +25,7 @@ public class LdapAuthentication extends AbstractEntry{
 	String serverName;
 	String username;
 	String password;
+	Boolean terminate=true;
 	String errorMessage;
 	IObjectRegistry mObjectRegistry;
 
@@ -81,8 +82,10 @@ public class LdapAuthentication extends AbstractEntry{
 				 ServiceContext  sc = ServiceContext.createServiceContext(context);
 				 sc.setError(msg.getObjectContext());
 				 sc.put("success", false);
-		         runner.getCaller().locateTo("CreateResponse");
-		         runner.stop();
+				 if(terminate){
+					 runner.getCaller().locateTo("CreateResponse");
+					 runner.stop();
+				 }
 			 }
 			 else
 				 throw exception;
@@ -134,6 +137,14 @@ public class LdapAuthentication extends AbstractEntry{
 
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
+	}
+
+	public Boolean getTerminate() {
+		return terminate;
+	}
+
+	public void setTerminate(Boolean terminate) {
+		this.terminate = terminate;
 	}
 	
 }
