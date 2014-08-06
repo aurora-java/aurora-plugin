@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -126,11 +127,15 @@ public class HttpClient extends HttpServlet {
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		OutputStream os = null;
 		InputStream is = null;
-		try {
+		try {			
 			HttpGet httpget = new HttpGet(url);
-			HttpResponse response = httpclient.execute(httpget);
+			HttpResponse response = httpclient.execute(httpget);			
 			HttpEntity entity = response.getEntity();
-			if (entity != null) {
+			if (entity != null) {				
+				Header[] headers=response.getAllHeaders();
+				for(Header header:headers){
+					httpResponse.addHeader(header.getName(),header.getValue());
+				}
 				os = httpResponse.getOutputStream();
 				is = entity.getContent();
 				int Buffer_size = 50 * 1024;
