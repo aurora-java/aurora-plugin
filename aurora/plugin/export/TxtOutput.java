@@ -26,7 +26,6 @@ import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 
 public class TxtOutput implements IResultSetConsumer, IContextAcceptable {
-	private static final String ENCODING = "UTF-8";
 	String separator;
 	ServiceContext context;
 	PrintWriter pw = null;
@@ -68,12 +67,13 @@ public class TxtOutput implements IResultSetConsumer, IContextAcceptable {
 				userAgent = userAgent.toLowerCase();
 				if (userAgent.indexOf("msie") != -1) {
 					fileName=new String(fileName.getBytes("GBK"),"ISO-8859-1");
+					response.setCharacterEncoding("GBK");
 				}else{
 					fileName=new String(fileName.getBytes("UTF-8"),"ISO-8859-1");
+					response.setCharacterEncoding("GBK");
 				}
 			}
 			response.setContentType("text/plain");
-			response.setCharacterEncoding(ENCODING);
 			response.setHeader("Content-Disposition", "attachment; filename=\""
 					+ fileName + ".txt\"");
 			pw = response.getWriter();
@@ -99,14 +99,17 @@ public class TxtOutput implements IResultSetConsumer, IContextAcceptable {
 		Iterator<String> it = headList.iterator();
 		StringBuffer sb = new StringBuffer();
 		String content = null;
+		boolean is_first=true;
 		while (it.hasNext()) {
+			if(!is_first)
+				sb.append(this.separator);
 			Object value=rowMap.get(it.next());
 			if(value!=null)
 				content = value.toString();				
 			else
 				content = "";
 			sb.append(content);
-			sb.append(this.separator);
+			is_first=false;
 		}
 		pw.println(sb);
 	}
