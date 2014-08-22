@@ -82,7 +82,10 @@ public class ExcelReport extends AbstractEntry {
 			File excelFile;
 			String fileAbsolutePath;
 			IObjectRegistry or = this.uncertainEngine.getObjectRegistry();
-			IReportTask excelTask = (IReportTask) or.getInstanceOfType(IReportTask.class);
+			IReportTask excelTask=null;
+			if(this.enableTaskBoolean){
+				excelTask = (IReportTask) or.getInstanceOfType(IReportTask.class);
+			}
 			if(excelTask!=null){
 				fileAbsolutePath = excelTask.getReportDir() + "/" + "excel"
 						+ System.currentTimeMillis() + excelReport.getFormat();
