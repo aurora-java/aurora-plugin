@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -124,14 +125,14 @@ public class SharePointAttachmentManager extends AbstractEntry {
 		Object attachment_id = (Object) params.getObject("@attachment_id");
 		if (attachment_id != null) {
 			Connection conn = getContextConnection(context);
-
-			Statement st = conn.createStatement();
+			PreparedStatement pst = null;
 			ResultSet rs = null;
 			InputStream is = null;
 			OutputStream os = null;
 			try {
-				rs = st.executeQuery("select file_name,file_size,mime_type, file_path, content from fnd_atm_attachment t where t.attachment_id = "
-						+ attachment_id);
+				pst = conn.prepareStatement("select file_name,file_size,mime_type, file_path, content from fnd_atm_attachment t where t.attachment_id = ?");
+				pst.setObject(1, attachment_id);
+				rs = pst.executeQuery();
 				if (!rs.next())
 					throw new IllegalArgumentException("attachment_id not set");
 				String fileFullPath = rs.getString(4);
@@ -158,7 +159,7 @@ public class SharePointAttachmentManager extends AbstractEntry {
 				response.setHeader("Connection", "close");
 			} finally {
 				DBUtil.closeResultSet(rs);
-				DBUtil.closeStatement(st);
+				DBUtil.closeStatement(pst);
 				SharePointConfig.close(is);
 				SharePointConfig.close(os);
 			}
@@ -169,28 +170,38 @@ public class SharePointAttachmentManager extends AbstractEntry {
 		ServiceContext service = ServiceContext.createServiceContext(context);
 		HttpServiceInstance serviceInstance = (HttpServiceInstance) ServiceInstance.getInstance(context);
 
-		CompositeMap params = service.getParameter();
+//		CompositeMap params = service.getParameter();
+		CompositeMap currentParameter = service.getCurrentParameter();
 		Object attachment_id = serviceInstance.getRequest().getAttribute("attachment_id");
 		if (attachment_id == null)
-			attachment_id = (Object) params.getObject("/parameter/record/@attachment_id");
+			attachment_id = (Object) currentParameter.getObject("@attachment_id");
 		if (attachment_id != null && !"".equals(attachment_id)) {
 			Connection conn = getContextConnection(context);
-			Statement st = conn.createStatement();
+			PreparedStatement pst = null;
 			ResultSet rs = null;
 			try {
-				rs = st.executeQuery("select file_name,file_path from fnd_atm_attachment t where t.attachment_id = " + attachment_id);
-				if (!rs.next())
-					throw new IllegalArgumentException("attachment_id not set");
+				pst = conn.prepareStatement("select file_name,file_path from fnd_atm_attachment t where t.attachment_id = ?");
+				pst.setObject(1,attachment_id);
+				rs = pst.executeQuery(); 
+				if (!rs.next()) throw new IllegalArgumentException("attachment_id not set");
 
 				String fileFullPath = rs.getString(2);
 				SharePointFile spFile = new SharePointFile(spConfig, fileFullPath);
 				Delete delete = new Delete(spConfig, spFile);
 				delete.execute();
-				st.execute("delete from fnd_atm_attachment at where at.attachment_id = " + attachment_id);
-				st.execute("delete from fnd_atm_attachment_multi atm where atm.attachment_id = " + attachment_id);
+				pst.close();
+				
+				pst = conn.prepareStatement("delete from fnd_atm_attachment at where at.attachment_id = ?");
+				pst.setObject(1,attachment_id);
+				pst.executeUpdate();
+				pst.close();
+				
+				pst = conn.prepareStatement("delete from fnd_atm_attachment_multi atm where atm.attachment_id = ?");
+				pst.setObject(1,attachment_id);
+				pst.executeUpdate();
 			} finally {
 				DBUtil.closeResultSet(rs);
-				DBUtil.closeStatement(st);
+				DBUtil.closeStatement(pst);
 			}
 		}
 	}
@@ -216,17 +227,18 @@ public class SharePointAttachmentManager extends AbstractEntry {
 
 		if (attachment_id != null && !"".equals(attachment_id)) {
 			Connection conn = getContextConnection(context);
-			Statement st = conn.createStatement();
+			PreparedStatement pst = null;
 			ResultSet rs = null;
 			String path = null;
 			try {
-				rs = st.executeQuery("select file_path from fnd_atm_attachment t where t.attachment_id = " + attachment_id);
-				if (!rs.next())
-					throw new IllegalArgumentException("attachment_id not set");
+				pst = conn.prepareStatement("select file_path from fnd_atm_attachment t where t.attachment_id = ?");
+				pst.setObject(1,attachment_id);
+				rs = pst.executeQuery(); 
+				if (!rs.next()) throw new IllegalArgumentException("attachment_id not set");
 				path = rs.getString(1);
 			} finally {
 				DBUtil.closeResultSet(rs);
-				DBUtil.closeStatement(st);
+				DBUtil.closeStatement(pst);
 			}
 			File delFile = new File(path);
 			if (delFile.exists()) {
@@ -246,7 +258,10 @@ public class SharePointAttachmentManager extends AbstractEntry {
 						size++;
 					}
 					stmt = conn.createStatement();
-					stmt.executeUpdate("update fnd_atm_attachment a set a.file_size = " + size + " where a.attachment_id = " + attachment_id);
+					pst = conn.prepareStatement("update fnd_atm_attachment a set a.file_size = ? where a.attachment_id = ?");
+					pst.setLong(1, size);
+					pst.setObject(2, attachment_id);
+					pst.executeUpdate();
 				} finally {
 					if (ins != null)
 						ins.close();
@@ -408,14 +423,22 @@ public class SharePointAttachmentManager extends AbstractEntry {
 
 	private void deleteAttachement(Connection conn, String attachment_id) throws Exception {
 		if (attachment_id != null && !"".equals(attachment_id)) {
-			Statement st = conn.createStatement();
+			int atm_id = Integer.valueOf(attachment_id);
+			PreparedStatement pst = null;
 			ResultSet rs = null;
 			try {
-				st.execute("delete from fnd_atm_attachment at where at.attachment_id = " + attachment_id);
-				st.execute("delete from fnd_atm_attachment_multi atm where atm.attachment_id = " + attachment_id);
+				pst = conn.prepareStatement("delete from fnd_atm_attachment at where at.attachment_id = ?");
+				pst.setInt(1, atm_id);
+				pst.executeUpdate();
+				pst.close();
+				
+				pst = conn.prepareStatement("delete from fnd_atm_attachment_multi atm where atm.attachment_id = ?");
+				pst.setInt(1, atm_id);
+				pst.executeUpdate();
+				pst.close();
 			} finally {
 				DBUtil.closeResultSet(rs);
-				DBUtil.closeStatement(st);
+				DBUtil.closeStatement(pst);
 			}
 		}
 	}
@@ -432,15 +455,17 @@ public class SharePointAttachmentManager extends AbstractEntry {
 			throws Exception {
 		Upload upload = new Upload(spConfig, spFile, fileContent, sourceSystem, sourceSystemUser);
 		upload.execute();
-		Statement stmt = null;
+		PreparedStatement pst = null;
 		try {
 			// Update attachment record
 			String url = spFile.getFileFullPath();
-			stmt = conn.createStatement();
-			stmt.executeUpdate("update fnd_atm_attachment a set a.file_path = '" + url + "' where a.attachment_id = " + aid);
+			pst = conn.prepareStatement("update fnd_atm_attachment a set a.file_path = ? where a.attachment_id = ?");
+			pst.setString(1, url);
+			pst.setObject(2, aid);
+			pst.executeUpdate();
 			// conn.commit();
 		} finally {
-			DBUtil.closeStatement(stmt);
+			DBUtil.closeStatement(pst);
 		}
 	}
 
