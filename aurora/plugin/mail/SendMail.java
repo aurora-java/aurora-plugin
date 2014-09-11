@@ -82,19 +82,19 @@ public class SendMail extends AbstractEntry implements IConfigurable {
 		cc = TextParser.parse(cc, current_param);
 
 		if (smtpServer == null || "".equals(smtpServer)) {
-			throw BuiltinExceptionFactory.createAttributeMissing(this, smtpServer);
+			throw BuiltinExceptionFactory.createAttributeMissing(this, "smtpServer");
 		}
 		if (from == null || "".equals(from)) {
-			throw BuiltinExceptionFactory.createAttributeMissing(this, from);
+			throw BuiltinExceptionFactory.createAttributeMissing(this, "from");
 		}
 		if (password == null || "".equals(password)) {
-			throw BuiltinExceptionFactory.createAttributeMissing(this, password);
+			throw BuiltinExceptionFactory.createAttributeMissing(this, "password");
 		}
 		if (to == null || "".equals(to)) {
-			throw BuiltinExceptionFactory.createAttributeMissing(this, to);
+			throw BuiltinExceptionFactory.createAttributeMissing(this, "to");
 		}
 		if (content == null || "".equals(content)) {
-			throw BuiltinExceptionFactory.createAttributeMissing(this, content);
+			throw BuiltinExceptionFactory.createAttributeMissing(this, "content");
 		}
 
 		parseAttachParameters(runner.getContext());
