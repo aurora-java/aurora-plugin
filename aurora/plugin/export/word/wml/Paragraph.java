@@ -51,6 +51,7 @@ public class Paragraph {
 	@XmlElementRefs({
         @XmlElementRef(name = "t", type = Text.class),
         @XmlElementRef(name = "img",type = Image.class),
+        @XmlElementRef(name = "qr-code",type = QRCode.class),
         @XmlElementRef(name = "ptab",type = PTab.class),
         @XmlElementRef(name = "pbdr",type = PBdr.class)
     })

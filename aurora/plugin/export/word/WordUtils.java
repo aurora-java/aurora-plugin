@@ -1,5 +1,6 @@
 package aurora.plugin.export.word;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -110,6 +111,12 @@ import org.docx4j.wml.TcPrInner.GridSpan;
 import org.docx4j.wml.TcPrInner.TcBorders;
 import org.docx4j.wml.TcPrInner.VMerge;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
 import aurora.plugin.export.word.wml.AltChunk;
 import aurora.plugin.export.word.wml.Body;
 import aurora.plugin.export.word.wml.Break;
@@ -121,6 +128,7 @@ import aurora.plugin.export.word.wml.NumberingChunk;
 import aurora.plugin.export.word.wml.PBdr;
 import aurora.plugin.export.word.wml.PTab;
 import aurora.plugin.export.word.wml.Paragraph;
+import aurora.plugin.export.word.wml.QRCode;
 import aurora.plugin.export.word.wml.Table;
 import aurora.plugin.export.word.wml.TableTc;
 import aurora.plugin.export.word.wml.TableTcBorder;
@@ -880,6 +888,22 @@ public class WordUtils {
 					}finally {
 						FileUtils.forceDelete(file);
 					}
+				}
+			}else if(obj instanceof QRCode){
+				hasImg = true;
+				QRCode qrcode = (QRCode)obj;
+		        String format = "jpg"; 
+		        HashMap hints = new HashMap();  
+		        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8"); 
+		        hints.put(EncodeHintType.ERROR_CORRECTION,  ErrorCorrectionLevel.valueOf(qrcode.getErrorCorrection()));
+		        hints.put(EncodeHintType.MARGIN,1);
+		        BitMatrix bitMatrix = new MultiFormatWriter().encode(qrcode.getText(), BarcodeFormat.QR_CODE, qrcode.getWidth(), qrcode.getHeight(), hints); 
+		        File file = File.createTempFile("qrcode", ".tmp");		        
+				try{
+					QRCodeWriter.writeToFile(bitMatrix, format, file);
+					p.getContent().add(WordUtils.createImage(wordprocessingMLPackage, factory, part, file));
+				}finally {
+					FileUtils.forceDelete(file);
 				}
 			}
 			
