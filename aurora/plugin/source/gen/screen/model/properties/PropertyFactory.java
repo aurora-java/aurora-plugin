@@ -36,6 +36,9 @@ public class PropertyFactory implements ComponentInnerProperties,
 				String types = ((CompositeMap) object).getString("type", "");
 				if ("".equals(types) == true)
 					continue;
+				if("gridcolumn".equals(types)){
+					gridcolumnSimpleDataTS((CompositeMap) object);
+				}
 				DefaultPropertyDescriptor[] parseProperty = parseProperty((CompositeMap) object);
 				String[] split = types.split(",");
 				for (String type : split) {
@@ -117,6 +120,26 @@ public class PropertyFactory implements ComponentInnerProperties,
 			}
 		}
 		return new CompositeMap();
+	}
+
+	private static void gridcolumnSimpleDataTS(CompositeMap maps) {
+		int k = 101;
+		for (int i = 11; i < k; i++) {
+
+			CompositeMap sd = new CompositeMap("attribute");
+			sd.put("id", "grid_column_simple_data_" + i);
+			sd.put("style", "save,inner,_cdata");
+			CompositeMap sdts = new CompositeMap("attribute");
+			sdts.put("id", "grid_column_simple_data_" + i + "_text_style");
+			sdts.put("style", "containment,save,inner");
+			maps.addChild(sd);
+			maps.addChild(sdts);
+		}
+
+		// <attribute id="grid_column_simple_data_10" style="save,inner,_cdata"
+		// />
+		// <attribute id="grid_column_simple_data_1_text_style"
+		// style="containment,save,inner" />
 
 	}
 }
