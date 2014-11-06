@@ -1,5 +1,6 @@
 package aurora.plugin.export.word.wml;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,11 +16,16 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Paragraph {
 	
+	
+	
 	@XmlAttribute
 	private Double indLeft;
 	
 	@XmlAttribute
 	private Double indFirstLine;
+	
+	@XmlAttribute
+	private Double indFirstLineChars;
 	
 	@XmlAttribute
 	private String align;
@@ -37,16 +43,34 @@ public class Paragraph {
 	private String after = "0";
 	
 	@XmlAttribute
-	private String line = "400";
+	private BigInteger beforeLines;
 	
 	@XmlAttribute
-	private String lineRule = "exact";
+	private BigInteger afterLines;
+	
+	@XmlAttribute
+	private String line;// = "400";
+	
+	@XmlAttribute
+	private String lineRule = "atLeast";
 	
 	@XmlAttribute
 	private String orientation;
 	
 	@XmlAttribute
 	private String tocTitle;	
+	
+	@XmlAttribute
+	private BigInteger colsNum;
+	
+	@XmlAttribute
+	private String sectPrType;
+	
+	@XmlAttribute
+	private Double colsSpace;
+	
+	@XmlAttribute
+	private String pageBreakBefore = "false";
 	
 	@XmlElementRefs({
         @XmlElementRef(name = "t", type = Text.class),
@@ -198,5 +222,61 @@ public class Paragraph {
 
 	public void setAfter(String after) {
 		this.after = after;
+	}
+
+	public Double getIndFirstLineChars() {
+		return indFirstLineChars;
+	}
+
+	public void setIndFirstLineChars(Double indFirstLineChars) {
+		this.indFirstLineChars = indFirstLineChars;
+	}
+
+	public BigInteger getBeforeLines() {
+		return beforeLines;
+	}
+
+	public void setBeforeLines(BigInteger beforeLines) {
+		this.beforeLines = beforeLines;
+	}
+
+	public BigInteger getAfterLines() {
+		return afterLines;
+	}
+
+	public void setAfterLines(BigInteger afterLines) {
+		this.afterLines = afterLines;
+	}
+
+	public BigInteger getColsNum() {
+		return colsNum;
+	}
+
+	public void setColsNum(BigInteger colsNum) {
+		this.colsNum = colsNum;
+	}
+
+	public Double getColsSpace() {
+		return colsSpace;
+	}
+
+	public void setColsSpace(Double colsSpace) {
+		this.colsSpace = colsSpace;
+	}
+
+	public String getSectPrType() {
+		return sectPrType;
+	}
+
+	public void setSectPrType(String sectPrType) {
+		this.sectPrType = sectPrType;
+	}
+
+	public String getPageBreakBefore() {
+		return pageBreakBefore;
+	}
+
+	public void setPageBreakBefore(String pageBreakBefore) {
+		this.pageBreakBefore = pageBreakBefore;
 	}
 }

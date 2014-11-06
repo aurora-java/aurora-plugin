@@ -28,10 +28,8 @@ import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.jaxb.Context;
 import org.docx4j.model.structure.PageSizePaper;
 import org.docx4j.model.structure.SectionWrapper;
-import org.docx4j.openpackaging.exceptions.InvalidFormatException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.Part;
-import org.docx4j.openpackaging.parts.PartName;
 import org.docx4j.openpackaging.parts.WordprocessingML.AltChunkType;
 import org.docx4j.openpackaging.parts.WordprocessingML.BinaryPartAbstractImage;
 import org.docx4j.openpackaging.parts.WordprocessingML.DocumentSettingsPart;
@@ -45,12 +43,16 @@ import org.docx4j.wml.BooleanDefaultTrue;
 import org.docx4j.wml.Br;
 import org.docx4j.wml.CTBookmark;
 import org.docx4j.wml.CTBorder;
+import org.docx4j.wml.CTCharacterSpacing;
+import org.docx4j.wml.CTColumns;
+import org.docx4j.wml.CTDocGrid;
 import org.docx4j.wml.CTDocProtect;
 import org.docx4j.wml.CTHeight;
 import org.docx4j.wml.CTMarkupRange;
 import org.docx4j.wml.CTSettings;
 import org.docx4j.wml.CTShd;
 import org.docx4j.wml.CTTabStop;
+import org.docx4j.wml.CTTwipsMeasure;
 import org.docx4j.wml.CTVerticalJc;
 import org.docx4j.wml.Color;
 import org.docx4j.wml.FldChar;
@@ -74,7 +76,9 @@ import org.docx4j.wml.STAlgClass;
 import org.docx4j.wml.STAlgType;
 import org.docx4j.wml.STBorder;
 import org.docx4j.wml.STBrType;
+import org.docx4j.wml.STCharacterSpacing;
 import org.docx4j.wml.STCryptProv;
+import org.docx4j.wml.STDocGrid;
 import org.docx4j.wml.STDocProtect;
 import org.docx4j.wml.STFldCharType;
 import org.docx4j.wml.STHeightRule;
@@ -100,6 +104,8 @@ import org.docx4j.wml.Tr;
 import org.docx4j.wml.TrPr;
 import org.docx4j.wml.U;
 import org.docx4j.wml.UnderlineEnumeration;
+import org.docx4j.wml.CTSettings.DisplayHorizontalDrawingGridEvery;
+import org.docx4j.wml.CTSettings.DisplayVerticalDrawingGridEvery;
 import org.docx4j.wml.CTTblPrBase.TblStyle;
 import org.docx4j.wml.P.Hyperlink;
 import org.docx4j.wml.PPrBase.NumPr;
@@ -107,15 +113,10 @@ import org.docx4j.wml.PPrBase.NumPr.Ilvl;
 import org.docx4j.wml.PPrBase.NumPr.NumId;
 import org.docx4j.wml.R.Ptab;
 import org.docx4j.wml.SectPr.PgMar;
+import org.docx4j.wml.SectPr.PgSz;
 import org.docx4j.wml.TcPrInner.GridSpan;
 import org.docx4j.wml.TcPrInner.TcBorders;
 import org.docx4j.wml.TcPrInner.VMerge;
-
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import aurora.plugin.export.word.wml.AltChunk;
 import aurora.plugin.export.word.wml.Body;
@@ -129,12 +130,19 @@ import aurora.plugin.export.word.wml.PBdr;
 import aurora.plugin.export.word.wml.PTab;
 import aurora.plugin.export.word.wml.Paragraph;
 import aurora.plugin.export.word.wml.QRCode;
+import aurora.plugin.export.word.wml.Settings;
 import aurora.plugin.export.word.wml.Table;
 import aurora.plugin.export.word.wml.TableTc;
 import aurora.plugin.export.word.wml.TableTcBorder;
 import aurora.plugin.export.word.wml.TableTr;
 import aurora.plugin.export.word.wml.Text;
 import aurora.plugin.export.word.wml.Toc;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 
 @SuppressWarnings("unchecked")
@@ -185,6 +193,16 @@ public class WordUtils {
 				
 		
 		SectPr docSectPr = wordMLPackage.getMainDocumentPart().getContents().getBody().getSectPr();
+		
+		PgSz pgSz = factory.createSectPrPgSz();
+		BigInteger w = doc.getPgSzW();
+		if(w!=null) pgSz.setW(w);
+		BigInteger h = doc.getPgSzH();
+		if(h!=null) pgSz.setH(h);
+		BigInteger code = doc.getPgSzCode();
+		if(code!=null) pgSz.setCode(code);
+		docSectPr.setPgSz(pgSz);
+		
 		PgMar pg = factory.createSectPrPgMar();
 		Double top = doc.getTop()*TWIP_CENTIMETER;
 		pg.setTop(BigInteger.valueOf(top.intValue()));
@@ -194,18 +212,46 @@ public class WordUtils {
 		pg.setLeft(BigInteger.valueOf(left.intValue()));
 		Double right = doc.getRight()*TWIP_CENTIMETER;
 		pg.setRight(BigInteger.valueOf(right.intValue()));
+		Double header = doc.getHeaderSize()*TWIP_CENTIMETER;
+		pg.setHeader(BigInteger.valueOf(header.intValue()));
+		Double footer = doc.getFooterSize()*TWIP_CENTIMETER;
+		pg.setFooter(BigInteger.valueOf(footer.intValue()));
 		docSectPr.setPgMar(pg);
+		docSectPr.setCols(factory.createCTColumns());
+		SectPr.Type st = new SectPr.Type();
+		st.setVal("continuous");
+		docSectPr.setType(st);
+		
+		String docGridType = doc.getDocGridType();
+		
+		if(docGridType!=null){
+			CTDocGrid docGrid = factory.createCTDocGrid();
+			docGrid.setType(STDocGrid.fromValue(docGridType));
+			docSectPr.setDocGrid(docGrid);
+			BigInteger linePitch = doc.getDocGridLinePitch();
+			if(linePitch!=null)docGrid.setLinePitch(linePitch);
+		}
+		
+		
+		
+		Settings sts = doc.getSettings();
+		if(sts!=null){
+			CTSettings settings = WordUtils.createSettings(factory, wordMLPackage, sts);
+			DocumentSettingsPart dsp = new DocumentSettingsPart();
+			dsp.setJaxbElement(settings);
+			mdp.addTargetPart(dsp);		
+		}
 		
 		
 		HeaderPart hp = null;
-		Header header = doc.getHeader();
-		if(header!=null && header.getPara()!=null){
-			hp = WordUtils.addHeader(factory, wordMLPackage, header.getPara());
+		Header hd = doc.getHeader();
+		if(hd!=null && hd.getPara()!=null){
+			hp = WordUtils.addHeader(factory, wordMLPackage, hd.getPara());
 		}
 		
-		Footer footer = doc.getFooter();
-		if(footer!=null){
-			WordUtils.addFooter(factory, wordMLPackage, footer.getPara());
+		Footer ft = doc.getFooter();
+		if(ft!=null){
+			WordUtils.addFooter(factory, wordMLPackage, ft.getPara());
 		}
 		
 		String watermark = doc.getWatermark();
@@ -263,7 +309,7 @@ public class WordUtils {
 			mdp.getContents().getBody().getContent().add(indexOfToc++,WordUtils.createTOCEnd(factory));
 			mdp.getContents().getBody().getContent().add(indexOfToc++,WordUtils.createPageBreak(factory));
 		}
-		WordUtils.hideSpellAndGrammaticalErrors(wordMLPackage, factory);
+//		WordUtils.hideSpellAndGrammaticalErrors(wordMLPackage, factory);
 		
 		if(doc.getReadOnly()) {
 			setReadOnly(wordMLPackage, true);
@@ -343,25 +389,6 @@ public class WordUtils {
 		return wordPackage.getDocumentModel().getSections().get(0).getPageDimensions().getWritableWidthTwips();
 	}
 	
-	
-	/**
-	 * hideSpellAndGrammaticalErrors
-	 * 
-	 * @param wordPackage
-	 * @param factory
-	 * @throws InvalidFormatException
-	 */
-	public static void hideSpellAndGrammaticalErrors(WordprocessingMLPackage wordMLPackage,ObjectFactory factory) throws InvalidFormatException{
-		DocumentSettingsPart ds = wordMLPackage.getMainDocumentPart().getDocumentSettingsPart();  
-        if(ds == null){  
-            ds = new DocumentSettingsPart();
-        }  
-        CTSettings cs = factory.createCTSettings();
-        cs.setHideSpellingErrors(Context.getWmlObjectFactory().createBooleanDefaultTrue());
-        cs.setHideGrammaticalErrors(Context.getWmlObjectFactory().createBooleanDefaultTrue());
-        ds.setJaxbElement(cs);
-        wordMLPackage.getMainDocumentPart().addTargetPart(ds); 
-	}
 	
 	
 	/**
@@ -454,7 +481,12 @@ public class WordUtils {
 							tcB.setLeft(ctborder);
 						}else if("right".equalsIgnoreCase(type)){
 							tcB.setRight(ctborder);
+						}else if("tl2br".equalsIgnoreCase(type)){
+							tcB.setTl2Br(ctborder);
+						}else if("tr2bl".equalsIgnoreCase(type)){
+							tcB.setTr2Bl(ctborder);
 						}
+						
 					}
 				}
 				
@@ -743,6 +775,7 @@ public class WordUtils {
 	
 	public static P createPara(WordprocessingMLPackage wordprocessingMLPackage, ObjectFactory factory, Part part, Paragraph para) throws Exception{
 		P  p = factory.createP();
+		Double indfirstLineChars = para.getIndFirstLineChars();
 		Double indFirstLine = para.getIndFirstLine();
 		Double indLeft = para.getIndLeft();
 		String align = para.getAlign();
@@ -753,17 +786,31 @@ public class WordUtils {
 		spacing.setAfter(new BigInteger(para.getAfter()));		
 		ppr.setSpacing(spacing);
 		
+		
+		String pageBreakBefore = para.getPageBreakBefore();
+		if("true".equals(pageBreakBefore)){
+			BooleanDefaultTrue pageBreakBeforeOn = factory.createBooleanDefaultTrue();
+			pageBreakBeforeOn.setVal(Boolean.TRUE);
+			ppr.setPageBreakBefore(pageBreakBeforeOn);
+		}
+		
+		
 		//左悬挂 首行悬挂
-		if(indFirstLine!=null || indLeft !=null){
+		if(indFirstLine!=null || indLeft !=null || indfirstLineChars!=null){
 			PPrBase.Ind ind = factory.createPPrBaseInd();
 			if(indLeft != null ) {
 				indLeft = indLeft * TWIP_CENTIMETER;
 				ind.setLeft(BigInteger.valueOf(indLeft.intValue()));
 			}
 			if(indFirstLine != null ) {
-				indFirstLine = indFirstLine * TWIP_CENTIMETER;
+				indFirstLine = indFirstLine* TWIP_CENTIMETER;
 				ind.setFirstLine(BigInteger.valueOf(indFirstLine.intValue()));			
 			}
+			if(indfirstLineChars != null ) {
+//				indfirstLineChars = indfirstLineChars;//字符
+				ind.setFirstLineChars(BigInteger.valueOf(indfirstLineChars.intValue()));			
+			}
+			
 			ppr.setInd(ind);
 		}	
 		
@@ -772,24 +819,54 @@ public class WordUtils {
 		BigInteger pageWidth = docSectPr.getPgSz().getW();
 		BigInteger pageHeight = docSectPr.getPgSz().getH();
 		String orientation = para.getOrientation();
-		SectPr sectPr = factory.createSectPr();
-		sectPr.getEGHdrFtrReferences().addAll(docSectPr.getEGHdrFtrReferences());
-		
-		
-		SectPr.PgSz pgSz = factory.createSectPrPgSz();
-		if("portrait".equals(orientation)){			
-			pgSz.setW(pageWidth);
-			pgSz.setH(pageHeight);
-//			pgSz.setOrient(STPageOrientation.fromValue("portrait"));
-			sectPr.setPgSz(pgSz);
-			ppr.setSectPr(sectPr);
-		}else if("landscape".equals(orientation)){
-			pgSz.setW(pageHeight);
-			pgSz.setH(pageWidth);
-//			pgSz.setOrient(STPageOrientation.fromValue("landscape"));
-			sectPr.setPgSz(pgSz);
-			ppr.setSectPr(sectPr);
+		SectPr sectPr = null;
+		if(orientation!=null){
+			sectPr = factory.createSectPr();
+			
+			SectPr.PgSz pgSz = factory.createSectPrPgSz();
+			if("portrait".equals(orientation)){			
+				pgSz.setW(pageWidth);
+				pgSz.setH(pageHeight);
+//				pgSz.setOrient(STPageOrientation.fromValue("portrait"));
+				sectPr.setPgSz(pgSz);
+			}else if("landscape".equals(orientation)){
+				pgSz.setW(pageHeight);
+				pgSz.setH(pageWidth);
+//				pgSz.setOrient(STPageOrientation.fromValue("landscape"));
+				sectPr.setPgSz(pgSz);
+			}
+			//TODO:pageMargin
+			
 		}
+		
+		BigInteger colsNum = para.getColsNum();
+		if(colsNum!=null){
+			if(sectPr == null) sectPr = factory.createSectPr();
+			CTColumns ctc = factory.createCTColumns();
+			ctc.setNum(colsNum);
+			Double colsSpace = para.getColsSpace();
+			if(colsSpace!=null) {
+				//colsSpace *= TWIP_CENTIMETER;
+				ctc.setSpace(BigInteger.valueOf(colsSpace.intValue()));
+			}
+			sectPr.setPgSz(docSectPr.getPgSz());
+			sectPr.setPgMar(docSectPr.getPgMar());
+			sectPr.setDocGrid(docSectPr.getDocGrid());
+			sectPr.setCols(ctc);
+			
+			
+			String type = para.getSectPrType();
+			if(type!=null){
+				SectPr.Type t = new SectPr.Type();
+				t.setVal(type);
+				sectPr.setType(t);
+			}
+		}
+		if(sectPr!=null){
+			sectPr.getEGHdrFtrReferences().addAll(docSectPr.getEGHdrFtrReferences());
+			ppr.setSectPr(sectPr);			
+		}
+		
 		
 		
 		Long numId = para.getNumId();
@@ -912,9 +989,18 @@ public class WordUtils {
 		if(!hasImg){
 			String line = para.getLine();
 			String lineRule = para.getLineRule();
-			if(line!=null || lineRule !=null){
+			if(line!=null){
 				spacing.setLine(new BigInteger(line));
 				spacing.setLineRule(STLineSpacingRule.fromValue(lineRule));
+			}
+			
+			BigInteger beforeLines = para.getBeforeLines();
+			if(beforeLines!=null){
+				spacing.setBeforeLines(beforeLines);
+			}
+			BigInteger afterLines = para.getAfterLines();
+			if(afterLines!=null){
+				spacing.setAfterLines(afterLines);
 			}
 		}
 		return p;
@@ -1003,6 +1089,54 @@ public class WordUtils {
 //		}
 //		return ppr;
 //	}
+	
+	
+	public static CTSettings createSettings(ObjectFactory factory,WordprocessingMLPackage wordprocessingMLPackage, Settings st) throws Exception{
+		CTSettings settings = factory.createCTSettings(); 
+		String characterSpacingControl = st.getCharacterSpacingControl();
+		if(characterSpacingControl!=null){
+			CTCharacterSpacing characterspacing = factory.createCTCharacterSpacing(); 
+		    settings.setCharacterSpacingControl(characterspacing); 
+		    characterspacing.setVal(STCharacterSpacing.fromValue(characterSpacingControl));
+		}
+		
+		Boolean hideSpellingErrors = st.getHideSpellingErrors();
+		if(hideSpellingErrors == true) settings.setHideSpellingErrors(Context.getWmlObjectFactory().createBooleanDefaultTrue());
+		
+		Boolean hideGrammaticalErrors = st.getHideGrammaticalErrors();
+		if(hideGrammaticalErrors == true) settings.setHideGrammaticalErrors(Context.getWmlObjectFactory().createBooleanDefaultTrue());
+		
+		BigInteger drawingGridHorizontalSpacing = st.getDrawingGridHorizontalSpacing();
+		if(drawingGridHorizontalSpacing!=null) {
+			CTTwipsMeasure dghs = factory.createCTTwipsMeasure();
+			dghs.setVal(drawingGridHorizontalSpacing);
+			settings.setDrawingGridHorizontalSpacing(dghs);
+		}
+		
+		BigInteger drawingGridVerticalSpacing = st.getDrawingGridVerticalSpacing();
+		if(drawingGridVerticalSpacing!=null) {
+			CTTwipsMeasure dgvs = factory.createCTTwipsMeasure();
+			dgvs.setVal(drawingGridVerticalSpacing);
+			settings.setDrawingGridVerticalSpacing(dgvs);
+		}
+		
+		
+		BigInteger displayHorizontalDrawingGridEvery = st.getDisplayHorizontalDrawingGridEvery();
+		if(displayHorizontalDrawingGridEvery!=null) {
+			DisplayHorizontalDrawingGridEvery dhdge = factory.createCTSettingsDisplayHorizontalDrawingGridEvery();
+			dhdge.setVal(displayHorizontalDrawingGridEvery);
+			settings.setDisplayHorizontalDrawingGridEvery(dhdge);
+		}
+		
+		
+		BigInteger displayVerticalDrawingGridEvery = st.getDisplayVerticalDrawingGridEvery();
+		if(displayVerticalDrawingGridEvery!=null) {
+			DisplayVerticalDrawingGridEvery dvdge = factory.createCTSettingsDisplayVerticalDrawingGridEvery();
+			dvdge.setVal(displayVerticalDrawingGridEvery);
+			settings.setDisplayVerticalDrawingGridEvery(dvdge);
+		}
+		return settings;
+	}
 	
 	/**
 	 * add Header
