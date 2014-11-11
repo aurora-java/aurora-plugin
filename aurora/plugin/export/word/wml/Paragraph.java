@@ -19,13 +19,13 @@ public class Paragraph {
 	
 	
 	@XmlAttribute
-	private Double indLeft;
+	private Float indLeft;
 	
 	@XmlAttribute
-	private Double indFirstLine;
+	private Float indFirstLine;
 	
 	@XmlAttribute
-	private Double indFirstLineChars;
+	private Float indFirstLineChars;
 	
 	@XmlAttribute
 	private String align;
@@ -85,19 +85,19 @@ public class Paragraph {
 	private String tocBookMark;
 
 	
-	public Double getIndLeft() {
+	public Float getIndLeft() {
 		return indLeft;
 	}
 
-	public void setIndLeft(Double indLeft) {
+	public void setIndLeft(Float indLeft) {
 		this.indLeft = indLeft;
 	}
 
-	public Double getIndFirstLine() {
+	public Float getIndFirstLine() {
 		return indFirstLine;
 	}
 
-	public void setIndFirstLine(Double indFirstLine) {
+	public void setIndFirstLine(Float indFirstLine) {
 		this.indFirstLine = indFirstLine;
 	}
 
@@ -224,11 +224,11 @@ public class Paragraph {
 		this.after = after;
 	}
 
-	public Double getIndFirstLineChars() {
+	public Float getIndFirstLineChars() {
 		return indFirstLineChars;
 	}
 
-	public void setIndFirstLineChars(Double indFirstLineChars) {
+	public void setIndFirstLineChars(Float indFirstLineChars) {
 		this.indFirstLineChars = indFirstLineChars;
 	}
 

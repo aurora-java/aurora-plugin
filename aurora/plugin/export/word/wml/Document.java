@@ -29,22 +29,22 @@ public class Document {
 	private String pageSize = "A4";
 	
 	@XmlAttribute(name="header")
-	private Double headerSize = 1.5;
+	private Float headerSize = new Float(1.5);
 	
 	@XmlAttribute(name="footer")
-	private Double footerSize = 1.75;
+	private Float footerSize = new Float(1.75);
 	
 	@XmlAttribute
-	private Double top = 2.54;
+	private Float top = new Float(2.54);
 	
 	@XmlAttribute
-	private Double bottom = 2.54;
+	private Float bottom = new Float(2.54);
 	
 	@XmlAttribute
-	private Double left = 3.17;
+	private Float left = new Float(3.17);
 	
 	@XmlAttribute
-	private Double right = 3.17;
+	private Float right = new Float(3.17);
 	
 	@XmlAttribute
 	private Boolean landscape = false;
@@ -137,35 +137,35 @@ public class Document {
 		this.landscape = landscape;
 	}
 
-	public Double getTop() {
+	public Float getTop() {
 		return top;
 	}
 
-	public void setTop(Double top) {
+	public void setTop(Float top) {
 		this.top = top;
 	}
 
-	public Double getBottom() {
+	public Float getBottom() {
 		return bottom;
 	}
 
-	public void setBottom(Double bottom) {
+	public void setBottom(Float bottom) {
 		this.bottom = bottom;
 	}
 
-	public Double getLeft() {
+	public Float getLeft() {
 		return left;
 	}
 
-	public void setLeft(Double left) {
+	public void setLeft(Float left) {
 		this.left = left;
 	}
 
-	public Double getRight() {
+	public Float getRight() {
 		return right;
 	}
 
-	public void setRight(Double right) {
+	public void setRight(Float right) {
 		this.right = right;
 	}
 
@@ -193,19 +193,19 @@ public class Document {
 		this.numberingChunk = numberingChunk;
 	}
 
-	public Double getHeaderSize() {
+	public Float getHeaderSize() {
 		return headerSize;
 	}
 
-	public void setHeaderSize(Double headerSize) {
+	public void setHeaderSize(Float headerSize) {
 		this.headerSize = headerSize;
 	}
 
-	public Double getFooterSize() {
+	public Float getFooterSize() {
 		return footerSize;
 	}
 
-	public void setFooterSize(Double footerSize) {
+	public void setFooterSize(Float footerSize) {
 		this.footerSize = footerSize;
 	}
 

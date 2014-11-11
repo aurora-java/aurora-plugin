@@ -20,10 +20,10 @@ public class Table {
 	private String align = "left";
 	
 	@XmlAttribute
-	private Double width;
+	private Float width;
 	
 	@XmlAttribute
-	private Double indLeft;
+	private Float indLeft;
 	
 	@XmlElement(name = "tr")
 	private List<TableTr> trs = new ArrayList<TableTr>();
@@ -52,19 +52,19 @@ public class Table {
 		this.align = align;
 	}
 
-	public Double getIndLeft() {
+	public Float getIndLeft() {
 		return indLeft;
 	}
 
-	public void setIndLeft(Double indLeft) {
+	public void setIndLeft(Float indLeft) {
 		this.indLeft = indLeft;
 	}
 
-	public Double getWidth() {
+	public Float getWidth() {
 		return width;
 	}
 
-	public void setWidth(Double width) {
+	public void setWidth(Float width) {
 		this.width = width;
 	}
 }

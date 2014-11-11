@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class TableTr {
 	
 	@XmlAttribute
-	private Double height = 0.67;
+	private Float height = new Float(0.67);
 	
 	
 	
@@ -29,11 +29,11 @@ public class TableTr {
 		this.tcs = tcs;
 	}
 
-	public Double getHeight() {
+	public Float getHeight() {
 		return height;
 	}
 
-	public void setHeight(Double height) {
+	public void setHeight(Float height) {
 		this.height = height;
 	}
 

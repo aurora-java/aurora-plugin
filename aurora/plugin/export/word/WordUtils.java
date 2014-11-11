@@ -23,9 +23,11 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.io.FileUtils;
+import org.docx4j.UnitsOfMeasurement;
 import org.docx4j.XmlUtils;
 import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.jaxb.Context;
+import org.docx4j.model.structure.PageDimensions;
 import org.docx4j.model.structure.PageSizePaper;
 import org.docx4j.model.structure.SectionWrapper;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -148,7 +150,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 @SuppressWarnings("unchecked")
 public class WordUtils {
 	
-	public static final int TWIP_CENTIMETER = 567;
+//	public static final int TWIP_CENTIMETER = 567;
 	
 	public static final String TYPE_WORD = "word";
 	public static final String TYPE_PDF = "pdf";
@@ -194,29 +196,26 @@ public class WordUtils {
 		
 		SectPr docSectPr = wordMLPackage.getMainDocumentPart().getContents().getBody().getSectPr();
 		
-		PgSz pgSz = factory.createSectPrPgSz();
-		BigInteger w = doc.getPgSzW();
-		if(w!=null) pgSz.setW(w);
-		BigInteger h = doc.getPgSzH();
-		if(h!=null) pgSz.setH(h);
-		BigInteger code = doc.getPgSzCode();
-		if(code!=null) pgSz.setCode(code);
-		docSectPr.setPgSz(pgSz);
+//		PgSz pgSz = factory.createSectPrPgSz();
+//		BigInteger w = doc.getPgSzW();
+//		if(w!=null) pgSz.setW(w);
+//		BigInteger h = doc.getPgSzH();
+//		if(h!=null) pgSz.setH(h);
+//		BigInteger code = doc.getPgSzCode();
+//		if(code!=null) pgSz.setCode(code);
+//		docSectPr.setPgSz(pgSz);
+		
 		
 		PgMar pg = factory.createSectPrPgMar();
-		Double top = doc.getTop()*TWIP_CENTIMETER;
-		pg.setTop(BigInteger.valueOf(top.intValue()));
-		Double bottom = doc.getBottom()*TWIP_CENTIMETER;
-		pg.setBottom(BigInteger.valueOf(bottom.intValue()));
-		Double left = doc.getLeft()*TWIP_CENTIMETER;
-		pg.setLeft(BigInteger.valueOf(left.intValue()));
-		Double right = doc.getRight()*TWIP_CENTIMETER;
-		pg.setRight(BigInteger.valueOf(right.intValue()));
-		Double header = doc.getHeaderSize()*TWIP_CENTIMETER;
-		pg.setHeader(BigInteger.valueOf(header.intValue()));
-		Double footer = doc.getFooterSize()*TWIP_CENTIMETER;
-		pg.setFooter(BigInteger.valueOf(footer.intValue()));
+		pg.setTop(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(doc.getTop()*10)));
+		pg.setBottom(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(doc.getBottom()*10)));
+		pg.setLeft(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(doc.getLeft()*10)));
+		pg.setRight(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(doc.getRight()*10)));
+		pg.setHeader(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(doc.getHeaderSize()*10)));
+		pg.setFooter(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(doc.getFooterSize()*10)));
 		docSectPr.setPgMar(pg);
+		
+		
 		docSectPr.setCols(factory.createCTColumns());
 		SectPr.Type st = new SectPr.Type();
 		st.setVal("continuous");
@@ -411,21 +410,16 @@ public class WordUtils {
 		tbl.setTblPr(tblPr);		
 		
 		
-		Double indLeft = table.getIndLeft();
-		if(indLeft!=null){
-			indLeft = indLeft * TWIP_CENTIMETER;
+		if(table.getIndLeft()!=null){
 			TblWidth w = factory.createTblWidth();
 			w.setType("dxa");
-			w.setW(BigInteger.valueOf(indLeft.intValue()));
+			w.setW(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(table.getIndLeft()*10)));
 			tblPr.setTblInd(w);
 		}
-		
-		Double tblWidth = table.getWidth();
-		if(tblWidth!=null){
-			tblWidth = tblWidth * TWIP_CENTIMETER;
+		if(table.getWidth()!=null){
 			TblWidth w = factory.createTblWidth();
 			w.setType("dxa");
-			w.setW(BigInteger.valueOf(tblWidth.intValue()));
+			w.setW(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(table.getWidth()*10)));
 			tblPr.setTblW(w);
 		}
 		
@@ -449,8 +443,7 @@ public class WordUtils {
 			TrPr trPr = factory.createTrPr();
 			
 			CTHeight ctHeight = new CTHeight();
-			Double height = tblTr.getHeight()*TWIP_CENTIMETER;
-			ctHeight.setVal(BigInteger.valueOf(height.intValue()));
+			ctHeight.setVal(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(tblTr.getHeight()*10)));
 			ctHeight.setHRule(STHeightRule.AT_LEAST);
 			JAXBElement<CTHeight> trHeightElement = factory.createCTTrPrBaseTrHeight(ctHeight);
 			trPr.getCnfStyleOrDivIdOrGridBefore().add(trHeightElement);			
@@ -490,14 +483,12 @@ public class WordUtils {
 					}
 				}
 				
-				Double width = tblTc.getWidth();
-				if(width!=null){	
-					width = width*TWIP_CENTIMETER;
+				if(tblTc.getWidth()!=null){	
 					tc.setTcPr(tcPr);
 					TblWidth cellWidth = factory.createTblWidth();
 					tcPr.setTcW(cellWidth);
 					cellWidth.setType("dxa");
-					cellWidth.setW(BigInteger.valueOf(width.intValue()));			
+					cellWidth.setW(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(tblTc.getWidth()*10)));	
 				}
 				String fill = tblTc.getFill();
 				if(fill!=null){
@@ -542,10 +533,8 @@ public class WordUtils {
 			while(it.hasNext()){
 				TableTc tblTc = (TableTc)it.next();
 				TblGridCol col = factory.createTblGridCol();
-				Double wd = tblTc.getWidth();
-				if(wd!=null){
-					wd = wd*TWIP_CENTIMETER;
-		            col.setW(BigInteger.valueOf(wd.longValue()));
+				if(tblTc.getWidth()!=null){
+		            col.setW(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(tblTc.getWidth()*10)));	
 				}				
 	            tblGrid.getGridCol().add(col);
 			}
@@ -775,9 +764,9 @@ public class WordUtils {
 	
 	public static P createPara(WordprocessingMLPackage wordprocessingMLPackage, ObjectFactory factory, Part part, Paragraph para) throws Exception{
 		P  p = factory.createP();
-		Double indfirstLineChars = para.getIndFirstLineChars();
-		Double indFirstLine = para.getIndFirstLine();
-		Double indLeft = para.getIndLeft();
+		Float indfirstLineChars = para.getIndFirstLineChars();
+		Float indFirstLine = para.getIndFirstLine();
+		Float indLeft = para.getIndLeft();
 		String align = para.getAlign();
 		PPr ppr = factory.createPPr();
 		
@@ -799,12 +788,10 @@ public class WordUtils {
 		if(indFirstLine!=null || indLeft !=null || indfirstLineChars!=null){
 			PPrBase.Ind ind = factory.createPPrBaseInd();
 			if(indLeft != null ) {
-				indLeft = indLeft * TWIP_CENTIMETER;
-				ind.setLeft(BigInteger.valueOf(indLeft.intValue()));
+				ind.setLeft(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(indLeft*10)));	
 			}
 			if(indFirstLine != null ) {
-				indFirstLine = indFirstLine* TWIP_CENTIMETER;
-				ind.setFirstLine(BigInteger.valueOf(indFirstLine.intValue()));			
+				ind.setFirstLine(BigInteger.valueOf(UnitsOfMeasurement.mmToTwip(indFirstLine*10)));			
 			}
 			if(indfirstLineChars != null ) {
 //				indfirstLineChars = indfirstLineChars;//字符

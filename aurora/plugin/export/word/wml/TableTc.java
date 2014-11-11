@@ -17,7 +17,7 @@ public class TableTc {
 	private Integer span;
 	
 	@XmlAttribute
-	private Double width;
+	private Float width;
 	
 	@XmlAttribute
 	private String fill;
@@ -45,11 +45,11 @@ public class TableTc {
 		this.paras.add(para);
 	}
 
-	public Double getWidth() {
+	public Float getWidth() {
 		return width;
 	}
 
-	public void setWidth(Double width) {
+	public void setWidth(Float width) {
 		this.width = width;
 	}
 
