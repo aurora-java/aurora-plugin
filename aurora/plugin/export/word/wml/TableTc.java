@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "tc")
@@ -34,10 +36,21 @@ public class TableTc {
 	@XmlElement(name = "border")
 	private List<TableTcBorder> borders = new ArrayList<TableTcBorder>();
 
-	@XmlElement(name = "p")
-	private List<Paragraph> paras = new ArrayList<Paragraph>();
+//	@XmlElement(name = "p")
+//	private List<Paragraph> paras = new ArrayList<Paragraph>();
+	
+	
+	@XmlElementRefs({
+        @XmlElementRef(name = "t", type = Text.class),
+        @XmlElementRef(name = "img",type = Image.class),
+        @XmlElementRef(name = "qr-code",type = QRCode.class),
+        @XmlElementRef(name = "p",type = Paragraph.class),
+        @XmlElementRef(name = "permStart",type = PermStart.class),
+        @XmlElementRef(name = "permEnd",type = PermEnd.class)
+    })
+    private List<Object> paras = new ArrayList<Object>();
 
-	public List<Paragraph> getParas() {
+	public List<Object> getParas() {
 		return paras;
 	}
 

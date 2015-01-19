@@ -6,8 +6,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,6 +18,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -27,7 +37,6 @@ import org.docx4j.UnitsOfMeasurement;
 import org.docx4j.XmlUtils;
 import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.jaxb.Context;
-import org.docx4j.model.structure.PageDimensions;
 import org.docx4j.model.structure.PageSizePaper;
 import org.docx4j.model.structure.SectionWrapper;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -51,6 +60,7 @@ import org.docx4j.wml.CTDocGrid;
 import org.docx4j.wml.CTDocProtect;
 import org.docx4j.wml.CTHeight;
 import org.docx4j.wml.CTMarkupRange;
+import org.docx4j.wml.CTPerm;
 import org.docx4j.wml.CTSettings;
 import org.docx4j.wml.CTShd;
 import org.docx4j.wml.CTTabStop;
@@ -74,6 +84,7 @@ import org.docx4j.wml.PPrBase;
 import org.docx4j.wml.R;
 import org.docx4j.wml.RFonts;
 import org.docx4j.wml.RPr;
+import org.docx4j.wml.RangePermissionStart;
 import org.docx4j.wml.STAlgClass;
 import org.docx4j.wml.STAlgType;
 import org.docx4j.wml.STBorder;
@@ -115,7 +126,6 @@ import org.docx4j.wml.PPrBase.NumPr.Ilvl;
 import org.docx4j.wml.PPrBase.NumPr.NumId;
 import org.docx4j.wml.R.Ptab;
 import org.docx4j.wml.SectPr.PgMar;
-import org.docx4j.wml.SectPr.PgSz;
 import org.docx4j.wml.TcPrInner.GridSpan;
 import org.docx4j.wml.TcPrInner.TcBorders;
 import org.docx4j.wml.TcPrInner.VMerge;
@@ -131,6 +141,8 @@ import aurora.plugin.export.word.wml.NumberingChunk;
 import aurora.plugin.export.word.wml.PBdr;
 import aurora.plugin.export.word.wml.PTab;
 import aurora.plugin.export.word.wml.Paragraph;
+import aurora.plugin.export.word.wml.PermEnd;
+import aurora.plugin.export.word.wml.PermStart;
 import aurora.plugin.export.word.wml.QRCode;
 import aurora.plugin.export.word.wml.Settings;
 import aurora.plugin.export.word.wml.Table;
@@ -161,6 +173,8 @@ public class WordUtils {
 	private static final String KEY_NUMBERING_DEFINITION_PART = "KEY_NUMBERING_DEFINITION_PART";
 	
 	private static final ThreadLocal threadLocal = new ThreadLocal();
+	
+	private static int permId = new java.util.Random().nextInt();
 	
 	
 	public static Object getObject(String key){
@@ -264,6 +278,7 @@ public class WordUtils {
 		int indexOfToc = WordUtils.findToc(paras);
 		List<Map> tocs = new ArrayList();
 		
+//		int permId = new java.util.Random().nextInt();
 		for (Object obj : paras) {
 			Object p = null;
 			if(obj instanceof Paragraph) {
@@ -294,6 +309,17 @@ public class WordUtils {
 			}else if(obj instanceof AltChunk){
 				AltChunk chunk = (AltChunk)obj;
 				WordUtils.createChunk(mdp,chunk);
+			}else if(obj instanceof PermStart){
+				permId = new java.util.Random().nextInt();
+				RangePermissionStart start = factory.createRangePermissionStart();
+				start.setId(String.valueOf(permId));
+				start.setEdGrp("everyone");
+				mdp.getContents().getBody().getContent().add(start);
+			}else if(obj instanceof PermEnd){
+				CTPerm end = factory.createCTPerm();
+				end.setId(String.valueOf(permId));
+				mdp.getContents().getBody().getContent().add(end);	
+				
 			}
 			if(p!=null) mdp.getContents().getBody().getContent().add(p);
 		}
@@ -311,7 +337,7 @@ public class WordUtils {
 //		WordUtils.hideSpellAndGrammaticalErrors(wordMLPackage, factory);
 		
 		if(doc.getReadOnly()) {
-			setReadOnly(wordMLPackage, true);
+			setReadOnly(wordMLPackage, factory);
 		}
 		
 		if(doc.getDebugger()){
@@ -521,8 +547,22 @@ public class WordUtils {
 				}	
 				
 				tc.setTcPr(tcPr);
-				for (Paragraph para : tblTc.getParas()) {
-					tc.getContent().add(WordUtils.createPara(wordMLPackage,factory,para));
+				for (Object obj : tblTc.getParas()) {
+					if(obj instanceof Paragraph) {
+						tc.getContent().add(WordUtils.createPara(wordMLPackage,factory,(Paragraph)obj));
+					}else if(obj instanceof PermStart){
+						permId = new java.util.Random().nextInt();
+						RangePermissionStart start = factory.createRangePermissionStart();
+						start.setId(String.valueOf(permId));
+						start.setEdGrp("everyone");
+						tc.getContent().add(start);
+					}else if(obj instanceof PermEnd){
+						CTPerm end = factory.createCTPerm();
+						end.setId(String.valueOf(permId));
+						tc.getContent().add(end);	
+						
+					}
+					
 				}
 			}
 		}
@@ -764,6 +804,10 @@ public class WordUtils {
 	
 	public static P createPara(WordprocessingMLPackage wordprocessingMLPackage, ObjectFactory factory, Part part, Paragraph para) throws Exception{
 		P  p = factory.createP();
+		
+		
+		
+		
 		Float indfirstLineChars = para.getIndFirstLineChars();
 		Float indFirstLine = para.getIndFirstLine();
 		Float indLeft = para.getIndLeft();
@@ -969,6 +1013,16 @@ public class WordUtils {
 				}finally {
 					FileUtils.forceDelete(file);
 				}
+			}else if(obj instanceof PermStart){
+				permId = new java.util.Random().nextInt();
+				RangePermissionStart start = factory.createRangePermissionStart();
+				start.setId(String.valueOf(permId));
+				start.setEdGrp("everyone");
+				p.getContent().add(start);
+			}else if(obj instanceof PermEnd){
+				CTPerm end = factory.createCTPerm();
+				end.setId(String.valueOf(permId));
+				p.getContent().add(end);					
 			}
 			
 			i++;
@@ -989,7 +1043,7 @@ public class WordUtils {
 			if(afterLines!=null){
 				spacing.setAfterLines(afterLines);
 			}
-		}
+		}		
 		return p;
 	}
 	
@@ -1328,7 +1382,37 @@ public class WordUtils {
 			headerReference.setType(HdrFtrRef.DEFAULT);
 			sectPr.getEGHdrFtrReferences().add(headerReference);
 		}
-	}	
+	}
+	
+	
+	public static byte[] encrypt(String content, String password) {
+		try {
+			KeyGenerator kgen = KeyGenerator.getInstance("AES");
+			kgen.init(128);
+//			kgen.init(128, new SecureRandom(password.getBytes()));
+			SecretKey secretKey = kgen.generateKey();
+			byte[] enCodeFormat = secretKey.getEncoded();
+			SecretKeySpec key = new SecretKeySpec(enCodeFormat, "AES");
+			Cipher cipher = Cipher.getInstance("AES");// 创建密码器
+			byte[] byteContent = content.getBytes("utf-8");
+			cipher.init(Cipher.ENCRYPT_MODE, key);// 初始化
+			byte[] result = cipher.doFinal(byteContent);
+			return result; // 加密
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			e.printStackTrace();
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	/**
 	 * 功能描述：设置文档是否只读，包括内容和样式
@@ -1337,56 +1421,44 @@ public class WordUtils {
 	 * @throws Exception
 	 * 
 	 */
-	public static void setReadOnly(WordprocessingMLPackage wordPackage , boolean isReadOnly)throws Exception{
-		byte[] bt = "".getBytes();
-		if(isReadOnly){
-			bt = "123456".getBytes();
-		}
-		ObjectFactory factory = Context.getWmlObjectFactory();
+	public static void setReadOnly(WordprocessingMLPackage wordPackage , ObjectFactory factory)throws Exception{
+//		byte[] bt = encrypt("111111","abc");
+		
+		byte[] bt = "111111".getBytes();
+		
 		//创建设置文档对象
-		DocumentSettingsPart ds = wordPackage.getMainDocumentPart().getDocumentSettingsPart();
-		if(ds == null){
-			ds = new DocumentSettingsPart();
-		}
-		CTSettings cs = ds.getContents();
-		if(cs == null){
-			cs = factory.createCTSettings();
-		}
+		
 		//创建文档保护对象
-		CTDocProtect cp = cs.getDocumentProtection();
-		if(cp == null){
-			cp = new CTDocProtect();
-		}
+		CTDocProtect cp = factory.createCTDocProtect();
 		//设置加密方式
-		cp.setCryptProviderType(STCryptProv.RSA_FULL);
+		cp.setCryptProviderType(STCryptProv.RSA_AES);
 		cp.setCryptAlgorithmClass(STAlgClass.HASH);
 		//设置任何用户
 		cp.setCryptAlgorithmType(STAlgType.TYPE_ANY);
 		cp.setCryptAlgorithmSid(new BigInteger("4"));
 		cp.setCryptSpinCount(new BigInteger("50000"));
 		//只读
-		if(isReadOnly){
-			cp.setEdit(STDocProtect.READ_ONLY);
-			cp.setHash(bt);
-			cp.setSalt(bt);
-			//设置内容不可编辑
-			cp.setEnforcement(true);
-			//设置格式不可编辑
-			cp.setFormatting(true);
-		}else{
-			cp.setEdit(STDocProtect.NONE);
-			cp.setHash(null);
-			cp.setSalt(null);
-			//设置内容不可编辑
-			cp.setEnforcement(false);
-			//设置格式不可编辑
-			cp.setFormatting(false);
-		}
+		cp.setEdit(STDocProtect.READ_ONLY);
+		cp.setHash(bt);
+		cp.setSalt(bt);
+		//设置内容不可编辑
+		cp.setEnforcement(true);
+		//设置格式不可编辑
+		cp.setFormatting(true);
 		
-		cs.setDocumentProtection(cp);
-		ds.setJaxbElement(cs);
-		//添加到文档主体中
-		wordPackage.getMainDocumentPart().addTargetPart(ds);
+		
+		DocumentSettingsPart dsp = wordPackage.getMainDocumentPart().getDocumentSettingsPart();
+		CTSettings settings = null;
+		if(dsp == null){
+			dsp = new DocumentSettingsPart();
+			settings = factory.createCTSettings();
+			settings.setDocumentProtection(cp);
+			dsp.setJaxbElement(settings);
+			wordPackage.getMainDocumentPart().addTargetPart(dsp);
+		}else {
+			settings = dsp.getContents();
+			settings.setDocumentProtection(cp);
+		}
 	}
 	
 	

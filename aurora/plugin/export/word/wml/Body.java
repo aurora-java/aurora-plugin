@@ -22,7 +22,9 @@ public class Body {
         @XmlElementRef(name = "br",type = Break.class),
         @XmlElementRef(name = "toc",type = Toc.class),
         @XmlElementRef(name = "tbl",type = Table.class),
-        @XmlElementRef(name = "chunk",type = AltChunk.class)
+        @XmlElementRef(name = "chunk",type = AltChunk.class),
+        @XmlElementRef(name = "permStart",type = PermStart.class),
+        @XmlElementRef(name = "permEnd",type = PermEnd.class)
     })
 	private List<Object> paras = new ArrayList<Object>();
 
