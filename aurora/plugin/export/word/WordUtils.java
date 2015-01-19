@@ -1422,9 +1422,8 @@ public class WordUtils {
 	 * 
 	 */
 	public static void setReadOnly(WordprocessingMLPackage wordPackage , ObjectFactory factory)throws Exception{
-//		byte[] bt = encrypt("111111","abc");
 		
-		byte[] bt = "111111".getBytes();
+		byte[] bt = "handhand".getBytes();
 		
 		//创建设置文档对象
 		
