@@ -47,6 +47,7 @@ public class ScriptRunner {
 		return sso.get(ScriptShareObject.KEY_IMPORT);
 	}
 
+	@Deprecated
 	public String getParsedScript() {
 		if (context == null)
 			return exp;

@@ -41,7 +41,7 @@ public class AuroraScriptEngine {
 	public static final String KEY_SERVICE_CONTEXT = "service_context";
 	public static final String KEY_SSO = "sso";
 	private static String js = ScriptUtil.loadAuroraCore();
-	private static TopLevel topLevel = null;
+	protected static TopLevel topLevel = null;
 	private Scriptable scope = null;
 	static {
 		RhinoException.useMozillaStackStyle(false);
@@ -61,14 +61,14 @@ public class AuroraScriptEngine {
 
 	private static Set<String> executedInTopLevel = new HashSet<String>();
 
-	private CompositeMap service_context;
+	protected CompositeMap service_context;
 	private int optimizeLevel = -1;
 
 	public AuroraScriptEngine(CompositeMap context) {
 		super();
 		if (context == null)
-			throw new NullPointerException(
-					"init context for 'AuroraScriptEngine' can not be null.");
+			throw new NullPointerException("init context for '"
+					+ getClass().getSimpleName() + "' can not be null.");
 		this.service_context = context;
 		IObjectRegistry or = ((ScriptShareObject) service_context.get(KEY_SSO))
 				.getObjectRegistry();
@@ -78,7 +78,7 @@ public class AuroraScriptEngine {
 		ScriptUtil.registerExceptionHandle(or);
 	}
 
-	private void preDefine(Context cx, Scriptable scope) {
+	protected void preDefine(Context cx, Scriptable scope) {
 		Scriptable ctx = cx.newObject(scope, CompositeMapObject.CLASS_NAME,
 				new Object[] { service_context });
 		ScriptableObject.defineProperty(scope, "$ctx", ctx,
@@ -117,9 +117,9 @@ public class AuroraScriptEngine {
 			ScriptableObject.defineClass(topLevel, ActionEntryObject.class);
 			topLevel.defineFunctionProperties(new String[] { "print",
 					"println", "raise_app_error", "$instance", "$cache",
-					"$config", "$bm", "$define", "$logger" },
+					"$config", "$bm", "$define", "$import", "$logger" },
 					AuroraScriptEngine.class, ScriptableObject.DONTENUM);
-			cx.evaluateString(topLevel, js, aurora_core_js, 1, null);
+			// cx.evaluateString(topLevel, js, aurora_core_js, 1, null);
 			// --define useful method
 			ScriptableObject cmBuilder = (ScriptableObject) cx
 					.newObject(topLevel);
@@ -265,6 +265,16 @@ public class AuroraScriptEngine {
 			if (script != null)
 				script.exec(cx, topLevel);
 		}
+	}
+
+	public static void $import(Context cx, Scriptable thisObj, Object[] args,
+			Function funObj) throws IOException {
+		if (args.length == 0 || !(args[0] instanceof String))
+			return;
+		String jspath = (String) args[0];
+		CompositeMap context = (CompositeMap) cx
+				.getThreadLocal(KEY_SERVICE_CONTEXT);
+		ScriptImportor.defineExternScript(cx, thisObj, context, jspath);
 	}
 
 	public void setOptimizeLevel(int level) {
