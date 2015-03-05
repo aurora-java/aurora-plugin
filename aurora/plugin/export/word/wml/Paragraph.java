@@ -77,6 +77,7 @@ public class Paragraph {
         @XmlElementRef(name = "img",type = Image.class),
         @XmlElementRef(name = "qr-code",type = QRCode.class),
         @XmlElementRef(name = "ptab",type = PTab.class),
+        @XmlElementRef(name = "pbdr",type = PBdr.class),
         @XmlElementRef(name = "permStart",type = PermStart.class),
         @XmlElementRef(name = "permEnd",type = PermEnd.class)
     })
