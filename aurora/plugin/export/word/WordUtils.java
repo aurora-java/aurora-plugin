@@ -1422,7 +1422,7 @@ public class WordUtils {
 	 * 
 	 */
 	public static void setReadOnly(WordprocessingMLPackage wordPackage , ObjectFactory factory)throws Exception{
-		
+	
 		byte[] bt = "handhand".getBytes();
 		
 		//创建设置文档对象
@@ -1443,7 +1443,7 @@ public class WordUtils {
 		//设置内容不可编辑
 		cp.setEnforcement(true);
 		//设置格式不可编辑
-		cp.setFormatting(true);
+		cp.setFormatting(false);
 		
 		
 		DocumentSettingsPart dsp = wordPackage.getMainDocumentPart().getDocumentSettingsPart();
