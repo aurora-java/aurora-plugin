@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.io.FileUtils;
 import org.docx4j.Docx4J;
 import org.docx4j.convert.out.FOSettings;
 import org.docx4j.jaxb.Context;
@@ -109,7 +110,9 @@ public class WordExport extends AbstractEntry {
 		
 		String savePath = getSavePath();
 		if(savePath!=null){
-			File destPdf = new File(uncertain.composite.TextParser.parse(savePath,model),name);
+			String pathStr = uncertain.composite.TextParser.parse(savePath,model);
+			FileUtils.forceMkdir(new File(pathStr));
+			File destPdf = new File(pathStr,name);
 			if(WordUtils.TYPE_WORD.equals(getType())) {
 				wordMLPackage.save(destPdf);
 			}else if(WordUtils.TYPE_PDF.equals(getType())){
