@@ -10,8 +10,9 @@ import aurora.javascript.NativeArray;
 import aurora.javascript.NativeJavaObject;
 import aurora.javascript.Scriptable;
 import aurora.javascript.ScriptableObject;
+import aurora.javascript.Wrapper;
 
-public class CompositeMapObject extends ScriptableObject {
+public class CompositeMapObject extends ScriptableObject implements Wrapper {
 
 	private static final long serialVersionUID = 5555217288330437262L;
 	public static final String CLASS_NAME = "CompositeMap";
@@ -281,8 +282,12 @@ public class CompositeMapObject extends ScriptableObject {
 
 	@Override
 	public void put(String name, Scriptable start, Object value) {
-		if (!(value instanceof Callable))
-			composite_put(name, value);
+		if (!(value instanceof Callable)) {
+			if (value instanceof Wrapper) {
+				composite_put(name, ((Wrapper) value).unwrap());
+			} else
+				composite_put(name, value);
+		}
 		if (!isSealed())
 			super.put(name, start, value);
 	}
@@ -340,5 +345,10 @@ public class CompositeMapObject extends ScriptableObject {
 	@Override
 	public Object[] getIds() {
 		return data.keySet().toArray();
+	}
+
+	@Override
+	public Object unwrap() {
+		return data;
 	}
 }
