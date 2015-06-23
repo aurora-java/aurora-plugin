@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path=""/>
-	<classpathentry combineaccessrules="false" kind="src" path="/aurora"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/uncertain"/>
 	<classpathentry kind="lib" path="dependency/batik-anim.jar"/>
 	<classpathentry kind="lib" path="dependency/batik-awt-util.jar"/>
 	<classpathentry kind="lib" path="dependency/batik-bridge.jar"/>
@@ -22,19 +19,91 @@
 	<classpathentry kind="lib" path="dependency/batik-transcoder.jar"/>
 	<classpathentry kind="lib" path="dependency/batik-util.jar"/>
 	<classpathentry kind="lib" path="dependency/batik-xml.jar"/>
-	<classpathentry kind="lib" path="dependency/js.jar"/>
-	<classpathentry kind="lib" path="dependency/pdf-transcoder.jar"/>
 	<classpathentry kind="lib" path="dependency/xalan-2.6.0.jar"/>
 	<classpathentry kind="lib" path="dependency/xerces_2_5_0.jar"/>
 	<classpathentry kind="lib" path="dependency/xml-apis.jar"/>
 	<classpathentry kind="lib" path="dependency/xml-apis-ext.jar"/>
-	<classpathentry kind="lib" path="D:/WorkDevSpace/Tomcat-5.5.33/common/lib/servlet-api.jar"/>
 	<classpathentry kind="lib" path="dependency/sapjco.jar"/>
 	<classpathentry kind="lib" path="dependency/sapidoc.jar"/>
 	<classpathentry kind="lib" path="dependency/sapidocjco.jar"/>
 	<classpathentry kind="lib" path="dependency/sapidoc3.jar"/>
 	<classpathentry kind="lib" path="dependency/sapjco3.jar"/>
-	<classpathentry kind="lib" path="dependency/poi-3.6-20091214.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.5.0_09"/>
-	<classpathentry kind="output" path=""/>
+	<classpathentry kind="lib" path="dependency/activemq-core-5.4.2.jar"/>
+	<classpathentry kind="lib" path="dependency/aurora-js.jar"/>
+	<classpathentry kind="lib" path="dependency/avalon-framework-api-4.3.1.jar"/>
+	<classpathentry kind="lib" path="dependency/avalon-framework-impl-4.3.1.jar"/>
+	<classpathentry kind="lib" path="dependency/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="dependency/commons-codec-1.5.jar"/>
+	<classpathentry kind="lib" path="dependency/commons-fileupload-1.3.1.jar"/>
+	<classpathentry kind="lib" path="dependency/commons-io-1.3.1.jar"/>
+	<classpathentry kind="lib" path="dependency/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="dependency/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="dependency/core-2.1.jar"/>
+	<classpathentry kind="lib" path="dependency/docx4j-3.1.0.jar"/>
+	<classpathentry kind="lib" path="dependency/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="dependency/fop-1.1.jar"/>
+	<classpathentry kind="lib" path="dependency/freemarker-2.3.18.jar"/>
+	<classpathentry kind="lib" path="dependency/geronimo-j2ee-management_1.1_spec-1.0.1.jar"/>
+	<classpathentry kind="lib" path="dependency/geronimo-jms_1.1_spec-1.1.1.jar"/>
+	<classpathentry kind="lib" path="dependency/geronimo-stax-api_1.0_spec-1.0.jar"/>
+	<classpathentry kind="lib" path="dependency/httpclient-4.1.2.jar"/>
+	<classpathentry kind="lib" path="dependency/httpclient-cache-4.1.2.jar"/>
+	<classpathentry kind="lib" path="dependency/httpcore-4.1.2.jar"/>
+	<classpathentry kind="lib" path="dependency/httpmime-4.1.2.jar"/>
+	<classpathentry kind="lib" path="dependency/jaxb-xmldsig-core-1.0.0.jar"/>
+	<classpathentry kind="lib" path="dependency/jcifs-1.3.16.jar"/>
+	<classpathentry kind="lib" path="dependency/log4j-1.2.9.jar"/>
+	<classpathentry kind="lib" path="dependency/mail.jar"/>
+	<classpathentry kind="lib" path="dependency/memcached-2.6.jar"/>
+	<classpathentry kind="lib" path="dependency/org-netbeans-lib-cvsclient.jar"/>
+	<classpathentry kind="lib" path="dependency/poi-3.9-20121203.jar"/>
+	<classpathentry kind="lib" path="dependency/poi-ooxml-3.9-20121203.jar"/>
+	<classpathentry kind="lib" path="dependency/poi-ooxml-schemas-3.9-20121203.jar"/>
+	<classpathentry kind="lib" path="dependency/quartz.jar"/>
+	<classpathentry kind="lib" path="dependency/slf4j-api-1.5.6.jar"/>
+	<classpathentry kind="lib" path="dependency/slf4j-log4j12-1.5.8.jar"/>
+	<classpathentry kind="lib" path="dependency/spnego-r7.jar"/>
+	<classpathentry kind="lib" path="dependency/spymemcached-2.9.0.jar"/>
+	<classpathentry kind="lib" path="dependency/xmemcached-1.3.8.jar"/>
+	<classpathentry kind="lib" path="dependency/xmlbeans-2.3.0.jar"/>
+	<classpathentry kind="lib" path="dependency/xmlgraphics-commons-1.5.jar"/>
+	<classpathentry kind="lib" path="dependency/YeePay_HTMLcommon_V3.0.jar"/>
+	<classpathentry kind="lib" path="dependency/aurora.plugin.sso.cas/cas-client-core-3.2.1.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/servlet-api.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/c3p0-0.9.1.2.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/commons-fileupload.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/druid-0.2.7.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/freemarker-2.3.18.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/jotm-client.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/mysql-connector-java-5.1.12-bin.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/ojdbc14.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/ow2-jta-1.1-spec.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/rhino1_7R4.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/sqlserverjdbc.jar"/>
+	<classpathentry kind="lib" path="/AuroraDependency/Library/xapool.jar"/>
+	<classpathentry kind="lib" path="dependency/aurora.plugin.bgtcheck.dataimport/mybatis-3.2.3.jar"/>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path="src/main/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
