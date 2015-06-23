@@ -1,26 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="lib" path="dependency/batik-anim.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-awt-util.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-bridge.jar"/>
 	<classpathentry kind="lib" path="dependency/batik-codec.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-css.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-dom.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-ext.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-extension.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-gui-util.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-gvt.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-parser.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-rasterizer.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-script.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-svg-dom.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-svggen.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-swing.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-transcoder.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-util.jar"/>
-	<classpathentry kind="lib" path="dependency/batik-xml.jar"/>
-	<classpathentry kind="lib" path="dependency/xalan-2.6.0.jar"/>
-	<classpathentry kind="lib" path="dependency/xerces_2_5_0.jar"/>
 	<classpathentry kind="lib" path="dependency/xml-apis.jar"/>
 	<classpathentry kind="lib" path="dependency/xml-apis-ext.jar"/>
 	<classpathentry kind="lib" path="dependency/sapjco.jar"/>
@@ -69,18 +50,9 @@
 	<classpathentry kind="lib" path="dependency/xmlgraphics-commons-1.5.jar"/>
 	<classpathentry kind="lib" path="dependency/YeePay_HTMLcommon_V3.0.jar"/>
 	<classpathentry kind="lib" path="dependency/aurora.plugin.sso.cas/cas-client-core-3.2.1.jar"/>
-	<classpathentry kind="lib" path="/AuroraDependency/Library/servlet-api.jar"/>
-	<classpathentry kind="lib" path="/AuroraDependency/Library/c3p0-0.9.1.2.jar"/>
-	<classpathentry kind="lib" path="/AuroraDependency/Library/commons-fileupload.jar"/>
-	<classpathentry kind="lib" path="/AuroraDependency/Library/druid-0.2.7.jar"/>
-	<classpathentry kind="lib" path="/AuroraDependency/Library/freemarker-2.3.18.jar"/>
-	<classpathentry kind="lib" path="/AuroraDependency/Library/jotm-client.jar"/>
 	<classpathentry kind="lib" path="/AuroraDependency/Library/mysql-connector-java-5.1.12-bin.jar"/>
-	<classpathentry kind="lib" path="/AuroraDependency/Library/ojdbc14.jar"/>
-	<classpathentry kind="lib" path="/AuroraDependency/Library/ow2-jta-1.1-spec.jar"/>
 	<classpathentry kind="lib" path="/AuroraDependency/Library/rhino1_7R4.jar"/>
 	<classpathentry kind="lib" path="/AuroraDependency/Library/sqlserverjdbc.jar"/>
-	<classpathentry kind="lib" path="/AuroraDependency/Library/xapool.jar"/>
 	<classpathentry kind="lib" path="dependency/aurora.plugin.bgtcheck.dataimport/mybatis-3.2.3.jar"/>
 	<classpathentry kind="src" output="target/classes" path="src/main/java">
 		<attributes>
