@@ -194,6 +194,16 @@ public class IOUtilsEx extends IOUtils {
 		}
 	}
 
+	public static void writeFile(byte[] data, String filePath)
+			throws IOException {
+		writeFile(new ByteArrayInputStream(data), filePath);
+	}
+
+	public static void writeFile(String src, String filePath, String encoding)
+			throws IOException {
+		writeFile(asReader(src), filePath, encoding);
+	}
+
 	/**
 	 * transfer all bytes from {@code in} to {@code out}<br>
 	 * {@code in} will be close after transfer complete<br>
