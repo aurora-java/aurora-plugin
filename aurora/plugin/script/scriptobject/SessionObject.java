@@ -11,6 +11,7 @@ import aurora.javascript.Context;
 import aurora.javascript.Function;
 import aurora.javascript.Scriptable;
 import aurora.javascript.ScriptableObject;
+import aurora.javascript.Wrapper;
 import aurora.service.ServiceInstance;
 import aurora.service.http.HttpServiceInstance;
 
@@ -68,6 +69,8 @@ public class SessionObject extends ScriptableObject {
 
 	public void jsFunction_writeValue(String target, Object value) {
 		init();
+		if (value instanceof Wrapper)
+			value = ((Wrapper) value).unwrap();
 		HttpSession session = request.getSession();
 		session.setAttribute(target, value);
 		context.putObject("/session/@" + target, value);
