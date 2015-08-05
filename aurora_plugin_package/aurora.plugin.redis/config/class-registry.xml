@@ -2,5 +2,6 @@
 <class-registry>
   <package-mapping packageName="aurora.plugin.redis" />
   <package-mapping packageName="aurora.plugin.redis.pipe" />
+  <package-mapping packageName="aurora.plugin.redis.sc" />
   <package-mapping packageName="redis.clients.jedis" />
 </class-registry>

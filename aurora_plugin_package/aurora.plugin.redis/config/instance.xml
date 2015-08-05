@@ -7,5 +7,17 @@
 				<u:type typeName="aurora.plugin.redis.IRedisConnectionFactory" />
 			</u:implement-types>			
 		</u:configurable-instance>
+
+		<u:configurable-instance configFile="secondary-cache.config" >
+			<u:description>Redis based secondary cache, synchronize data from redis to JVMs</u:description>
+			<u:implement-types>
+				<u:type typeName="aurora.plugin.redis.sc.SecondaryCacheManager" />
+			</u:implement-types>
+			<u:required-instances>
+				<u:type typeName="aurora.plugin.redis.IRedisConnectionFactory" />
+				<u:type typeName="uncertain.data.IDataDistributor" />
+			</u:required-instances>
+		</u:configurable-instance>
+
 	</u:instances>
 </u:instance-config>
