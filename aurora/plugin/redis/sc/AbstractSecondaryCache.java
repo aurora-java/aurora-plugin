@@ -9,7 +9,10 @@ import uncertain.ocm.OCManager;
 public abstract class AbstractSecondaryCache extends AbstractLocatableObject implements ISecondaryCache {
 	
 	String	name;
+	Class	collectionType;
 	Class   recordType;
+	String	serializeFormat = "hash";
+	
 	
 	OCManager mapper;
 
@@ -25,27 +28,49 @@ public abstract class AbstractSecondaryCache extends AbstractLocatableObject imp
 		this.name = name;
 	}
 	
-	public Class getRecordType() {
-		return recordType;
-	}
-	
 	public void setRecordType(Class recordType) {
 		this.recordType = recordType;
 	}
 	
-	protected Object convert(Map<String, String> input) {
-		if (recordType == null) {
+	protected Object convert(Object input) {
+		if (recordType == null || !(input instanceof Map)) {
 			return input;
 		}
 		try {
+			Map mdata = (Map)input;
 			Object obj = recordType.newInstance();
 			CompositeMap map = new CompositeMap();
-			map.putAll(input);
+			map.putAll(mdata);
 			mapper.populateObject(map, obj);
 			return obj;
 		} catch (Exception ex) {
 			throw new RuntimeException("Can't create instance of " + recordType, ex);
 		}
+	}
+
+	public String getSerializeFormat() {
+		return serializeFormat;
+	}
+	
+	public Class getRecordType() {
+		return recordType;
+	}
+
+	public void setSerializeFormat(String serialize_format) {
+		this.serializeFormat = serialize_format;
+	}
+	
+	public abstract Class getBaseDataType();
+	
+	public Class getCollectionType() {
+		return collectionType;
+	}
+
+	public void setCollectionType(Class type) {
+		Class cls = getBaseDataType();
+		if( !cls.isAssignableFrom(type))
+			throw new IllegalArgumentException(type+" is incompatible with "+cls.getName());
+		this.collectionType = type;
 	}
 	
 
