@@ -2,9 +2,10 @@ package aurora.plugin.redis.sc;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import uncertain.composite.CompositeMap;
 import uncertain.ocm.AbstractLocatableObject;
-import uncertain.ocm.OCManager;
 
 public abstract class AbstractSecondaryCache extends AbstractLocatableObject implements ISecondaryCache {
 	
@@ -13,12 +14,15 @@ public abstract class AbstractSecondaryCache extends AbstractLocatableObject imp
 	Class   recordType;
 	String	serializeFormat = "hash";
 	
+	ObjectMapper	objMapper = new ObjectMapper();
 	
-	OCManager mapper;
+	//OCManager mapper;
 
+	/*
 	protected AbstractSecondaryCache(OCManager mapper) {
 		this.mapper = mapper;
-	}	
+	}
+	*/	
 
 	public String getName() {
 		return name;
@@ -38,11 +42,15 @@ public abstract class AbstractSecondaryCache extends AbstractLocatableObject imp
 		}
 		try {
 			Map mdata = (Map)input;
+			Object obj= objMapper.convertValue(mdata, recordType);
+			return obj;
+			/*
 			Object obj = recordType.newInstance();
 			CompositeMap map = new CompositeMap();
 			map.putAll(mdata);
 			mapper.populateObject(map, obj);
 			return obj;
+			*/
 		} catch (Exception ex) {
 			throw new RuntimeException("Can't create instance of " + recordType, ex);
 		}

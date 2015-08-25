@@ -8,8 +8,8 @@ import redis.clients.jedis.Jedis;
 
 public interface IRedisConnectionFactory {
     
-    //public Jedis getConnection();
-    
     public Jedis getConnection(String name);
+    
+    public ISubscribeManager getSubscribeManager();
 
 }

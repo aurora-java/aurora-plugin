@@ -28,9 +28,10 @@ public class RedisPipe extends AdaptivePipe  {
     
     Jedis jedisForPop, jedisForPush;
     
-    static ThreadLocal  conns = new ThreadLocal();
+    //static ThreadLocal  conns = new ThreadLocal();
     
     public RedisPipe(IObjectRegistry ios) {
+    	//super();
         jsonMapper = new ObjectMapper();
         this.ios = ios;
     }
@@ -85,10 +86,24 @@ public class RedisPipe extends AdaptivePipe  {
     
     @Override
     public Object take() throws InterruptedException {
+        if (!running)
+            return null;
+        Jedis jedis = jedisForPop;
+        Object value = direction==PipeDirection.FIFO ? jedis.rpop( getId()) : jedis.lpop(getId());
+        return value;
+    }
+    /*
+    public Object take() throws InterruptedException {
+    	int timeout=1;
+    	List<String> value = null;
         try {
             Jedis jedis = jedisForPop;
-            List<String> value = direction == PipeDirection.FIFO ? jedis.brpop(
-                    0, getId()) : jedis.blpop(0, getId());
+            while(value==null && super.running && (!super.shutdownInProcess) ){
+	            value = direction == PipeDirection.FIFO ? jedis.brpop(
+	                    timeout, getId()) : jedis.blpop(timeout, getId());
+            }
+            if( value==null)
+            	return null;
             if (value.size() != 2)
                 throw new RuntimeException("blpop return format error:" + value);
             String str = value.get(1);
@@ -99,6 +114,7 @@ public class RedisPipe extends AdaptivePipe  {
             return null;
         }
     }
+    */
 
     @Override
     public int size() {
@@ -121,9 +137,11 @@ public class RedisPipe extends AdaptivePipe  {
     
     @Override
     public void shutdown() {
-        super.shutdown();
         jedisForPush.close();
         jedisForPop.close();
+        //System.out.println(getId()+" to call super.shutdown()");
+        super.shutdown();
+
     }
 
     @Override

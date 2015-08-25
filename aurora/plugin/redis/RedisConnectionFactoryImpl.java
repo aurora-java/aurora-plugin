@@ -12,13 +12,15 @@ import java.util.Map;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
 
-public class RedisConnectionFactoryImpl implements IRedisConnectionFactory {
+public class RedisConnectionFactoryImpl implements IRedisConnectionFactory  {
     
     Map<String,JedisShardInfo>   connMap;
     List<RedisServer>         connList;
+    SubscribeManager				subscribeManager;
 
     public RedisConnectionFactoryImpl() {
         connMap = new HashMap<String,JedisShardInfo>();
+        subscribeManager = new SubscribeManager(this);
     }
     
     public void addConnections(List<RedisServer> conns){
@@ -36,7 +38,9 @@ public class RedisConnectionFactoryImpl implements IRedisConnectionFactory {
         return connList;
     }
     
-
+    public ISubscribeManager getSubscribeManager(){
+    	return this.subscribeManager;
+    }
     
     public Jedis getConnection(String name){
         JedisShardInfo info = connMap.get(name);

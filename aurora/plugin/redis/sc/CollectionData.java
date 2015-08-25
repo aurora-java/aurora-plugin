@@ -8,9 +8,15 @@ import uncertain.ocm.OCManager;
 
 public class CollectionData extends MapData {
 
+	/*
 	public CollectionData(OCManager mapper) throws Exception {
 		super(mapper);
 		this.collectionType = Collection.class;
+	}
+	*/
+	
+	public CollectionData(){
+		super();
 	}
 
 	@Override
