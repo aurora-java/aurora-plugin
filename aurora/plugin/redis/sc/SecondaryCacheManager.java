@@ -69,6 +69,8 @@ public class SecondaryCacheManager extends AbstractLocatableObject
 	CacheManagerMode mode = CacheManagerMode.distributor;
 	String modeProperty;
 
+	Map<String,Boolean> initLoadFlags = new HashMap<String, Boolean>();
+
 	Thread subscribeThread;
 
 	public class FullLoadWorker implements Runnable {
@@ -104,6 +106,7 @@ public class SecondaryCacheManager extends AbstractLocatableObject
 		public void run() {
 			try {
 				fullLoad(conn, cache);
+				initLoadFlags.put(cache.getName(), Boolean.TRUE);
 			} catch (Exception ex) {
 				fullLoadFail(this, ex);
 			} finally {
@@ -124,6 +127,14 @@ public class SecondaryCacheManager extends AbstractLocatableObject
 		this.dataDistributor = dataDistributor;
 		this.connFactory = connFactory;
 		jobManager = new RedisJobManager("SecondaryCacheManage", connFactory);
+	}
+
+	public boolean initialLoadComplete(){
+		for(Boolean b : initLoadFlags.values()){
+			if(!b)
+				return false;
+		}
+		return true;
 	}
 
 	public ISecondaryCache getCache(String name) {
@@ -177,6 +188,7 @@ public class SecondaryCacheManager extends AbstractLocatableObject
 	}
 
 	public void addCache(ISecondaryCache cache) {
+		initLoadFlags.put(cache.getName(),Boolean.FALSE);
 		cacheConfigMap.put(cache.getName(), cache);
 	}
 

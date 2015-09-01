@@ -11,6 +11,7 @@ import java.util.Map;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisShardInfo;
+import redis.clients.util.Pool;
 
 public class RedisConnectionFactoryImpl implements IRedisConnectionFactory  {
     
@@ -41,8 +42,13 @@ public class RedisConnectionFactoryImpl implements IRedisConnectionFactory  {
     public ISubscribeManager getSubscribeManager(){
     	return this.subscribeManager;
     }
-    
-    public Jedis getConnection(String name){
+
+	@Override
+	public Pool<Jedis> getJedisPool(String poolName) {
+		return null;
+	}
+
+	public Jedis getConnection(String name){
         JedisShardInfo info = connMap.get(name);
         return info==null?null: new Jedis(info);
         //return new Jedis();
