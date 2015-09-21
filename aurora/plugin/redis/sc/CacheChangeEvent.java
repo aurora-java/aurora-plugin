@@ -12,6 +12,14 @@ public class CacheChangeEvent implements Serializable {
 	String cache;
 	String key;
 
+	public CacheChangeEvent(){}
+
+	public CacheChangeEvent(DataChangeType type, String cache, String key) {
+		this.type = type;
+		this.cache = cache;
+		this.key = key;
+	}
+
 	public DataChangeType getType() {
 		return type;
 	}
