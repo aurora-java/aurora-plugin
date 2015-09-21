@@ -4,28 +4,27 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisDataException;
+import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.util.Pool;
 
 /**
  * Created by jessen on 15/8/5.
  */
 public class RedisTaskExecutor {
-	public static <T> T  execute(Pool<Jedis> pool, RedisTask task) {
+	public static <T> T execute(Pool<Jedis> pool, RedisTask task) {
 
 		while (true) {
 			Jedis redis = getJedisConnection(pool);
 			try {
 				Object obj = task.runWithRedis(redis);
-				return (T)obj;
-			} catch (JedisConnectionException e) {
-				if (!task.retryOnException()) {
-					throw e;
-				}
-			} catch (JedisDataException e) {
+				return (T) obj;
+			} catch (JedisException e) {
 				if (!task.retryOnException()) {
 					throw e;
 				}
 			} catch (Exception e) {
+				if (e instanceof RuntimeException)
+					throw (RuntimeException) e;
 				throw new RuntimeException(e);
 			} finally {
 				try {
@@ -41,7 +40,7 @@ public class RedisTaskExecutor {
 		while (true) {
 			try {
 				return pool.getResource();
-			} catch (JedisConnectionException e) {
+			} catch (JedisException e) {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e1) {
@@ -65,20 +64,16 @@ public class RedisTaskExecutor {
 					redis = initJedis[0] = getJedisConnection(pool);
 				}
 				Object obj = task.runWithRedis(redis);
-				return (T)obj;
-			} catch (JedisConnectionException e) {
-				if (task.retryOnException()) {
-					initJedis[0] = getJedisConnection(pool);
-				} else {
-					throw e;
-				}
-			} catch (JedisDataException e) {
+				return (T) obj;
+			} catch (JedisException e) {
 				if (task.retryOnException()) {
 					initJedis[0] = getJedisConnection(pool);
 				} else {
 					throw e;
 				}
 			} catch (Exception e) {
+				if (e instanceof RuntimeException)
+					throw (RuntimeException) e;
 				throw new RuntimeException(e);
 			}
 		}
