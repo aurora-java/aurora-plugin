@@ -1,6 +1,5 @@
 package aurora.plugin.redis;
 
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -46,7 +45,7 @@ public class SentinelBasedRedisConnectionFactory implements IRedisConnectionFact
 		}
 	}
 
-	public ISubscribeManager getSubscribeManager(){
+	public ISubscribeManager getSubscribeManager() {
 		return subscribeManager;
 	}
 
@@ -65,10 +64,8 @@ public class SentinelBasedRedisConnectionFactory implements IRedisConnectionFact
 			for (SentinelServer ss : pool.getServers()) {
 				sentinels.add(ss.getHost() + ":" + ss.getPort());
 			}
-			GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-			JedisSentinelPool sentinelPool = new JedisSentinelPool(pool.getMaster(), sentinels, config, (int) pool.getConnectionTimeout());
+			JedisSentinelPool sentinelPool = new JedisSentinelPool(pool.getMaster(), sentinels, pool.getConfig(), pool.getConnectionTimeout());
 			poolMap.put(pool.getName(), sentinelPool);
-
 		}
 		return true;
 	}
