@@ -22,24 +22,25 @@ public class HttpUtils {
 
 	/**
 	 * GET METHOD
-	 * 
-	 * @param strUrl
-	 *            String
-	 * @param map
-	 *            Map
-	 * @throws IOException
+	 *
+	 * @param strUrl   String
+	 * @param map      存放参数的map,可以为null
+	 * @param encoding 对参数编码时用的编码
 	 * @return List
+	 * @throws IOException
 	 */
 	public static InputStream urlGet(String strUrl, Map map, String encoding)
 			throws IOException {
-		String strtTotalURL = "";
-		if (strUrl.indexOf("?") == -1) {
-			strtTotalURL = strUrl + "?" + getQueryString(map, encoding);
-		} else {
-			strtTotalURL = strUrl + "&" + getQueryString(map, encoding);
+		String strTotalURL = strUrl;
+		String queryString = getQueryString(map, encoding);
+		if (queryString.length() > 0) {
+			if (strUrl.indexOf("?") == -1) {
+				strTotalURL += "?" + queryString;
+			} else {
+				strTotalURL += "&" + queryString;
+			}
 		}
-		URL url = new URL(strtTotalURL);
-
+		URL url = new URL(strTotalURL);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		// con.setUseCaches(false);
 		// con.setFollowRedirects(true);
@@ -48,37 +49,50 @@ public class HttpUtils {
 
 	/**
 	 * POST METHOD
-	 * 
-	 * @param strUrl
-	 *            String
-	 * @param content
-	 *            Map
-	 * @throws IOException
+	 *
+	 * @param strUrl String
+	 * @param map    Map 中的key-value会拼接成queryString形式的数据,value会encode
 	 * @return List
+	 * @throws IOException
 	 */
+
 	public static InputStream urlPost(String strUrl, Map map, String encoding)
 			throws IOException {
-
 		String content = getQueryString(map, encoding);
-		return urlPost(strUrl, content, encoding);
-	}
-
-	public static InputStream urlPost(String strUrl, String postData,
-			String encoding) throws IOException {
-		return urlPost(strUrl, new FastStringReader(postData), encoding);
+		return urlPost(strUrl, content, "application/x-www-form-urlencoded;charset=" + encoding, encoding);
 	}
 
 	/**
-	 * for plain text
-	 * 
+	 * default contentType is application/json;charset={@code encoding}
+	 *
 	 * @param strUrl
-	 * @param postDataReader
+	 * @param postData
 	 * @param encoding
 	 * @return
 	 * @throws IOException
 	 */
-	public static InputStream urlPost(String strUrl, Reader postDataReader,
-			String encoding) throws IOException {
+	public static InputStream urlPost(String strUrl, String postData,
+	                                  String encoding) throws IOException {
+		return urlPost(strUrl, postData, "application/json;charset=" + encoding, encoding);
+	}
+
+	public static InputStream urlPost(String strUrl, String postData, String contentType,
+	                                  String encoding) throws IOException {
+		return urlPost(strUrl, new FastStringReader(postData), contentType, encoding);
+	}
+
+	/**
+	 * do post for plain text<br/>
+	 *
+	 * @param strUrl
+	 * @param postDataReader
+	 * @param contentType
+	 * @param encoding
+	 * @return
+	 * @throws IOException
+	 */
+	public static InputStream urlPost(String strUrl, Reader postDataReader, String contentType,
+	                                  String encoding) throws IOException {
 
 		URL url = new URL(strUrl);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -87,8 +101,7 @@ public class HttpUtils {
 		con.setAllowUserInteraction(false);
 		con.setUseCaches(false);
 		con.setRequestMethod("POST");
-		con.setRequestProperty("Content-Type",
-				"application/x-www-form-urlencoded;charset=" + encoding);
+		con.setRequestProperty("Content-Type", contentType);
 		OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream(),
 				encoding);
 		IOUtilsEx.transfer(postDataReader, osw);
@@ -99,16 +112,19 @@ public class HttpUtils {
 	}
 
 	/**
-	 * for binary data
-	 * 
-	 * @param strUrl
-	 * @param postDataStream
-	 * @param encoding
+	 * @param strUrl         target url
+	 * @param postDataStream data source
+	 * @param contentType    charset should be specified (if needed). <br/>e.g.
+	 *                       <ul>
+	 *                       <li>text/xml;charset=UTF-8</li>
+	 *                       <li>application/xml</li>
+	 *                       <li>application/json;charset=UTF-8</li>
+	 *                       <li>application/octet-stream</li>
+	 *                       </ul>
 	 * @return
 	 * @throws IOException
 	 */
-	public static InputStream urlPost(String strUrl, InputStream postDataStream,
-			String encoding) throws IOException {
+	public static InputStream urlPost(String strUrl, InputStream postDataStream, String contentType) throws IOException {
 
 		URL url = new URL(strUrl);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -117,8 +133,7 @@ public class HttpUtils {
 		con.setAllowUserInteraction(false);
 		con.setUseCaches(false);
 		con.setRequestMethod("POST");
-		con.setRequestProperty("Content-Type",
-				"application/x-www-form-urlencoded;charset=" + encoding);
+		con.setRequestProperty("Content-Type", contentType);
 		OutputStream os = con.getOutputStream();
 		IOUtilsEx.transfer(postDataStream, os);
 		os.flush();
@@ -133,7 +148,7 @@ public class HttpUtils {
 		}
 		StringBuilder param = new StringBuilder();
 		Set keys = map.keySet();
-		for (Iterator i = keys.iterator(); i.hasNext();) {
+		for (Iterator i = keys.iterator(); i.hasNext(); ) {
 			String key = String.valueOf(i.next());
 			if (map.containsKey(key)) {
 				Object val = map.get(key);
