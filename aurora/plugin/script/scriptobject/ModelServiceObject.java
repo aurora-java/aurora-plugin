@@ -45,9 +45,10 @@ public class ModelServiceObject extends ScriptableObject {
 		context = ScriptUtil.getContext();
 		IObjectRegistry registry = ScriptUtil.getObjectRegistry(context);
 		if (registry != null) {
-			UncertainEngine uEngine = (UncertainEngine) registry
-					.getInstanceOfType(UncertainEngine.class);
-			svcFactory = new DatabaseServiceFactory(uEngine);
+			//UncertainEngine uEngine = (UncertainEngine) registry
+			//		.getInstanceOfType(UncertainEngine.class);
+			svcFactory = (DatabaseServiceFactory) registry.getInstanceOfType(DatabaseServiceFactory.class);
+            //svcFactory = new DatabaseServiceFactory(uEngine);
 		}
 		model = TextParser.parse(model, context);
 		try {
