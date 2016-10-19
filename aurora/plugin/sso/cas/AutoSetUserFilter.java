@@ -43,7 +43,6 @@ public class AutoSetUserFilter implements Filter {
 	IObjectRegistry objectRegistry;
 	ILogger logger;
 
-	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		afterLoginRedirectUrl = getPropertyFromInitParams(filterConfig, "afterLoginRedirectUrl", null);
 
@@ -56,7 +55,6 @@ public class AutoSetUserFilter implements Filter {
 
 	}
 
-	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 		
 		HttpServletRequest request = (HttpServletRequest)servletRequest;
@@ -111,7 +109,6 @@ public class AutoSetUserFilter implements Filter {
         return svc;
 	}
 
-	@Override
 	public void destroy() {
 
 	}

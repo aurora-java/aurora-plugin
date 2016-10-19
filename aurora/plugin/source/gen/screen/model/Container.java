@@ -30,7 +30,6 @@ abstract public class Container extends AuroraComponent implements
 		this.setPrompt("");
 		this.addPropertyChangeListener(new PropertyChangeListener() {
 
-			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (ComponentInnerProperties.CONTAINER_SECTION_TYPE.equals(evt
 						.getPropertyName())) {

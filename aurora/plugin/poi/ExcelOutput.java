@@ -88,7 +88,6 @@ public class ExcelOutput implements IResultSetConsumer, IContextAcceptable {
 		fileType = parameter.getString(ModelOutput.KEY_FORMAT);
 	}
 
-	@Override
 	public void setContext(CompositeMap context) {
 		this.ServiceContext = (SqlServiceContext) DynamicObject.cast(context,
 				SqlServiceContext.class);	
@@ -201,7 +200,6 @@ public class ExcelOutput implements IResultSetConsumer, IContextAcceptable {
 		return promptString;
 	}
 
-	@Override
 	public void begin(String root_name) {
 		Iterator<Entry<Integer, Map<Integer,String>>> iterator= headMap.entrySet().iterator();
 		Entry<Integer, Map<Integer,String>> entry;
@@ -247,7 +245,6 @@ public class ExcelOutput implements IResultSetConsumer, IContextAcceptable {
 		}			
 	}
 
-	@Override
 	public void newRow(String row_name) {
 		this.headLevel++;	
 		if (headLevel+1 > excelBean.getRowLimit()){
@@ -258,12 +255,10 @@ public class ExcelOutput implements IResultSetConsumer, IContextAcceptable {
 		rowMap = new HashMap<String, Object>();
 	}
 
-	@Override
 	public void loadField(String name, Object value) {
 		rowMap.put(name, value);
 	}
 
-	@Override
 	public void endRow() {
 		Row row = sheet.createRow(this.headLevel);
 		Iterator<Entry<Integer, CompositeMap>> iterator= columnMap.entrySet().iterator();
@@ -312,7 +307,6 @@ public class ExcelOutput implements IResultSetConsumer, IContextAcceptable {
 		}
 	}
 
-	@Override
 	public void end() {
 		ServiceInstance svc = ServiceInstance.getInstance(this.ServiceContext
 				.getObjectContext());	
@@ -339,12 +333,10 @@ public class ExcelOutput implements IResultSetConsumer, IContextAcceptable {
 
 	}
 
-	@Override
 	public void setRecordCount(long count) {
 
 	}
 
-	@Override
 	public Object getResult() {
 		return null;
 	}

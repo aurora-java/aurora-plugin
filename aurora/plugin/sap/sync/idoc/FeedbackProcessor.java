@@ -28,7 +28,6 @@ public class FeedbackProcessor implements Runnable {
 		this.logger = serverManager.getLogger();
 	}
 
-	@Override
 	public void run() {
 		while (serverManager.isRunning()) {
 			IDocFile idocFile = iDocProcessManager.pollFeedbackFile();

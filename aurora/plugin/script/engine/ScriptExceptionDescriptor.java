@@ -9,7 +9,6 @@ import aurora.service.validation.ErrorMessage;
 
 public class ScriptExceptionDescriptor implements IExceptionDescriptor {
 
-	@Override
 	public CompositeMap process(ServiceContext context, Throwable exception) {
 		ScriptException se = (ScriptException) exception;
 		String msg = exception.getMessage();

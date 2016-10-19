@@ -61,7 +61,6 @@ public class Grid extends GridColumn implements DatasetBinder, IDatasetDelegate 
 		super.setDataset(dataset);
 		dataset.addPropertyChangeListener(new PropertyChangeListener() {
 
-			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				if (ComponentProperties.selectionModel.equals(evt
 						.getPropertyName())) {

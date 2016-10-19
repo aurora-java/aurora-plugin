@@ -40,7 +40,6 @@ public class ExpiredSessionRegistry extends AbstractLocatableObject implements I
 		return expiredSessionHashMap.keySet().contains(sessionId);
 	}
 
-	@Override
 	public boolean startup() {
 		addScheduledService();
 		return true;
@@ -52,7 +51,6 @@ public class ExpiredSessionRegistry extends AbstractLocatableObject implements I
 		service.scheduleWithFixedDelay(new RemoveSession(), 1, timeOut, TimeUnit.MILLISECONDS);
 	}
 
-	@Override
 	public void shutdown() {
 		expiredSessionHashMap.clear();
 		service.shutdown();

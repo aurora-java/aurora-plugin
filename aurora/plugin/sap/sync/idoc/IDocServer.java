@@ -16,7 +16,6 @@ public class IDocServer implements ILifeCycle {
 		this.serverName = serverName;
 	}
 
-	@Override
 	public boolean startup() {
 		iDocProcessManager = new IDocProcessManager(serverManager);
 		iDocProcessManager.startup();
@@ -30,7 +29,6 @@ public class IDocServer implements ILifeCycle {
 		return true;
 	}
 
-	@Override
 	public void shutdown() {
 		shutdownMonitor();
 		shutdownListener();

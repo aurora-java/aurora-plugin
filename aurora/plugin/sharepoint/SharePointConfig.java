@@ -74,7 +74,6 @@ public class SharePointConfig extends AbstractLocatableObject implements ILifeCy
 	private long cacheFolderLength = 1000;
 	private CompositeMap spLists = new CompositeMap();
 
-	@Override
 	public boolean startup() {
 		if (appLocation == null)
 			throw BuiltinExceptionFactory.createAttributeMissing(this, "appLocation");
@@ -91,7 +90,6 @@ public class SharePointConfig extends AbstractLocatableObject implements ILifeCy
 		return true;
 	}
 
-	@Override
 	public void shutdown() {
 
 	}

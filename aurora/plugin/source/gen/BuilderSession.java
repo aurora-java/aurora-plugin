@@ -88,7 +88,6 @@ public class BuilderSession {
 		}
 		final CompositeMap[] maps = new CompositeMap[1];
 		this.context.iterate(new IterationHandle() {
-			@Override
 			public int process(CompositeMap map) {
 				String c_id = map.getString("markid", "");
 				if (modelId.equals(c_id)) {

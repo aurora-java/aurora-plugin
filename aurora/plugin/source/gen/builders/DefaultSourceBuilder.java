@@ -11,7 +11,6 @@ import aurora.plugin.source.gen.screen.model.properties.IProperties;
 
 public class DefaultSourceBuilder implements ISourceBuilder {
 
-	@Override
 	public void buildContext(BuilderSession session) {
 		CompositeMap currentModel = session.getCurrentModel();
 		CompositeMap context = createContext(session);
@@ -78,7 +77,6 @@ public class DefaultSourceBuilder implements ISourceBuilder {
 		return map;
 	}
 
-	@Override
 	public void actionEvent(String event, BuilderSession session) {
 	}
 

@@ -61,7 +61,6 @@ public class QueryFormToolBar extends HBox implements PropertyChangeListener {
 			hBox.setLabelWidth(lw);
 	}
 
-	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (evt.getPropertyName().equals(QueryForm.DEFAULT_QUERY_HINT_KEY)) {
 			this.firePropertyChange(QueryForm.DEFAULT_QUERY_HINT_KEY,

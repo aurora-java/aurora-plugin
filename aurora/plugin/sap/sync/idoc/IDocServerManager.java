@@ -63,7 +63,6 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 		}
 	}
 
-	@Override
 	public boolean startup() {
 		initParameters();
 		if(isEnabledJCo()){
@@ -95,7 +94,6 @@ public class IDocServerManager extends AbstractLocatableObject implements ILifeC
 			databaseManager.close();
 	}
 
-	@Override
 	public void shutdown() {
 		running = false;
 		if (idocServerList != null && !idocServerList.isEmpty()) {

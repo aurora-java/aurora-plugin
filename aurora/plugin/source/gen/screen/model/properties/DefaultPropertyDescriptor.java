@@ -17,7 +17,6 @@ public class DefaultPropertyDescriptor implements IPropertyDescriptor {
 		this.setStyle(style);
 	}
 
-	@Override
 	public Object getId() {
 		return id;
 	}

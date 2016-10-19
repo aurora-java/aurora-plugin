@@ -8,7 +8,6 @@ import aurora.service.validation.ErrorMessage;
 
 public class InterruptExceptionDescriptor implements IExceptionDescriptor {
 
-	@Override
 	public CompositeMap process(ServiceContext context, Throwable exception) {
 		String code = exception.getMessage();
 		ErrorMessage msg = new ErrorMessage(code,

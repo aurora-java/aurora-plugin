@@ -160,7 +160,6 @@ public class SourceGenManager {
 			CompositeMap components = loader.loadByFullFilePath(component_file
 					.getPath());
 			components.iterate(new IterationHandle() {
-				@Override
 				public int process(CompositeMap map) {
 					String component_type = map.getString("component_type", "");
 					String builder = map.getString("builder", "");

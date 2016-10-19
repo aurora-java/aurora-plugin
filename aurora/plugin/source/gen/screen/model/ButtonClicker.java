@@ -143,7 +143,6 @@ public class ButtonClicker extends AuroraComponent implements
 		super.setPropertyValue(propId, val);
 	}
 
-	@Override
 	public String getDescripition() {
 		return getActionID();
 	}

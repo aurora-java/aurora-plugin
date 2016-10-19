@@ -34,7 +34,6 @@ public class TxtOutput implements IResultSetConsumer, IContextAcceptable {
 	Map<String, Object> rowMap;
 	List<String> headList = new LinkedList<String>();
 
-	@Override
 	public void setContext(CompositeMap context) {
 		this.context = (SqlServiceContext) DynamicObject.cast(context,
 				SqlServiceContext.class);
@@ -55,7 +54,6 @@ public class TxtOutput implements IResultSetConsumer, IContextAcceptable {
 		this.separator = parameter.getString(ModelOutput.KEY_SEPARATOR, ",");
 	}
 
-	@Override
 	public void begin(String root_name) {
 		try {
 			ServiceInstance svc = ServiceInstance.getInstance(this.context
@@ -84,17 +82,14 @@ public class TxtOutput implements IResultSetConsumer, IContextAcceptable {
 		}
 	}
 
-	@Override
 	public void newRow(String row_name) {
 		rowMap = new HashMap<String, Object>();
 	}
 
-	@Override
 	public void loadField(String name, Object value) {
 		rowMap.put(name, value);
 	}
 
-	@Override
 	public void endRow() {
 		Iterator<String> it = headList.iterator();
 		StringBuffer sb = new StringBuffer();
@@ -114,18 +109,15 @@ public class TxtOutput implements IResultSetConsumer, IContextAcceptable {
 		pw.println(sb);
 	}
 
-	@Override
 	public void end() {		
 		pw.close();
 	}
 
-	@Override
 	public void setRecordCount(long count) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public Object getResult() {
 		// TODO Auto-generated method stub
 		return null;

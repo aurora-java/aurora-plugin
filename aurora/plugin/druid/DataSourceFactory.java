@@ -33,7 +33,6 @@ public class DataSourceFactory implements IDataSourceFactory {
 		((DruidDataSource) ds).close();
 	}
 
-	@Override
 	public Connection getNativeJdbcExtractor(Connection conn) throws Exception {
 		Connection nativeConn=conn;
 		if(conn instanceof DruidPooledConnection){

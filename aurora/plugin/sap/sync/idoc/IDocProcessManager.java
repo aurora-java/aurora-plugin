@@ -32,7 +32,6 @@ public class IDocProcessManager implements ILifeCycle {
 		this.interfaceEnabledFlag = serverManager.isInterfaceEnabledFlag();
 	}
 
-	@Override
 	public boolean startup() {
 		int threadCount = getThreadCount();
 		idocServerThreadMananger = Executors.newFixedThreadPool(threadCount);
@@ -54,7 +53,6 @@ public class IDocProcessManager implements ILifeCycle {
 		return true;
 	}
 
-	@Override
 	public void shutdown() {
 		List<Runnable> threadList = idocServerThreadMananger.shutdownNow();
 		for (Runnable thread : threadList) {
@@ -149,7 +147,6 @@ public class IDocProcessManager implements ILifeCycle {
 	}
 
 	class DeleteIDocFileProcessor implements Runnable {
-		@Override
 		public void run() {
 			while (serverManager.isRunning()) {
 				if (!serverManager.isKeepIdocFile()) {

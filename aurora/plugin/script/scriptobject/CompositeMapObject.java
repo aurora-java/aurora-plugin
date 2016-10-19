@@ -347,7 +347,6 @@ public class CompositeMapObject extends ScriptableObject implements Wrapper {
 		return data.keySet().toArray();
 	}
 
-	@Override
 	public Object unwrap() {
 		return data;
 	}

@@ -15,7 +15,6 @@ public class ActionMethod implements TemplateMethodModel {
 		this.session = session;
 	}
 
-	@Override
 	public Object exec(List arguments) throws TemplateModelException {
 		String event = (String) arguments.get(0);
 		// System.out.println(arguments.get(1).getClass());

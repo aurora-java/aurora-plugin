@@ -69,12 +69,10 @@ public class BmScript implements IConfigurable {
 
 	}
 
-	@Override
 	public void endConfigure() {
 
 	}
 
-	@Override
 	public void beginConfigure(CompositeMap config) {
 		mScript = config.getText();
 		if (mScript == null)

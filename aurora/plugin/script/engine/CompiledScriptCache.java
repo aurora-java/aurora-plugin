@@ -153,7 +153,6 @@ public class CompiledScriptCache implements CompiledScriptCacheMBean {
 		return v.script;
 	}
 
-	@Override
 	public int getScriptSize() {
 		return scriptCache.size();
 	}
@@ -181,14 +180,12 @@ public class CompiledScriptCache implements CompiledScriptCacheMBean {
 		}
 	}
 
-	@Override
 	public void clearScriptCache() {
 		synchronized (scriptCache) {
 			scriptCache.clear();
 		}
 	}
 
-	@Override
 	public String getScriptDetail(int idx) {
 		if (idx < 0 || idx >= scriptCache.size())
 			return "Index outof bounds";

@@ -250,7 +250,6 @@ public class ModelMapParser {
 
 		modelMap.iterate(new IterationHandle() {
 
-			@Override
 			public int process(CompositeMap map) {
 				if (refID.equals(map.getString("markid"))) {
 					// CompositeMap child = map.getChild("Dataset");
@@ -271,7 +270,6 @@ public class ModelMapParser {
 	public CompositeMap getComponentByID(final String markid) {
 		final CompositeMap[] maps = new CompositeMap[1];
 		modelMap.iterate(new IterationHandle() {
-			@Override
 			public int process(CompositeMap map) {
 				if (markid.equals(map.getString("markid"))
 						&& "reference".equals(map.getName()) == false) {
