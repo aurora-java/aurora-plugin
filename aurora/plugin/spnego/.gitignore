@@ -1,0 +1,14 @@
+/Base64.class
+/DelegateServletRequest.class
+/SpnegoAuthScheme.class
+/SpnegoAuthenticator.class
+/SpnegoConfig$Constants.class
+/SpnegoConfig.class
+/SpnegoHttpServletRequest.class
+/SpnegoHttpServletResponse.class
+/SpnegoLogin.class
+/SpnegoPrincipal.class
+/SpnegoProvider$1.class
+/SpnegoProvider$2.class
+/SpnegoProvider$3.class
+/SpnegoProvider.class
