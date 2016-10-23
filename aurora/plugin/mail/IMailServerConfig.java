@@ -14,4 +14,6 @@ public interface IMailServerConfig {
 	
 	public boolean getAuth();
 	
+	public boolean getSslEnable();
+	
 }

@@ -43,6 +43,7 @@ public class SendMail extends AbstractEntry implements IConfigurable {
 	private String from;
 	private String port;
 	private Boolean auth = null;
+	private Boolean sslEnable = null;
 
 	private Attachment[] attachments;
 
@@ -60,11 +61,14 @@ public class SendMail extends AbstractEntry implements IConfigurable {
 			from = from != null ? from : mailConfig.getFrom();
 			port = port != null ? port : mailConfig.getPort();
 			auth = auth != null ? auth : mailConfig.getAuth();
+			sslEnable = sslEnable != null ? sslEnable : mailConfig.getSslEnable();
 		}
 		if (port == null)
 			port = "25";
 		if (auth == null)
 			auth = false;
+		if(sslEnable == null)
+			sslEnable = false;
 		ILogger logger = LoggingContext.getLogger(runner.getContext(), this.getClass().getCanonicalName());
 		logger.config("Accept to E-mail message, began sendind mail operation");
 		CompositeMap map = runner.getContext();
@@ -107,8 +111,14 @@ public class SendMail extends AbstractEntry implements IConfigurable {
 		Properties props = new Properties();
 		props.put("mail.smtp.host", smtpServer);// 存储发送邮件服务器的信息
 		props.put("mail.smtp.auth", "true");// 同时通过验证
-		props.put("mail.smtp.port", port);
-
+		
+		if(!sslEnable){
+			props.put("mail.smtp.port", port);
+		}else{
+			props.put("mail.smtp.socketFactory.port", port);
+			props.put("mail.smtp.starttls.enable","true");
+		}
+		
 		Session s = null;
 		if (auth) { // 服务器需要身份认证
 			props.put("mail.smtp.auth", "true");
@@ -244,6 +254,7 @@ public class SendMail extends AbstractEntry implements IConfigurable {
 	public void setCto(String cto) {
 		this.cc = cto;
 	}
+
 	@Deprecated
 	public String getTo() {
 		return to;
@@ -252,7 +263,7 @@ public class SendMail extends AbstractEntry implements IConfigurable {
 	public void setTo(String to) {
 		this.to = to;
 	}
-	
+
 	public String getCc() {
 		return cc;
 	}
@@ -301,4 +312,19 @@ public class SendMail extends AbstractEntry implements IConfigurable {
 		this.auth = auth;
 	}
 
+	public Boolean getAuth() {
+		return auth;
+	}
+
+	public void setAuth(Boolean auth) {
+		this.auth = auth;
+	}
+
+	public Boolean getSslEnable() {
+		return sslEnable;
+	}
+
+	public void setSslEnable(Boolean sslEnable) {
+		this.sslEnable = sslEnable;
+	}
 }
