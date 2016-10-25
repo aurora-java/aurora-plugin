@@ -3,3 +3,7 @@
 /MailServerConfig.class
 /SendMail$SmtpAuth.class
 /SendMail.class
+/SendMailSilence$SmtpAuth.class
+/SendMailSilence.class
+/SendMailSilence$1.class
+/SendMailSilence$2.class

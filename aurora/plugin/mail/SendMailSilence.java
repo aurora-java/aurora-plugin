@@ -23,7 +23,7 @@ import javax.mail.internet.MimeUtility;
 import com.sun.mail.util.MailSSLSocketFactory;
 
 import aurora.database.service.SqlServiceContext;
-import aurora.plugin.mail.SendMailSilence.SmtpAuth;
+import test.JavaMailSSL;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
 import uncertain.exception.BuiltinExceptionFactory;
@@ -34,7 +34,7 @@ import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 
-public class SendMail extends AbstractEntry implements IConfigurable {
+public class SendMailSilence extends AbstractEntry implements IConfigurable {
 
 	private IObjectRegistry registry;
 	private String title;
@@ -52,7 +52,7 @@ public class SendMail extends AbstractEntry implements IConfigurable {
 
 	private Attachment[] attachments;
 
-	public SendMail(IObjectRegistry registry) {
+	public SendMailSilence(IObjectRegistry registry) {
 		this.registry = registry;
 	}
 
@@ -81,39 +81,51 @@ public class SendMail extends AbstractEntry implements IConfigurable {
 		SqlServiceContext svcContext = SqlServiceContext.createSqlServiceContext(map);
 		CompositeMap current_param = svcContext.getCurrentParameter();
 
-		password = TextParser.parse(password, current_param);
-		smtpServer = TextParser.parse(smtpServer, current_param);
-		content = TextParser.parse(content, current_param);
-		from = TextParser.parse(from, current_param);
-		displayName = TextParser.parse(displayName, current_param);
-		title = TextParser.parse(title, current_param);
-		to = TextParser.parse(to, current_param);
-		port = TextParser.parse(port, current_param);
-		userName = TextParser.parse(userName, current_param);
-		cc = TextParser.parse(cc, current_param);
+		try {
+			password = TextParser.parse(password, current_param);
+			smtpServer = TextParser.parse(smtpServer, current_param);
+			content = TextParser.parse(content, current_param);
+			from = TextParser.parse(from, current_param);
+			displayName = TextParser.parse(displayName, current_param);
+			title = TextParser.parse(title, current_param);
+			to = TextParser.parse(to, current_param);
+			port = TextParser.parse(port, current_param);
+			userName = TextParser.parse(userName, current_param);
+			cc = TextParser.parse(cc, current_param);
 
-		if (smtpServer == null || "".equals(smtpServer)) {
-			throw BuiltinExceptionFactory.createAttributeMissing(this, "smtpServer");
-		}
-		if (from == null || "".equals(from)) {
-			throw BuiltinExceptionFactory.createAttributeMissing(this, "from");
-		}
-		if (password == null || "".equals(password)) {
-			throw BuiltinExceptionFactory.createAttributeMissing(this, "password");
-		}
-		if (to == null || "".equals(to)) {
-			throw BuiltinExceptionFactory.createAttributeMissing(this, "to");
-		}
-		if (content == null || "".equals(content)) {
-			throw BuiltinExceptionFactory.createAttributeMissing(this, "content");
-		}
+			if (smtpServer == null || "".equals(smtpServer)) {
+				throw BuiltinExceptionFactory.createAttributeMissing(this, "smtpServer");
+			}
+			if (from == null || "".equals(from)) {
+				throw BuiltinExceptionFactory.createAttributeMissing(this, "from");
+			}
+			if (password == null || "".equals(password)) {
+				throw BuiltinExceptionFactory.createAttributeMissing(this, "password");
+			}
+			if (to == null || "".equals(to)) {
+				throw BuiltinExceptionFactory.createAttributeMissing(this, "to");
+			}
+			if (content == null || "".equals(content)) {
+				throw BuiltinExceptionFactory.createAttributeMissing(this, "content");
+			}
 
-		parseAttachParameters(runner.getContext());
-		sendMail();
-		logger.config("Mail send successfully!");
+			parseAttachParameters(runner.getContext());
+			sendMail();
+			logger.config("Mail send successfully!");
+
+			current_param.put("mail_status", "S");
+		} catch (Exception e) {
+			logger.severe("Mail send Error!");
+			logger.severe(e.getMessage());
+			logger.severe(e.getStackTrace().toString());
+			e.printStackTrace();
+
+			current_param.put("mail_status", "E");
+			current_param.put("error_message", e.getMessage());
+		}
 	}
 
-	public void sendMail() throws Exception {
+	public void sendMail() throws Exception {		
 		Properties props = new Properties();
 		props.setProperty("mail.smtp.host", smtpServer);// 存储发送邮件服务器的信息
 
@@ -345,4 +357,15 @@ public class SendMail extends AbstractEntry implements IConfigurable {
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
+	
+	public SendMailSilence(){
+		
+	}
+	
+	public static void main(String args[]) throws Exception{
+		SendMailSilence mail = new SendMailSilence();
+		mail.sendMail();
+	}
+	
+	
 }

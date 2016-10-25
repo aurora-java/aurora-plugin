@@ -74,7 +74,6 @@
 	<classpathentry kind="lib" path="dependency/poi-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="dependency/poi-ooxml-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="dependency/poi-ooxml-schemas-3.9-20121203.jar"/>
-	<classpathentry kind="lib" path="dependency/quartz.jar"/>
 	<classpathentry kind="lib" path="dependency/slf4j-api-1.5.6.jar"/>
 	<classpathentry kind="lib" path="dependency/slf4j-log4j12-1.5.8.jar"/>
 	<classpathentry kind="lib" path="dependency/spnego-r7.jar"/>
@@ -85,6 +84,9 @@
 	<classpathentry kind="lib" path="dependency/YeePay_HTMLcommon_V3.0.jar"/>
 	<classpathentry kind="lib" path="dependency/aurora.plugin.bgtcheck.dataimport/mybatis-3.2.3.jar"/>
 	<classpathentry kind="lib" path="dependency/aurora.plugin.sso.cas/cas-client-core-3.2.1.jar"/>
+	<classpathentry kind="lib" path="dependency/quartz.jar"/>
+	<classpathentry kind="lib" path="dependency/activation.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.6.0_02"/>
 	<classpathentry kind="output" path=""/>
 </classpath>

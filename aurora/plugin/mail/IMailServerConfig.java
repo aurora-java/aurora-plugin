@@ -16,4 +16,6 @@ public interface IMailServerConfig {
 	
 	public boolean getSslEnable();
 	
+	public String getDisplayName();
+	
 }

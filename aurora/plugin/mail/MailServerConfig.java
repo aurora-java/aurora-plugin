@@ -9,6 +9,15 @@ public class MailServerConfig implements IMailServerConfig {
 	private String port = "25";
 	private boolean auth = false;
 	private boolean sslEnable = false;
+	private String displayName;
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
 
 	public boolean getSslEnable() {
 		return sslEnable;
