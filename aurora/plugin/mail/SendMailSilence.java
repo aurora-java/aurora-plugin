@@ -23,7 +23,6 @@ import javax.mail.internet.MimeUtility;
 import com.sun.mail.util.MailSSLSocketFactory;
 
 import aurora.database.service.SqlServiceContext;
-import test.JavaMailSSL;
 import uncertain.composite.CompositeMap;
 import uncertain.composite.TextParser;
 import uncertain.exception.BuiltinExceptionFactory;
@@ -49,6 +48,7 @@ public class SendMailSilence extends AbstractEntry implements IConfigurable {
 	private Boolean auth = null;
 	private Boolean sslEnable = null;
 	private String displayName;
+	private String mailTitle, mailContent, mailTo, mailCc;
 
 	private Attachment[] attachments;
 
@@ -84,14 +84,14 @@ public class SendMailSilence extends AbstractEntry implements IConfigurable {
 		try {
 			password = TextParser.parse(password, current_param);
 			smtpServer = TextParser.parse(smtpServer, current_param);
-			content = TextParser.parse(content, current_param);
 			from = TextParser.parse(from, current_param);
 			displayName = TextParser.parse(displayName, current_param);
-			title = TextParser.parse(title, current_param);
-			to = TextParser.parse(to, current_param);
 			port = TextParser.parse(port, current_param);
 			userName = TextParser.parse(userName, current_param);
-			cc = TextParser.parse(cc, current_param);
+			mailContent = TextParser.parse(content, current_param);
+			mailTitle = TextParser.parse(title, current_param);
+			mailTo = TextParser.parse(to, current_param);
+			mailCc = TextParser.parse(cc, current_param);
 
 			if (smtpServer == null || "".equals(smtpServer)) {
 				throw BuiltinExceptionFactory.createAttributeMissing(this, "smtpServer");
@@ -102,10 +102,10 @@ public class SendMailSilence extends AbstractEntry implements IConfigurable {
 			if (password == null || "".equals(password)) {
 				throw BuiltinExceptionFactory.createAttributeMissing(this, "password");
 			}
-			if (to == null || "".equals(to)) {
+			if (mailTo == null || "".equals(mailTo)) {
 				throw BuiltinExceptionFactory.createAttributeMissing(this, "to");
 			}
-			if (content == null || "".equals(content)) {
+			if (mailContent == null || "".equals(mailContent)) {
 				throw BuiltinExceptionFactory.createAttributeMissing(this, "content");
 			}
 
@@ -125,7 +125,7 @@ public class SendMailSilence extends AbstractEntry implements IConfigurable {
 		}
 	}
 
-	public void sendMail() throws Exception {		
+	public void sendMail() throws Exception {
 		Properties props = new Properties();
 		props.setProperty("mail.smtp.host", smtpServer);// 存储发送邮件服务器的信息
 
@@ -156,17 +156,17 @@ public class SendMailSilence extends AbstractEntry implements IConfigurable {
 		Address fromAddress = new InternetAddress(from, displayName);// 发件人的邮件地址
 		message.setFrom(fromAddress);// 设置发件人
 
-		message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(to));// 设置收件人,并设置其接收类型为TO,还有3种预定义类型如下：
+		message.addRecipients(Message.RecipientType.TO, InternetAddress.parse(mailTo));// 设置收件人,并设置其接收类型为TO,还有3种预定义类型如下：
 
 		if (cc != null && !"".equals(cc)) {
-			message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(cc));// 设置抄送
+			message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(mailCc));// 设置抄送
 		}
-		message.setSubject(title);// 设置主题
+		message.setSubject(mailTitle);// 设置主题
 		message.setSentDate(new Date());// 设置发信时间
 
 		Multipart mp = new MimeMultipart();
 		MimeBodyPart mbp = new MimeBodyPart();
-		mbp.setContent(content, "text/html;charset=utf-8");
+		mbp.setContent(mailContent, "text/html;charset=utf-8");
 		mp.addBodyPart(mbp);
 		addAttachment(mp);
 		message.setContent(mp);
@@ -357,15 +357,14 @@ public class SendMailSilence extends AbstractEntry implements IConfigurable {
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
-	
-	public SendMailSilence(){
-		
+
+	public SendMailSilence() {
+
 	}
-	
-	public static void main(String args[]) throws Exception{
+
+	public static void main(String args[]) throws Exception {
 		SendMailSilence mail = new SendMailSilence();
 		mail.sendMail();
 	}
-	
-	
+
 }
