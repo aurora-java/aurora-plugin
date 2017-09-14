@@ -19,91 +19,102 @@ import uncertain.ocm.IObjectRegistry;
 import uncertain.proc.AbstractEntry;
 import uncertain.proc.ProcedureRunner;
 
-public class LdapAuthentication extends AbstractEntry{
+public class LdapAuthentication extends AbstractEntry {
 	LdapConfig ldapMap;
-	List<LdapServerInstance> ldapServerList=null;
+	List<LdapServerInstance> ldapServerList = null;
 	String serverName;
 	String username;
 	String password;
-	Boolean terminate=true;
+	Boolean terminate = true;
 	String errorMessage;
 	IObjectRegistry mObjectRegistry;
 
-	public LdapAuthentication(LdapConfig ldapMap,IObjectRegistry reg) {
+	public LdapAuthentication(LdapConfig ldapMap, IObjectRegistry reg) {
 		this.ldapMap = ldapMap;
 		this.mObjectRegistry = reg;
-		ldapServerList=this.ldapMap.getInstanceList();		
+		ldapServerList = this.ldapMap.getInstanceList();
 	}
 
-	public void run(ProcedureRunner runner) throws Exception{
-		CompositeMap context=runner.getContext();
-		validateParameter(context);		
-		Iterator<LdapServerInstance> iterator=ldapServerList.iterator();
-		Exception exception=null;
-		while(iterator.hasNext()){			
-			LdapServerInstance ldapServer=iterator.next();			
-			if(!this.serverName.equals(ldapServer.getName()))
+	public void run(ProcedureRunner runner) throws Exception {
+		CompositeMap context = runner.getContext();
+		validateParameter(context);
+		Iterator<LdapServerInstance> iterator = ldapServerList.iterator();
+		Exception exception = null;
+		while (iterator.hasNext()) {
+			LdapServerInstance ldapServer = iterator.next();
+			if (!this.serverName.equals(ldapServer.getName()))
 				continue;
-			exception=null;
-			String user = this.getUsername().indexOf(ldapServer.getDomain()) > 0 ? this.getUsername() : this.getUsername()
-					+ ldapServer.getDomain();		
-			String url="ldap://" + ldapServer.getHost() + ":" + ldapServer.getPort();			
-			Hashtable<String,String> env = new Hashtable<String,String>();
-			env.put(Context.INITIAL_CONTEXT_FACTORY,ldapServer.getInitialContextFactory());		
+			exception = null;
+			String user = this.getUsername().indexOf(ldapServer.getDomain()) > 0 ? this.getUsername()
+					: this.getUsername() + ldapServer.getDomain();
+			String url = "ldap://" + ldapServer.getHost() + ":" + ldapServer.getPort();
+			Hashtable<String, String> env = new Hashtable<String, String>();
+			env.put(Context.INITIAL_CONTEXT_FACTORY, ldapServer.getInitialContextFactory());
 			env.put(Context.SECURITY_AUTHENTICATION, ldapServer.getSecurityAuthentication());
 			env.put(Context.SECURITY_PRINCIPAL, user);
 			env.put(Context.SECURITY_CREDENTIALS, this.getPassword());
-			if(ldapServer.getSSLEnabled()){		
-				url="ldaps://" + ldapServer.getHost() + ":" + ldapServer.getPort();	
-				env.remove(Context.SECURITY_AUTHENTICATION);			
+			if (ldapServer.getSSLEnabled()) {
+				url = "ldaps://" + ldapServer.getHost() + ":" + ldapServer.getPort();
+				env.remove(Context.SECURITY_AUTHENTICATION);
 				env.put(Context.SECURITY_PROTOCOL, "ssl");
-				env.put("java.naming.ldap.factory.socket","aurora.plugin.ldap.SSLSocketFactoryWrap");
+				env.put("java.naming.ldap.factory.socket", "aurora.plugin.ldap.SSLSocketFactoryWrap");
 			}
-			env.put(Context.PROVIDER_URL, url);			
+			env.put(Context.PROVIDER_URL, url);
 			LdapContext ctx = null;
 			try {
-				ctx = new InitialLdapContext(env, null);					
+				ctx = new InitialLdapContext(env, null);
 				return;
 			} catch (NamingException e) {
-				exception=e;	
-			}finally{
+				exception = e;
+			} finally {
 				try {
-					if(ctx!=null)
+					if (ctx != null)
 						ctx.close();
-				} catch (NamingException e) {					
+				} catch (NamingException e) {
 				}
-			}		
+			}
 		}
-		if(exception!=null){
-			if(exception.getMessage().startsWith("[LDAP: error code 49")){
-				 String error_message=this.getErrorMessage();			 
-				 error_message = LanguageUtil.getTranslatedMessage(mObjectRegistry, error_message, context);
-				 ErrorMessage msg = new ErrorMessage(null,error_message, null);			
-				 ServiceContext  sc = ServiceContext.createServiceContext(context);
-				 sc.setError(msg.getObjectContext());
-				 sc.put("success", false);
-				 if(terminate){
-					 runner.getCaller().locateTo("CreateResponse");
-					 runner.stop();
-				 }
-			 }
-			 else
-				 throw exception;
+		if (exception != null) {
+			exception.printStackTrace();
+			if (exception.getMessage().startsWith("[LDAP: error code 49")) {
+				String error_message = this.getErrorMessage();
+				error_message = LanguageUtil.getTranslatedMessage(mObjectRegistry, error_message, context);
+				ErrorMessage msg = new ErrorMessage(null, error_message, null);
+				ServiceContext sc = ServiceContext.createServiceContext(context);
+				sc.setError(msg.getObjectContext());
+				sc.put("success", false);
+				if (terminate) {
+					runner.getCaller().locateTo("CreateResponse");
+					runner.stop();
+				}
+			} else {
+				// 非用户名异常，直接抛出具体的异常信息到前台用户处
+				String error_message = exception.getMessage();
+				ErrorMessage msg = new ErrorMessage(null, error_message, null);
+				ServiceContext sc = ServiceContext.createServiceContext(context);
+				sc.setError(msg.getObjectContext());
+				sc.put("success", false);
+				if (terminate) {
+					runner.getCaller().locateTo("CreateResponse");
+					runner.stop();
+				}
+			}
+			// throw exception;
 		}
 	}
-	
-	void validateParameter(CompositeMap context){
-		this.username=TextParser.parse(this.username, context);
-		if(this.username==null)
+
+	void validateParameter(CompositeMap context) {
+		this.username = TextParser.parse(this.username, context);
+		if (this.username == null)
 			throw new IllegalStateException("parameter \"username\" is null");
-		this.password=TextParser.parse(this.password, context);
-		if(this.password==null)
+		this.password = TextParser.parse(this.password, context);
+		if (this.password == null)
 			throw new IllegalStateException("parameter \"password\" is null");
-		this.serverName=TextParser.parse(this.serverName, context);
-		if(this.serverName==null)
+		this.serverName = TextParser.parse(this.serverName, context);
+		if (this.serverName == null)
 			throw new IllegalStateException("parameter \"serverName\" is null");
-		this.errorMessage=TextParser.parse(this.errorMessage, context);
-		if(this.errorMessage==null)
+		this.errorMessage = TextParser.parse(this.errorMessage, context);
+		if (this.errorMessage == null)
 			throw new IllegalStateException("parameter \"errorMessage\" is null");
 	}
 
@@ -146,5 +157,5 @@ public class LdapAuthentication extends AbstractEntry{
 	public void setTerminate(Boolean terminate) {
 		this.terminate = terminate;
 	}
-	
+
 }

@@ -180,7 +180,7 @@ public class ModelMapParser {
 		// Parameter p = parameters.get(0);
 		// Container container = p.getContainer();
 		// String findDatasetId = sg.findDatasetId(container);
-		// String ds = "var record = $('" + findDatasetId
+		// String ds = "var record = $au('" + findDatasetId
 		// + "').getCurrentRecord();";
 		// script = script.replace("#parameters#", ds + " #parameters# ");
 		// }

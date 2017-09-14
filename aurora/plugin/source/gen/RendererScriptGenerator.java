@@ -22,28 +22,28 @@ public class RendererScriptGenerator {
 	}
 
 	public String searchScript(String functionName, String datasetId) {
-		String s = "function #functionName#(){$('#datasetId#').query();}";
+		String s = "function #functionName#(){$au('#datasetId#').query();}";
 		s = s.replace("#functionName#", functionName);
 		s = s.replace("#datasetId#", datasetId);
 		return s;
 	}
 
 	public String resetScript(String functionName, String datasetId) {
-		String s = " function #functionName#(){$('#datasetId#').reset();}";
+		String s = " function #functionName#(){$au('#datasetId#').reset();}";
 		s = s.replace("#functionName#", functionName);
 		s = s.replace("#datasetId#", datasetId);
 		return s;
 	}
 
 	public String saveScript(String functionName, String datasetId) {
-		String s = " function #functionName#(){$('#datasetId#').submit();}";
+		String s = " function #functionName#(){$au('#datasetId#').submit();}";
 		s = s.replace("#functionName#", functionName);
 		s = s.replace("#datasetId#", datasetId);
 		return s;
 	}
 
 	public String openScript(String functionName, String linkId,String para_name) {
-		String s = " function #functionName#(para) {var linkUrl = $('#linkId#'); linkUrl.set('#para_name#', para); new Aurora.Window({id: '#windowId#',url:linkUrl.getUrl(),title: 'Title',height: 735,width: 720});}";
+		String s = " function #functionName#(para) {var linkUrl = $au('#linkId#'); linkUrl.set('#para_name#', para); new Aurora.Window({id: '#windowId#',url:linkUrl.getUrl(),title: 'Title',height: 735,width: 720});}";
 		s = s.replace("#functionName#", functionName);
 		String windowID = session.getIDGenerator().genWindowID(linkId);
 		s = s.replaceAll("#windowId#", windowID);
@@ -53,7 +53,7 @@ public class RendererScriptGenerator {
 	}
 
 	public String closeScript(String functionName, String windowId) {
-		String s = "function #functionName#(){$('#windowId#').close();}";
+		String s = "function #functionName#(){$au('#windowId#').close();}";
 		s = s.replace("#functionName#", functionName);
 		s = s.replace("#windowId#", windowId);
 		return s;
