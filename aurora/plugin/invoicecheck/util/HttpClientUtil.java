@@ -2,6 +2,7 @@ package aurora.plugin.invoicecheck.util;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -185,7 +186,8 @@ public class HttpClientUtil {
 			response = doPost(url, params);
 		}
 		if(response.getStatusLine().getStatusCode() != 200){
-			return "{'responseStatus'：'" + response.getStatusLine().getStatusCode() + "'}";
+			StatusLine statusLine = response.getStatusLine();
+            return "{'errorCode':'" + statusLine.getStatusCode() + "','errorMsg':'" + statusLine.getReasonPhrase() + "'}";
 		}
 		HttpEntity entity = response.getEntity();
 		String body = "";

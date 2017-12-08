@@ -562,7 +562,7 @@ var getInvoiceCheckResult = function (fpxx, hwxxs) {
             "seller_tax_number": fpxx[6],
             "seller_address_phone": fpxx[7],
             "seller_bank_account": fpxx[8],
-            "remark":jmbz
+            "remark": jmbz
         };
 //		seller_information = {
 //		"seller_name": fpxx[5],
@@ -599,7 +599,7 @@ var getInvoiceCheckResult = function (fpxx, hwxxs) {
             "seller_tax_number": fpxx[6],
             "seller_address_phone": fpxx[7],
             "seller_bank_account": fpxx[8],
-            "remark":jmbz
+            "remark": jmbz
         };
 //		seller_information = {
 //		"seller_name": fpxx[5],
@@ -636,7 +636,7 @@ var getInvoiceCheckResult = function (fpxx, hwxxs) {
             "seller_tax_number": FormatSBH(fpxx[10], rules[1]),
             "seller_address_phone": fpxx[11],
             "seller_bank_account": fpxx[12],
-            "remark":jmbz
+            "remark": jmbz
         };
 //		purchaser_information = {
 //		"purchaser_name": fpxx[5],
@@ -706,10 +706,10 @@ var getInvoiceCheckResult = function (fpxx, hwxxs) {
                     "pecification": hw[1],
                     "unit": hw[2],
                     "quantity": getzeroDot(hw[6]),
-                    "unit_price": GetJeToDot(hw[4].trim()),
-                    "without_tax_amount": GetJeToDot(hw[5].trim()),
+                    "unit_price": GetJeToDot(hw[4]),
+                    "without_tax_amount": GetJeToDot(hw[5]),
                     "tax_rate": FormatSl(hw[3]),
-                    "tax_amount": GetJeToDot(hw[7].trim())
+                    "tax_amount": GetJeToDot(hw[7])
                 };
                 items[i+1] = item;
             }else{
@@ -718,10 +718,10 @@ var getInvoiceCheckResult = function (fpxx, hwxxs) {
                     "pecification": hw[1],
                     "unit": hw[2],
                     "quantity": getzeroDot(hw[3]),
-                    "unit_price": GetJeToDot(hw[4].trim()),
-                    "without_tax_amount": GetJeToDot(hw[5].trim()),
+                    "unit_price": GetJeToDot(hw[4]),
+                    "without_tax_amount": GetJeToDot(hw[5]),
                     "tax_rate": FormatSl(hw[6]),
-                    "tax_amount": GetJeToDot(hw[7].trim())
+                    "tax_amount": GetJeToDot(hw[7])
                 };
                 items[i+1] = item;
             }
@@ -733,4 +733,12 @@ var getInvoiceCheckResult = function (fpxx, hwxxs) {
         "lines_information": items,
     };
     return JSON.stringify(result);
+}
+
+String.prototype.replaceAll = function(reallyDo, replaceWith, ignoreCase) {
+    if (!RegExp.prototype.isPrototypeOf(reallyDo)) {
+        return this.replace(new RegExp(reallyDo, (ignoreCase ? "gi": "g")), replaceWith);
+    } else {
+        return this.replace(reallyDo, replaceWith);
+    }
 }

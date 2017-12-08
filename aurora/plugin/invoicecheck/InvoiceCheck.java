@@ -113,8 +113,8 @@ public class InvoiceCheck extends AbstractEntry {
 		response.setContentType("text/html;charset=UTF-8");
 		response.setCharacterEncoding("UTF-8");
 		System.out.println("校验参数为" + getQueryString());
-		JSONObject result = queryInvoiceFromDb(context, getQueryString());
-//		JSONObject result = null;
+//		JSONObject result = queryInvoiceFromDb(context, getQueryString());
+		JSONObject result = null;
 		if(result == null) {
 			System.out.println("--------------------数据库中不存在此发票信息----------------------");
 			result = new JSONObject(invoiceCheck(context, getQueryString()));
@@ -391,6 +391,7 @@ public class InvoiceCheck extends AbstractEntry {
 		importRemoteJs("AesUtil");
 		importLocalJs("validate");
 		importLocalJs("result");
+		importLocalJs("init");
 	}
 
 	private  void importRemoteJs(String jsName) throws Exception{
@@ -470,78 +471,94 @@ public class InvoiceCheck extends AbstractEntry {
 		 * @Return: 验证结果
 		 */
 		String result = null;
-		try {
-			String windowsPath = BaseUtil.getPropertity("windowsPath");
-			String linuxPath = BaseUtil.getPropertity("linuxPath");
-			String pythonName = BaseUtil.getPropertity("pythonName");
-			File file = new File(windowsPath + pythonName);
-			if(file.exists()){
-				PATH = windowsPath;
-			}else{
-				file = new File(linuxPath + pythonName);
-				if(file.exists()){
-					PATH = linuxPath;
-				}
-			}
-			if(PATH == null){
-				result = "{errorCode:'system',errorMsg:'[" + windowsPath + "]或[" + linuxPath +"]路径下不存在文件" + pythonName + "'}";
-				return result;
-			}
-			engine = new ScriptEngineManager().getEngineByName("Nashorn");
-			importJsFiles();// 引入js文件
-			splitQueryString(queryString);
-			importLocalJs("handler1");
-			do {// 循环获取验证码直到获得正确的发票验证结果
-				errorMsg1 = new JSONObject("{'code':'','msg':''}");
-				status1 = false;
-				errorMsg2 = new JSONObject("{'code':'','msg':''}");
-				status2 = false;
-				yzmResponseResult = new JSONObject();
-				fpyzResponseResult = new JSONObject();
-				String yzmResponseBody = HttpClientUtil.getResponseBody((String) getValueByName("yzmQueryUrl"),
-						"{'fpdm': '" + invoiceCode + "', " + // 发票代码
-								"'r': '" + getValueByName("rad") + "'" + // 随机字符串
-						"}");
-				System.out.println(yzmResponseBody);
-				if (yzmResponseBody.indexOf("responseStatus") == -1) {// 当服务器正确响应请求时，执行一下操作
-					yzmResponseResult = new JSONObject(yzmResponseBody);
-					String base64Str = (String) yzmResponseResult.get("key1");// 验证码base64字符串
-					String yzmColor = (String) yzmResponseResult.get("key4");// 正确验证码颜色
-					System.out.println(yzmColor);
-					engine.eval("getErrorMsg1('" + base64Str + "')");
-					status1 = (boolean) getValueByName("status1");// 从js中获得验证码请求结果
-					errorMsg1 = new JSONObject((String) getValueByName("errorMsg1"));//从js中获得验证码请求错误消息
-					if (status1 && BaseUtil.GenerateImage(base64Str,PATH, invoiceNo)) {// 当验证码正确返回时，执行下列操作
-						autoRecognition(pythonName, yzmColor);
-						System.out.println(verificationCode);
-						if(verificationCode.indexOf("errorCode") != -1) {
-							return verificationCode;
-						}
-						eval("yzmSj", (String) yzmResponseResult.get("key2"));
-						String fpyzResponseBody = HttpClientUtil.getResponseBody((String) getValueByName("queryUrl"),
-								"{'fpdm': '" + invoiceCode + "', " + // 发票代码
-										"'fphm': '" + invoiceNo + "', " + // 发票号码
-										"'kprq': '" + invoiceDate + "', " + // 开票日期
-										"'fpje': '" + checkCode + "', " + // 发票金额，增值税专票为不含税金额，增值税普票为校验码后六位
-										"'fplx': '" + invoiceType + "', " + // 发票类型， 04->增值税普票，01->增值税专票，10->增值税电子普票
-										"'yzm': '" + verificationCode.toLowerCase() + "', " + // 系统识别出的验证码
-										"'yzmSj': '" + (String) yzmResponseResult.get("key2") + "', " + // 验证码请求时间
-										"'index': '" + (String) yzmResponseResult.get("key3") + "', " + // 验证码请求返回的加密密钥
-										"'iv': '" + (String) getValueByName("iv") + "', " + // 加密字段
-										"'salt': '" + (String) getValueByName("salt") + "' " + // 加密字段
-								"}");
-						System.out.println("发票验证结果：" + fpyzResponseBody);
-						if (!fpyzResponseBody.equals("")) {
-							fpyzResponseBody = fpyzResponseBody.substring(fpyzResponseBody.indexOf("{"),
-									fpyzResponseBody.lastIndexOf("}") + 1);// 截取响应报文的json字符串
-							System.out.println("发票验证结果截取字段：" + fpyzResponseBody);
-							fpyzResponseResult = new JSONObject(fpyzResponseBody);
-							System.out.println("发票验证结果json：" + fpyzResponseBody);
-							engine.eval("getErrorMsg2('" + (String) fpyzResponseResult.get("key1") + "')");// 解析发票验证请求结果代码
-							status2 = (boolean) getValueByName("status2");// 从js中获取发票验证请求错误代码
-							errorMsg2 = new JSONObject((String) getValueByName("errorMsg2"));;//从js中获取发票验证请求错误消息
-							System.out.println("发票验证请求状态：" + status2);
-						}
+        try{
+            String windowsPath = BaseUtil.getPropertity("windowsPath");
+            String linuxPath = BaseUtil.getPropertity("linuxPath");
+            String pythonName = BaseUtil.getPropertity("pythonName");
+            File file = new File(windowsPath + pythonName);
+            if(file.exists()){
+                PATH = windowsPath;
+            }else{
+                file = new File(linuxPath + pythonName);
+                if(file.exists()){
+                    PATH = linuxPath;
+                }
+            }
+            if(PATH == null){
+                result = "{errorCode:'system',errorMsg:'" + windowsPath + "'或'" + linuxPath +"'路径下不存在文件'" + pythonName + "'}";
+                return result;
+            }
+            engine = new ScriptEngineManager().getEngineByName("JavaScript");
+            eval("window",null);
+            importJsFiles();//引入js文件
+            System.out.println("--------------开始-----------");
+            splitQueryString(queryString);
+            importLocalJs("handler1");
+            do {//循环获取验证码直到获得正确的发票验证结果
+                errorMsg1 = new JSONObject("{'code':'','msg':''}");
+                status1 = false;
+                errorMsg2 = new JSONObject("{'code':'','msg':''}");
+                status2 = false;
+                yzmResponseResult = new JSONObject();
+                fpyzResponseResult = new JSONObject();
+                engine.eval("var nowtime = showTime().toString()");
+                engine.eval("publickey = $I.ck(fpdm,nowtime)");
+                String yzmResponseBody = HttpClientUtil.getResponseBody((String) getValueByName("yzmQueryUrl"),
+                        "{'fpdm': '" + invoiceCode + "', " +//发票代码
+                                "'r': '" + getValueByName("rad") + "', " +//随机字符串
+                                "'callback': 'jQuery110206610264423992902_1512534941292', " +//无用字段，为满足参数要求
+                                "'nowtime': '" + (String) getValueByName("nowtime") + "', " +//当前事件
+                                "'publickey': '" +(String) getValueByName("publickey") + "'" +//验证公钥
+                                "}");
+                System.out.println(yzmResponseBody);
+                if(yzmResponseBody.toLowerCase().indexOf("errorcode") == -1) {//当服务器正确响应请求时，执行一下操作，只有响应状态码非200时，才会返回responseStatus
+                    yzmResponseBody = yzmResponseBody.substring(yzmResponseBody.indexOf("{"), yzmResponseBody.lastIndexOf("}") + 1);//截取响应报文的json字符串
+                    yzmResponseResult = new JSONObject(yzmResponseBody);
+                    String base64Str = (String) yzmResponseResult.get("key1");//验证码base64字符串
+                    String yzmColor = (String) yzmResponseResult.get("key4");//正确验证码颜色
+                    System.out.println(yzmColor);
+                    System.out.println(base64Str);
+                    engine.eval("getErrorMsg1('" + base64Str + "')");
+                    status1 = (Boolean) getValueByName("status1");//从js中获得验证码请求结果
+                    errorMsg1 = new JSONObject((String) getValueByName("errorMsg1"));//从js中获得验证码请求错误消息
+                    if(status1 && BaseUtil.GenerateImage(base64Str,PATH, invoiceNo)){//当验证码正确返回时，执行下列操作
+                        autoRecognition(pythonName, yzmColor);
+                        verificationCode = verificationCode.toUpperCase();
+                        System.out.println(verificationCode);
+                        if(verificationCode.indexOf("errorCode") != -1) {
+                            return verificationCode;
+                        }
+                        eval("yzmSj", (String) yzmResponseResult.get("key2"));
+                        eval("yzm", verificationCode);
+                        engine.eval("publickey = $I.ck(fpdm,fphm,kjje,kprq,yzmSj,yzm)");
+                        String fpyzResponseBody = HttpClientUtil.getResponseBody((String) getValueByName("queryUrl"),
+                                "{'fpdm': '" + invoiceCode + "', " +//发票代码
+                                        "'fphm': '" + invoiceNo + "', " +//发票号码
+//                                        "'callback': 'jQuery110206610264423992902_1512534941292', " +
+                                        "'kprq': '" + invoiceDate + "', "+//开票日期
+                                        "'fpje': '" + (String) getValueByName("kjje") + "', "+//发票金额，增值税专票为不含税金额，增值税普票为校验码后六位
+                                        "'fplx': '" + invoiceType + "', "+//发票类型， 04->增值税普票，01->增值税专票，10->增值税电子普票
+                                        "'yzm': '" + verificationCode + "', "+//系统识别出的验证码
+                                        "'yzmSj': '" + (String) yzmResponseResult.get("key2") + "', "+//验证码请求时间
+                                        "'index': '" + (String) yzmResponseResult.get("key3") + "', "+//验证码请求返回的加密密钥
+                                        "'iv': '" + (String) getValueByName("iv") + "', "+//加密字段
+                                        "'salt': '" + (String) getValueByName("salt") + "', "+//加密字段
+                                        "'publickey': '" + (String) getValueByName("publickey") + "','_':'1512525397802' "+//加密字段 +
+                                        "}");
+                        System.out.println("发票验证结果：" + fpyzResponseBody);
+                        if(!fpyzResponseBody.equals("")) {
+                            fpyzResponseBody = fpyzResponseBody.substring(fpyzResponseBody.indexOf("{"), fpyzResponseBody.lastIndexOf("}") + 1);//截取响应报文的json字符串
+                            System.out.println("发票验证结果截取字段：" + fpyzResponseBody);
+                            if(fpyzResponseBody.toLowerCase().indexOf("errorcode") != -1){
+                                return fpyzResponseBody;
+                            }
+                            fpyzResponseResult = new JSONObject(fpyzResponseBody);
+                            System.out.println("发票验证结果json：" + fpyzResponseBody);
+                            engine.eval("getErrorMsg2('" + (String) fpyzResponseResult.get("key1") + "')");//解析发票验证请求结果代码
+                            status2 = (Boolean) getValueByName("status2");//从js中获取发票验证请求错误代码
+                            errorMsg2 = new JSONObject((String) getValueByName("errorMsg2"));;//从js中获取发票验证请求错误消息
+                            System.out.println("发票验证请求状态：" + status2);
+                        }
 						if (status2) {// 当发票验证结果正确返回时执行以下操
 							JSONObject fpyzResponseObj = new JSONObject(fpyzResponseBody);
 							engine.eval("jsonData = " + fpyzResponseObj);

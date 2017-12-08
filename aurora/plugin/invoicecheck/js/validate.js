@@ -187,3 +187,9 @@ var getErrorMsg1 = function(k) {
         ErrorMsg1 = "未知错误";
     }
 }
+
+function showTime() {
+    var myDate = new Date();
+    var time=myDate.getTime();
+    return time;
+}
