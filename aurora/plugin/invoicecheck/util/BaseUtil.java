@@ -88,7 +88,7 @@ public class BaseUtil {
         String propertity = null;
 
             Properties prop = new Properties();
-            InputStream in = BaseUtil.class.getResourceAsStream("invoiceCheck.properties");
+            InputStream in = BaseUtil.class.getResourceAsStream("/aurora/plugin/invoicecheck/config/invoiceCheck.properties");
             prop.load(in);
             propertity = prop.getProperty(key);
         return propertity;

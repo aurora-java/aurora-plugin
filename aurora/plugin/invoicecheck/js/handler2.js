@@ -12,7 +12,7 @@ if (jsonData.key4.trim() != '') {
     jmbz = aesUtil.decrypt(jsonData.key8, jsonData.key7, jsonData.key9, jsonData.key4);//解密备注
 }
 if(!jmbz || jmbz.length == 0){
-	jmbz = " ";
+    jmbz = " ";
 }
 var jmsort = aesUtil.decrypt(jsonData.key8, jsonData.key7, jsonData.key9, jsonData.key10);//解密排序顺序
 var tt = jsonData.key6;//var tt = "var result={\"template\":0,\"fplx\":fplx,\"fpxx\":fpxx,\"hwxx\":hwxx,\"jmbz\":jmbz,\"sort\":jmsort}";

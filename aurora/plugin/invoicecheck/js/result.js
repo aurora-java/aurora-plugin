@@ -4,89 +4,59 @@
  * @Description: 响应结果处理
  * @Time: 2017/10/17 19:06
  */
-var getErrorMsg1 = function(k) {
+var handleMsg = function(k) {
     /**
      * @Author: xuzhao
      * @Email: mailto:zhao.xu@hand-china.com
-     * @Description: 获取验证码请求返回的错误信息
+     * @Description: 处理请求返回的错误信息
      * @Time: 2017/10/17 19:07
      * @param k 错误代码
      * @Return: 错误信息
      */
     var code_msg = {
-        "003": "验证码请求次数过于频繁，请1分钟后再试！",
+        "1": "该省尚未开通发票查验功能!",
+        "002": "超过该张发票当日查验次数(请于次日再次查验)!",
+        "003": "发票查验请求太频繁，请稍后再试!",
+        "004": "超过服务器最大请求数，请稍后访问!",
         "005": "非法请求!",
-        "010": "网络超时，请重试！(01)",
+        "006": "不一致!",
+        "007": "验证码失效!",
+        "008": "验证码错误!",
+        "009": "查无此票!",
+        "rqerr": "当日开具发票可于次日进行查验!",
+        "003": "验证码请求次数过于频繁，请1分钟后再试!",
+        "005": "非法请求!",
+        "010": "网络超时，请重试!",
+        "010_": "网络超时，请重试!",
         "fpdmerr": "请输入合法发票代码!",
-        "024": "24小时内验证码请求太频繁，请稍后再试！",
-        "016": "服务器接收的请求太频繁，请稍后再试！",
-        "020": "由于查验行为异常，涉嫌违规，当前无法使用查验服务！"
+        "024": "24小时内验证码请求太频繁，请稍后再试!",
+        "016": "服务器接收的请求太频繁，请稍后再试!",
+        "020": "由于查验行为异常，涉嫌违规，当前无法使用查验服务!"
     };
     if(k in code_msg){
-        status1 = false;
-        errorMsg1 = {
-            "code": k,
-            "msg": code_msg[k]
+        if(k === "007" || k === "008"){
+            status = 0;
+        }else{
+            status = -1;
+        }
+        errorMsg = {
+            "errorCode": k,
+            "errorMsg": code_msg[k]
         };
     }else if(k != ""){
-        status1 = true;
-        errorMsg1 = {
-            "code": "",
-            "msg": "成功获取验证码"
+        status = 1;
+        errorMsg = {
+            "errorCode": '',
+            "errorMsg": ''
         };
     }else{
-        status1 = false;
-        errorMsg1 = {
-            "code": "",
-            "msg": "未知错误"
+        status = -1;
+        errorMsg = {
+            "errorCode": "xxx",
+            "errorMsg": "未知错误"
         };
     }
-    errorMsg1 = JSON.stringify(errorMsg1);
-};
-
-var getErrorMsg2 = function(k) {
-    /**
-     * @Author: xuzhao
-     * @Email: mailto:zhao.xu@hand-china.com
-     * @Description: 获取发票验证请求返回的错误信息
-     * @Time: 2017/10/17 19:10
-     * @param k 错误代码
-     * @Return: 错误消息
-     */
-    var code_msg = {
-        "1": "该省尚未开通发票查验功能！",
-        "002": "超过该张发票当日查验次数(请于次日再次查验)！",
-        "003": "发票查验请求太频繁，请稍后再试！",
-        "004": "超过服务器最大请求数，请稍后访问！",
-        "005": "请求不合法！",
-        "006": "不一致！",
-        "007": "验证码失效！",
-        "008": "验证码错误！",
-        "009": "查无此票！",
-        "rqerr": "当日开具发票可于次日进行查验！",
-        "010_": "网络超时，请重试！(05)！",
-        "020": "由于查验行为异常，涉嫌违规，当前无法使用查验服务！"
-    };
-    if(k in code_msg){
-        status2 = false;
-        errorMsg2 = {
-            "code": k,
-            "msg": code_msg[k]
-        };
-    }else if(k == "001"){
-        status2 = true;
-        errorMsg2 = {
-            "code": "001",
-            "msg": "发票验证请求成功"
-        };
-    }else{
-        status2 = false;
-        errorMsg2 = {
-            "code": "",
-            "msg": "未知错误"
-        };
-    }
-    errorMsg2 = JSON.stringify(errorMsg2);
+        errorMsg = JSON.stringify(errorMsg);
 };
 
 var FormatDate = function (time, add){
@@ -543,26 +513,26 @@ var getInvoiceCheckResult = function (fpxx, hwxxs) {
         header_information = {
             // "查验次数": Number(fpxx[3]) + 1,
             // "查验时间": fpxx[20],
-            "invoice_code": fpxx[0],
-            "invoice_number": fpxx[1],
-            "invoice_area": fpxx[2],
-            "invoice_type": getFplx(fplx),
-            "invoice_date": FormatDate(fpxx[4], rules[3]),
-            "machine_number": fpxx[17],
-            "check_code": fpxx[13],
-            "purchaser_name": fpxx[9],
-            "purchaser_tax_number": FormatSBH(fpxx[10], rules[1]),
-            "purchaser_address_phone": fpxx[11],
-            "purchaser_bank_account": fpxx[12],
-            "amount": '￥'+ GetJeToDot(getje(fpxx[15], rules[2])),
-            "amount_zhs": '⊗'+ NoToChinese(GetJeToDot(getje(fpxx[15], rules[2])),fplx),
-            "without_tax_amount": '￥'+ GetJeToDot(getje(fpxx[18], rules[2])),
-            "tax_amount": '￥'+ GetJeToDot(getje(fpxx[14], rules[2])),
-            "seller_name": fpxx[5],
-            "seller_tax_number": fpxx[6],
-            "seller_address_phone": fpxx[7],
-            "seller_bank_account": fpxx[8],
-            "remark": jmbz
+            "invoice_code": fpxx[0].trim(),
+            "invoice_number": fpxx[1].trim(),
+            "invoice_distrect": fpxx[2].trim(),
+            "invoice_type": getFplx(fplx).trim(),
+            "invoice_date": FormatDate(fpxx[4], rules[3]).trim(),
+            "machine_number": fpxx[17].trim(),
+            "check_code": fpxx[13].trim(),
+            "purchaser_name": fpxx[9].trim(),
+            "purchaser_tax_number": FormatSBH(fpxx[10], rules[1]).trim(),
+            "purchaser_address_phone": fpxx[11].trim(),
+            "purchaser_bank_account": fpxx[12].trim(),
+            "amount": GetJeToDot(getje(fpxx[15], rules[2])).trim(),
+            "amount_zhs": '⊗'+ NoToChinese(GetJeToDot(getje(fpxx[15], rules[2])),fplx).trim(),
+            "without_tax_amount": GetJeToDot(getje(fpxx[18], rules[2])).trim(),
+            "tax_amount": GetJeToDot(getje(fpxx[14], rules[2])).trim(),
+            "seller_name": fpxx[5].trim(),
+            "seller_tax_number": fpxx[6].trim(),
+            "seller_address_phone": fpxx[7].trim(),
+            "seller_bank_account": fpxx[8].trim(),
+            "remark": jmbz.replace(/\r\n/g, "<br/>").replace(/\n/g, "<br/>").trim()
         };
 //		seller_information = {
 //		"seller_name": fpxx[5],
@@ -580,26 +550,26 @@ var getInvoiceCheckResult = function (fpxx, hwxxs) {
         header_information = {
             // "查验次数": Number(fpxx[3]) + 1,
             // "查验时间": fpxx[20],
-            "invoice_code": fpxx[0],
-            "invoice_number": fpxx[1],
-            "invoice_area": fpxx[2],
-            "invoice_type": getFplx(fplx),
-            "invoice_date": FormatDate(fpxx[4], rules[3]),
-            "machine_number": fpxx[17],
-            "check_code": fpxx[13],
-            "purchaser_name": fpxx[9],
-            "purchaser_tax_number": FormatSBH(fpxx[10], rules[1]),
-            "purchaser_address_phone": fpxx[11],
-            "purchaser_bank_account": fpxx[12],
-            "amount": '￥'+ GetJeToDot(getje(fpxx[15], rules[2])),
-            "amount_zhs": '⊗'+ NoToChinese(GetJeToDot(getje(fpxx[15], rules[2])),fplx),
-            "without_tax_amount": '￥'+ GetJeToDot(getje(fpxx[19], rules[2])),
-            "tax_amount": '￥'+ GetJeToDot(getje(fpxx[14], rules[2])),
-            "seller_name": fpxx[5],
-            "seller_tax_number": fpxx[6],
-            "seller_address_phone": fpxx[7],
-            "seller_bank_account": fpxx[8],
-            "remark": jmbz
+            "invoice_code": fpxx[0].trim(),
+            "invoice_number": fpxx[1].trim(),
+            "invoice_distrect": fpxx[2].trim(),
+            "invoice_type": getFplx(fplx).trim(),
+            "invoice_date": FormatDate(fpxx[4], rules[3]).trim(),
+            "machine_number": fpxx[17].trim(),
+            "check_code": fpxx[13].trim(),
+            "purchaser_name": fpxx[9].trim(),
+            "purchaser_tax_number": FormatSBH(fpxx[10], rules[1]).trim(),
+            "purchaser_address_phone": fpxx[11].trim(),
+            "purchaser_bank_account": fpxx[12].trim(),
+            "amount": GetJeToDot(getje(fpxx[15], rules[2])).trim(),
+            "amount_zhs": '⊗'+ NoToChinese(GetJeToDot(getje(fpxx[15], rules[2])),fplx).trim(),
+            "without_tax_amount": GetJeToDot(getje(fpxx[19], rules[2])).trim(),
+            "tax_amount": GetJeToDot(getje(fpxx[14], rules[2])).trim(),
+            "seller_name": fpxx[5].trim(),
+            "seller_tax_number": fpxx[6].trim(),
+            "seller_address_phone": fpxx[7].trim(),
+            "seller_bank_account": fpxx[8].trim(),
+            "remark": jmbz.replace(/\r\n/g, "<br/>").replace(/\n/g, "<br/>").trim()
         };
 //		seller_information = {
 //		"seller_name": fpxx[5],
@@ -617,26 +587,26 @@ var getInvoiceCheckResult = function (fpxx, hwxxs) {
         header_information = {
             // "查验次数": Number(fpxx[3]) + 1,
             // "查验时间": fpxx[21],
-            "invoice_code": fpxx[0],
-            "invoice_number": fpxx[1],
-            "invoice_area": fpxx[2],
-            "invoice_type": getFplx(fplx),
-            "invoice_date": FormatDate(fpxx[4], rules[3]),
-            "machine_number": fpxx[17],
-            "check_code": fpxx[19],
-            "purchaser_name": fpxx[5],
-            "purchaser_tax_number": fpxx[6],
-            "purchaser_address_phone": fpxx[7],
-            "purchaser_bank_account": fpxx[8],
-            "amount": '￥'+ GetJeToDot(getje(fpxx[15], rules[2])),
-            "amount_zhs": '⊗'+ NoToChinese(GetJeToDot(getje(fpxx[15], rules[2])),"01"),
-            "without_tax_amount": '￥'+ GetJeToDot(getje(fpxx[13], rules[2])),
-            "tax_amount": '￥'+ GetJeToDot(getje(fpxx[14], rules[2])),
-            "seller_name": fpxx[9],
-            "seller_tax_number": FormatSBH(fpxx[10], rules[1]),
-            "seller_address_phone": fpxx[11],
-            "seller_bank_account": fpxx[12],
-            "remark": jmbz
+            "invoice_code": fpxx[0].trim(),
+            "invoice_number": fpxx[1].trim(),
+            "invoice_distrect": fpxx[2].trim(),
+            "invoice_type": getFplx(fplx).trim(),
+            "invoice_date": FormatDate(fpxx[4], rules[3]).trim(),
+            "machine_number": fpxx[17].trim(),
+            "check_code": fpxx[19].trim(),
+            "purchaser_name": fpxx[5].trim(),
+            "purchaser_tax_number": fpxx[6].trim(),
+            "purchaser_address_phone": fpxx[7].trim(),
+            "purchaser_bank_account": fpxx[8].trim(),
+            "amount": GetJeToDot(getje(fpxx[15], rules[2])).trim(),
+            "amount_zhs": '⊗'+ NoToChinese(GetJeToDot(getje(fpxx[15], rules[2])),"01").trim(),
+            "without_tax_amount": GetJeToDot(getje(fpxx[13], rules[2])).trim(),
+            "tax_amount": GetJeToDot(getje(fpxx[14], rules[2])).trim(),
+            "seller_name": fpxx[9].trim(),
+            "seller_tax_number": FormatSBH(fpxx[10], rules[1]).trim(),
+            "seller_address_phone": fpxx[11].trim(),
+            "seller_bank_account": fpxx[12].trim(),
+            "remark": jmbz.replace(/\r\n/g, "<br/>").replace(/\n/g, "<br/>").trim()
         };
 //		purchaser_information = {
 //		"purchaser_name": fpxx[5],
@@ -664,31 +634,31 @@ var getInvoiceCheckResult = function (fpxx, hwxxs) {
         var hwinfo = sechw.split('▎'),
             hw,
             item = null;
-            if(hwinfo !=""){
+        if(hwinfo !=""){
             for(var i = 0; i < hwinfo.length; i++){
                 hw = hwinfo[i].split('█');
                 if(fplx == "10"){
                     item ={
-                        "goods_or_taxable_services": FormatHwmc(hw[0], hwstr),
-                        "pecification": hw[1],
-                        "unit": hw[2],
-                        "quantity": getzeroDot(hw[6]),
-                        "unit_price": GetJeToDot(hw[4], je),
-                        "without_tax_amount": GetJeToDot(hw[5], je),
-                        "tax_rate": FormatSl(hw[3]),
-                        "tax_amount": GetJeToDot(hw[7], je)
+                        "goods_or_taxable_service": FormatHwmc(hw[0], hwstr).trim(),
+                        "specifications": hw[1].trim(),
+                        "unit": hw[2].trim(),
+                        "quantity": getzeroDot(hw[6]).trim(),
+                        "unit_price": GetJeToDot(hw[4], je).trim(),
+                        "without_tax_amount": GetJeToDot(hw[5], je).trim(),
+                        "tax_rate": FormatSl(hw[3]).trim(),
+                        "tax_amount": GetJeToDot(hw[7], je).trim()
                     };
                     items[i+1] = item;
                 }else{
                     item ={
-                        "goods_or_taxable_services": FormatHwmc(hw[0], hwstr),
-                        "pecification": hw[1],
-                        "unit": hw[2],
-                        "quantity": getzeroDot(hw[3]),
-                        "unit_price": GetJeToDot(hw[4], je),
-                        "without_tax_amount": GetJeToDot(hw[5], je),
-                        "tax_rate": FormatSl(hw[6]),
-                        "tax_amount": GetJeToDot(hw[7], je)
+                        "goods_or_taxable_service": FormatHwmc(hw[0], hwstr).trim(),
+                        "specifications": hw[1].trim(),
+                        "unit": hw[2].trim(),
+                        "quantity": getzeroDot(hw[3]).trim(),
+                        "unit_price": GetJeToDot(hw[4], je).trim(),
+                        "without_tax_amount": GetJeToDot(hw[5], je).trim(),
+                        "tax_rate": FormatSl(hw[6]).trim(),
+                        "tax_amount": GetJeToDot(hw[7], je).trim()
                     };
                     items[i+1] = item;
                 }
@@ -702,26 +672,26 @@ var getInvoiceCheckResult = function (fpxx, hwxxs) {
             hw = hwinfo[i].split('█');
             if(fplx == "10"){
                 item = {
-                    "goods_or_taxable_services": FormatHwmc(hw[0], hwstr),
-                    "pecification": hw[1],
-                    "unit": hw[2],
-                    "quantity": getzeroDot(hw[6]),
-                    "unit_price": GetJeToDot(hw[4]),
-                    "without_tax_amount": GetJeToDot(hw[5]),
-                    "tax_rate": FormatSl(hw[3]),
-                    "tax_amount": GetJeToDot(hw[7])
+                    "goods_or_taxable_service": FormatHwmc(hw[0], hwstr).trim(),
+                    "specifications": hw[1].trim(),
+                    "unit": hw[2].trim(),
+                    "quantity": getzeroDot(hw[6]).trim(),
+                    "unit_price": GetJeToDot(hw[4]).trim(),
+                    "without_tax_amount": GetJeToDot(hw[5]).trim(),
+                    "tax_rate": FormatSl(hw[3]).trim(),
+                    "tax_amount": GetJeToDot(hw[7]).trim()
                 };
                 items[i+1] = item;
             }else{
                 item = {
-                    "goods_or_taxable_services": FormatHwmc(hw[0], hwstr),
-                    "pecification": hw[1],
-                    "unit": hw[2],
-                    "quantity": getzeroDot(hw[3]),
-                    "unit_price": GetJeToDot(hw[4]),
-                    "without_tax_amount": GetJeToDot(hw[5]),
-                    "tax_rate": FormatSl(hw[6]),
-                    "tax_amount": GetJeToDot(hw[7])
+                    "goods_or_taxable_service": FormatHwmc(hw[0], hwstr).trim(),
+                    "specifications": hw[1].trim(),
+                    "unit": hw[2].trim(),
+                    "quantity": getzeroDot(hw[3]).trim(),
+                    "unit_price": GetJeToDot(hw[4]).trim(),
+                    "without_tax_amount": GetJeToDot(hw[5]).trim(),
+                    "tax_rate": FormatSl(hw[6]).trim(),
+                    "tax_amount": GetJeToDot(hw[7]).trim()
                 };
                 items[i+1] = item;
             }

@@ -299,7 +299,7 @@ public class RuoKuaiUtil {
                 if (data.length > 0)	result = RuoKuaiUtil.httpPostImage("http://api.ruokuai.com/create.xml", param, data);
             }
         } catch(Exception e) {
-        	result = "{errorCode:'system',errorMsg:'" + e.getMessage() + "'}";
+            result = "未知问题";
         }
 
 
