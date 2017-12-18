@@ -165,7 +165,6 @@ public class InvoiceCheck extends AbstractEntry {
 	public void run(ProcedureRunner runner) throws Exception {
 		logger = LoggingContext.getLogger(runner.getContext(), this.getClass().getCanonicalName());
 		CompositeMap context = runner.getContext();
-		System.out.println(getContextConnection(context).getAutoCommit());
 		doCertification(context);
 	}
 
@@ -186,8 +185,8 @@ public class InvoiceCheck extends AbstractEntry {
         try {
             conn = getContextConnection(context);
             certification_query_pst = conn.prepareStatement("SELECT  CERTIFICATION_ID, INVOICE_TYPE, INVOICE_CODE, INVOICE_NUMBER, " +
-                    "INVOICE_DATE, WITHOUT_TAX_AMOUNT, CHECK_CODE_LAST_CHARS, USER_ID" +
-                    " FROM INV_INVOICE_CERTIFICATION WHERE CERTIFICATE_STATUS = ? AND (CERTIFICATION_RESULT_CODE IS NULL OR CERTIFICATION_RESULT_CODE != ?) ORDER BY CERTIFICATION_ID");
+                    "INVOICE_DATE, WITHOUT_TAX_AMOUNT, CHECK_CODE_LAST_CHARS, USER_ID, ROWNUM" +
+                    " FROM INV_INVOICE_CERTIFICATION WHERE CERTIFICATE_STATUS = ? AND (CERTIFICATION_RESULT_CODE IS NULL OR CERTIFICATION_RESULT_CODE != ?) AND ROWNUM <= 10 ORDER BY CERTIFICATION_ID");
             certification_query_pst.setString(1, "N");
             certification_query_pst.setString(2, "009");
             certification_query_rs = certification_query_pst.executeQuery();
@@ -254,7 +253,7 @@ public class InvoiceCheck extends AbstractEntry {
          * @Description:
          * @Time: 2017/12/8 13:58
          * @param conn
-         * @param certification_id
+         * @param certification_id
          * @Return:
          */
         PreparedStatement pst = null;
@@ -393,8 +392,10 @@ public class InvoiceCheck extends AbstractEntry {
                     "CERTIFICATE_STATUS = ? " +
                     "WHERE INVOICE_NUMBER = ?");
             pst.setObject(1, invoice_id);
-            pst.setNull(2, Types.LONGNVARCHAR);
-            pst.setNull(3, Types.LONGNVARCHAR);
+//            pst.setNull(2, Types.LONGNVARCHAR);
+//            pst.setNull(3, Types.LONGNVARCHAR);
+            pst.setString(2, "");
+            pst.setString(3, "");
             pst.setString(4, "Y");
             pst.setString(5, invoice_number);
             pst.executeUpdate();
