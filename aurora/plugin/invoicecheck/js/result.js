@@ -35,22 +35,22 @@ var handleMsg = function(k) {
     };
     if(k in code_msg){
         if(k === "007" || k === "008"){
-            status = 0;
+            status = "0";
         }else{
-            status = -1;
+            status = "-1";
         }
         errorMsg = {
             "errorCode": k,
             "errorMsg": code_msg[k]
         };
     }else if(k != ""){
-        status = 1;
+        status = "1";
         errorMsg = {
             "errorCode": '',
             "errorMsg": ''
         };
     }else{
-        status = -1;
+        status = "-1";
         errorMsg = {
             "errorCode": "xxx",
             "errorMsg": "未知错误"
